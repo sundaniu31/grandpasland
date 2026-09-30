@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>???? ? Grandpas Land ????</title>
+<title>分享广场 — Grandpas Land 爷爷的地</title>
 <style>
 :root { --dark:#1e2b1a; --panel:#26351f; --gold:#d9a441; --cream:#f5efe0; --line:rgba(245,239,224,.15); }
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -36,42 +36,42 @@ footer { text-align:center; padding:24px; font-size:.85rem; opacity:.5; border-t
 </head>
 <body>
 <nav>
-  <a class="logo" href="index.html">?? Grandpas Land</a>
+  <a class="logo" href="index.html">🌱 Grandpas Land</a>
   <div class="links">
-    <a href="workshop.html">AI ??</a>
-    <a href="gallery.html" class="active">????</a>
-    <a href="docs.html">????</a>
-    <a href="index.html#about">????</a>
+    <a href="workshop.html">AI 工坊</a>
+    <a href="gallery.html" class="active">分享广场</a>
+    <a href="docs.html">使用文档</a>
+    <a href="index.html#about">游戏介绍</a>
   </div>
 </nav>
 <main>
-  <h1>????</h1>
-  <p class="lead">???? AI ??????????????????????????</p>
+  <h1>分享广场</h1>
+  <p class="lead">玩家们用 AI 工坊创造的资产都在这里。看中哪个就下载导入你的世界。</p>
 
   <div class="howto">
-    <b>?? ???????</b>? <a href="workshop.html" style="color:#d9a441">AI ??</a> ????? .json ????????????????????????? .json ????????????????????????citynames / npcnames / quests / events / festivals ???????????????????????
+    <b>🎁 分享你的创作：</b>在 <a href="workshop.html" style="color:#d9a441">AI 工坊</a> 生成并下载 .json 后，点击下方按钮新建分享帖：标题写资产名，正文粘贴 .json 文件的全部内容并加上一句介绍，再加一个类型标签（citynames / npcnames / quests / events / festivals 等小写即可）。提交后刷新本页即可看到你的分享。
   </div>
 
   <div class="toolbar">
     <select id="filter">
-      <option value="">????</option>
-      <option value="citynames">????</option>
-      <option value="npcnames">NPC ???</option>
-      <option value="companynames">????</option>
-      <option value="familynames">????</option>
-      <option value="quests">???</option>
-      <option value="events">???</option>
-      <option value="festivals">???</option>
-      <option value="specialnpcs">?? NPC ?</option>
+      <option value="">全部类型</option>
+      <option value="citynames">城市名库</option>
+      <option value="npcnames">NPC 名字库</option>
+      <option value="companynames">公司名库</option>
+      <option value="familynames">家族名库</option>
+      <option value="quests">支线库</option>
+      <option value="events">事件库</option>
+      <option value="festivals">节日库</option>
+      <option value="specialnpcs">特定 NPC 库</option>
     </select>
-    <input id="search" placeholder="?? ????????">
-    <a class="btn btn-gold" id="shareBtn" href="https://github.com/sundaniu31/grandpasland/issues/new?title=%E3%80%90%E5%88%86%E4%BA%AB%E3%80%91%E6%88%91%E7%9A%84%E8%B5%84%E4%BA%A7%E5%90%8D%E7%A7%B0&body=%E4%BB%8B%E7%BB%8D%EF%BC%88%E4%B8%80%E5%8F%A5%E8%AF%9D%EF%BC%89%3A%0A%E7%B1%BB%E5%9E%8B%EF%BC%88quests%2Fevents%2Ffestivals%2Fcitynames%E2%80%A6%EF%BC%89%3A%0AJSON%20%E5%86%85%E5%AE%B9%EF%BC%88%E7%9B%B4%E6%8E%A5%E7%B2%98%E8%B4%B4%E6%96%87%E4%BB%B6%E5%86%85%E5%AE%B9%EF%BC%89%3A%0A%0A%60%60%60json%0A%0A%60%60%60" target="_blank">?? ????</a>
-    <a class="btn" style="background:var(--panel);border:1px solid var(--line);color:var(--cream)" href="https://github.com/sundaniu31/grandpasland/issues" target="_blank">GitHub ?? ?</a>
+    <input id="search" placeholder="🔍 搜索标题关键词…">
+    <a class="btn btn-gold" id="shareBtn" href="https://github.com/sundaniu31/grandpasland/issues/new?title=%E3%80%90%E5%88%86%E4%BA%AB%E3%80%91%E6%88%91%E7%9A%84%E8%B5%84%E4%BA%A7%E5%90%8D%E7%A7%B0&body=%E4%BB%8B%E7%BB%8D%EF%BC%88%E4%B8%80%E5%8F%A5%E8%AF%9D%EF%BC%89%3A%0A%E7%B1%BB%E5%9E%8B%EF%BC%88quests%2Fevents%2Ffestivals%2Fcitynames%E2%80%A6%EF%BC%89%3A%0AJSON%20%E5%86%85%E5%AE%B9%EF%BC%88%E7%9B%B4%E6%8E%A5%E7%B2%98%E8%B4%B4%E6%96%87%E4%BB%B6%E5%86%85%E5%AE%B9%EF%BC%89%3A%0A%0A%60%60%60json%0A%0A%60%60%60" target="_blank">🎁 我要分享</a>
+    <a class="btn" style="background:var(--panel);border:1px solid var(--line);color:var(--cream)" href="https://github.com/sundaniu31/grandpasland/issues" target="_blank">GitHub 原帖 →</a>
   </div>
 
-  <div id="list" class="status">?????????</div>
+  <div id="list" class="status">正在加载玩家分享…</div>
 </main>
-<footer>? 2026 Grandpas Land ? ???? GitHub Issues</footer>
+<footer>© 2026 Grandpas Land · 数据来自 GitHub Issues</footer>
 <script>
 const REPO = "sundaniu31/grandpasland";
 let all = [];
@@ -85,28 +85,28 @@ async function load() {
     all = (await resp.json()).filter(i => !i.pull_request);
     render();
   } catch (e) {
-    $("list").textContent = "?????" + e.message + "???????????????";
+    $("list").textContent = "加载失败：" + e.message + "（若为网络问题请稍后刷新重试）";
   }
 }
 
 function extractSummary(body) {
   const t = (body||"").replace(/```[\s\S]*?```/g, "").trim();
-  const lines = t.split("\n").filter(l => l.trim() && !l.startsWith("??") && !l.startsWith("??") && !l.startsWith("JSON"));
-  return lines.slice(0,2).join(" ") || "?????????";
+  const lines = t.split("\n").filter(l => l.trim() && !l.startsWith("介绍") && !l.startsWith("类型") && !l.startsWith("JSON"));
+  return lines.slice(0,2).join(" ") || "点击查看详情与下载";
 }
 
 function render() {
   const kw = $("search").value.trim().toLowerCase();
   const lb = $("filter").value.toLowerCase();
   let items = all.filter(i => (!kw || i.title.toLowerCase().includes(kw)) && (!lb || i.labels.some(l => l.name.toLowerCase() === lb)));
-  if (!items.length) { $("list").className = "empty"; $("list").innerHTML = "????????<br>?????????? ? ??????????"; return; }
+  if (!items.length) { $("list").className = "empty"; $("list").innerHTML = "还没有找到分享。<br>成为第一个分享的人吧 → 点击上方「我要分享」"; return; }
   $("list").className = "grid";
   $("list").innerHTML = items.map(i => {
     const tags = i.labels.map(l => '<span class="tag">' + esc(l.name) + "</span>").join("");
     const date = new Date(i.created_at).toLocaleDateString("zh-CN");
     return '<div class="card">' + tags + "<h3>" + esc(i.title) + "</h3><p>" + esc(extractSummary(i.body)) +
-      '</p><div class="meta"><span>?? ' + esc(i.user.login) + " ? ?? " + date + ' ? ?? ' + i.comments +
-      '</span><a href="' + i.html_url + '" target="_blank">?? / ?? ?</a></div></div>';
+      '</p><div class="meta"><span>👤 ' + esc(i.user.login) + " · 📅 " + date + ' · 💬 ' + i.comments +
+      '</span><a href="' + i.html_url + '" target="_blank">查看 / 下载 →</a></div></div>';
   }).join("");
 }
 $("filter").onchange = render;
