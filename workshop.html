@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI ???? ? Grandpas Land ????</title>
+<style>
+:root { --dark:#1e2b1a; --panel:#26351f; --gold:#d9a441; --cream:#f5efe0; --line:rgba(245,239,224,.15); }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; background:var(--dark); color:var(--cream); min-height:100vh; }
+nav { display:flex; justify-content:space-between; align-items:center; padding:16px 6vw; background:rgba(20,30,16,.95); position:sticky; top:0; border-bottom:1px solid var(--line); }
+.logo { font-size:1.3rem; font-weight:bold; color:var(--gold); text-decoration:none; }
+nav .links a { color:var(--cream); text-decoration:none; margin-left:22px; font-size:.95rem; }
+nav .links a:hover, nav .links a.active { color:var(--gold); }
+main { max-width:1000px; margin:0 auto; padding:40px 5vw 80px; }
+h1 { color:var(--gold); font-size:1.8rem; margin-bottom:6px; }
+.lead { opacity:.75; margin-bottom:28px; line-height:1.7; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:22px; margin-bottom:20px; }
+.card h2 { font-size:1.1rem; color:var(--gold); margin-bottom:14px; }
+label { display:block; font-size:.9rem; opacity:.85; margin:12px 0 6px; }
+input, select, textarea { width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:rgba(20,30,16,.6); color:var(--cream); font-size:.95rem; font-family:inherit; }
+textarea { min-height:90px; resize:vertical; }
+.row { display:flex; gap:14px; flex-wrap:wrap; }
+.row > div { flex:1; min-width:180px; }
+.btn { display:inline-block; padding:12px 30px; border-radius:8px; border:none; font-size:1rem; font-weight:bold; cursor:pointer; text-decoration:none; text-align:center; }
+.btn-gold { background:var(--gold); color:#2a2110; }
+.btn-ghost { background:transparent; border:2px solid var(--cream); color:var(--cream); }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+.status { margin-top:14px; padding:10px 14px; border-radius:8px; display:none; }
+.status.ok { display:block; background:rgba(90,160,80,.2); border:1px solid #5aa050; }
+.status.err { display:block; background:rgba(200,80,60,.2); border:1px solid #c8503c; }
+.preview { width:100%; min-height:260px; font-family:Consolas,monospace; font-size:.85rem; white-space:pre; }
+.tip { font-size:.82rem; opacity:.6; margin-top:6px; line-height:1.6; }
+.hidden { display:none; }
+footer { text-align:center; padding:24px; font-size:.85rem; opacity:.5; border-top:1px solid var(--line); }
+footer a { color:var(--cream); }
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="index.html">?? Grandpas Land</a>
+  <div class="links">
+    <a href="workshop.html" class="active">AI ??</a>
+    <a href="gallery.html">????</a>
+    <a href="docs.html">????</a>
+    <a href="index.html#about">????</a>
+  </div>
+</nav>
+<main>
+  <h1>AI ????</h1>
+  <p class="lead">???? AI API Key???????????????????????????.json??Key ??????????????????????</p>
+
+  <div class="card">
+    <h2>? API ??</h2>
+    <div class="row">
+      <div>
+        <label>?????OpenAI ?????</label>
+        <input id="apiUrl" value="https://api.deepseek.com/v1/chat/completions">
+        <div class="tip">?? DeepSeek?????? OpenAI ???????? https://open.bigmodel.cn/api/paas/v4/chat/completions</div>
+      </div>
+      <div>
+        <label>???</label>
+        <input id="apiModel" value="deepseek-chat">
+      </div>
+    </div>
+    <label>API Key</label>
+    <input id="apiKey" type="password" placeholder="sk-...">
+    <div class="tip">Key ????????????localStorage?????????????? AI ???</div>
+  </div>
+
+  <div class="card">
+    <h2>? ??????</h2>
+    <div class="row">
+      <div>
+        <label>???</label>
+        <select id="libType">
+          <option value="CityNames">????</option>
+          <option value="NPCNames">NPC ???</option>
+          <option value="CompanyNames">????</option>
+          <option value="FamilyNames">????</option>
+          <option value="Quests">???</option>
+          <option value="Events">???</option>
+          <option value="Festivals">???</option>
+          <option value="SpecialNPCs">?? NPC ?</option>
+        </select>
+      </div>
+      <div>
+        <label>???????????</label>
+        <input id="libName" placeholder="???????">
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="nameCard">
+    <h2>? ??????????</h2>
+    <div class="row">
+      <div>
+        <label>??</label>
+        <input id="nameCount" type="number" value="30" min="5" max="200">
+      </div>
+    </div>
+    <label>????</label>
+    <textarea id="nameDesc" placeholder="????????????????????????????????"></textarea>
+  </div>
+
+  <div class="card hidden" id="contentCard">
+    <h2>? ????????</h2>
+    <label>???? / ???</label>
+    <textarea id="contentDesc" placeholder="??????????????????????????????????????????"></textarea>
+    <div class="row">
+      <div><label>????</label><input id="entryCount" type="number" value="3" min="1" max="20"></div>
+      <div><label>?? Weight</label><input id="weight" type="number" value="10" min="1" max="100"></div>
+      <div><label>???? CooldownDays</label><input id="cooldown" type="number" value="0" min="0" max="365"></div>
+    </div>
+    <div class="row hidden" id="festivalRow">
+      <div><label>????</label>
+        <select id="ruleType"><option value="Periodic">??? Periodic</option><option value="BySeason">??? BySeason</option><option value="ByDayInYear">?????? ByDayInYear</option></select>
+      </div>
+      <div><label>???BySeason ??</label>
+        <select id="ruleSeason"><option>Spring</option><option>Summer</option><option>Autumn</option><option>Winter</option></select>
+      </div>
+      <div><label>?????Periodic ??</label><input id="rulePeriod" type="number" value="15" min="1"></div>
+      <div><label>????</label><input id="ruleDuration" type="number" value="1" min="1"></div>
+    </div>
+  </div>
+
+  <button class="btn btn-gold" id="genBtn">? ????</button>
+  <div id="status" class="status"></div>
+
+  <div class="card hidden" id="resultCard">
+    <h2>? ?????</h2>
+    <textarea class="preview" id="preview"></textarea>
+    <div style="margin-top:14px; display:flex; gap:12px; flex-wrap:wrap;">
+      <button class="btn btn-gold" id="dlBtn">? ?? .json ??</button>
+      <button class="btn btn-ghost" onclick="location.reload()">????</button>
+    </div>
+    <div class="tip" id="importTip"></div>
+  </div>
+</main>
+<footer>? 2026 Grandpas Land ? <a href="https://grandpasland.xyz">grandpasland.xyz</a></footer>
+<script>
+const NAME_TYPES = ["CityNames","NPCNames","CompanyNames","FamilyNames"];
+const $ = id => document.getElementById(id);
+const libType = $("libType");
+libType.onchange = () => {
+  const isName = NAME_TYPES.includes(libType.value);
+  $("nameCard").classList.toggle("hidden", !isName);
+  $("contentCard").classList.toggle("hidden", isName);
+  $("festivalRow").classList.toggle("hidden", libType.value !== "Festivals");
+};
+$("apiKey").value = localStorage.getItem("gl_key") || "";
+$("apiKey").onchange = e => localStorage.setItem("gl_key", e.target.value.trim());
+
+function setStatus(msg, ok) { const s = $("status"); s.textContent = msg; s.className = "status " + (ok ? "ok" : "err"); }
+
+async function callAI(prompt) {
+  const url = $("apiUrl").value.trim(), model = $("apiModel").value.trim(), key = $("apiKey").value.trim();
+  if (!key) throw new Error("???? API Key");
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + key },
+    body: JSON.stringify({ model, messages: [{ role: "user", content: prompt }], temperature: 1.0 })
+  });
+  if (!resp.ok) { const t = await resp.text(); throw new Error("API ?? " + resp.status + "?" + t.slice(0, 300)); }
+  const data = await resp.json();
+  return data.choices[0].message.content;
+}
+
+function parseJSON(text) {
+  let t = text.trim();
+  const m = t.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (m) t = m[1].trim();
+  const s = t.indexOf("{"), e = t.lastIndexOf("}");
+  if (s >= 0 && e > s) t = t.slice(s, e + 1);
+  return JSON.parse(t);
+}
+
+$("genBtn").onclick = async () => {
+  const type = libType.value, isName = NAME_TYPES.includes(type);
+  const libName = ($("libName").value.trim() || "MyLibrary") + ".json";
+  try {
+    $("genBtn").disabled = true; setStatus("???? AI ???????? 10-60 ???", true);
+    let prompt, out;
+    if (isName) {
+      const n = Math.min(200, Math.max(5, parseInt($("nameCount").value) || 30));
+      prompt = "???????????????? Grandpas Land?????" + type + "?????????" + ($("nameDesc").value || "?????????") +
+        "???? JSON????{\"Items\":[\"??1\",\"??2\"]}?? " + n + " ??????????????????";
+      const arr = parseJSON(await callAI(prompt));
+      out = { Items: (arr.Items || arr).slice(0, n) };
+    } else {
+      const cnt = Math.min(20, Math.max(1, parseInt($("entryCount").value) || 3));
+      const base = "???????????????? Grandpas Land???" + type + "????????" + $("contentDesc").value +
+        "???? JSON????{\"Entries\":[{\"Name\":\"???\",\"Description\":\"????????100-200??\"";
+      let extra = "";
+      if (type === "Quests" || type === "SpecialNPCs") extra = ",\"Stages\":[{\"StageName\":\"???\",\"Description\":\"????\"}](??3-5???)";
+      if (type === "Festivals") extra = ",\"RuleType\":\"" + $("ruleType").value + "\",\"RuleSeason\":\"" + $("ruleSeason").value + "\",\"RulePeriodDays\":" + (parseInt($("rulePeriod").value)||15) + ",\"RuleDurationDays\":" + (parseInt($("ruleDuration").value)||1);
+      prompt = base + extra + ",\"Weight\":" + (parseInt($("weight").value)||10) + ",\"CooldownDays\":" + (parseInt($("cooldown").value)||0) + "}]}?? " + cnt + " ?????????????";
+      const arr = parseJSON(await callAI(prompt));
+      out = { Entries: (arr.Entries || arr).slice(0, cnt) };
+      out.Entries.forEach(en => { if (!en.Stages) en.Stages = []; if (!en.LinkedEventIds) en.LinkedEventIds = []; });
+    }
+    const json = JSON.stringify(out, null, 2);
+    $("preview").value = json;
+    $("resultCard").classList.remove("hidden");
+    setStatus("? ????????????????????", true);
+    $("dlBtn").onclick = () => {
+      const blob = new Blob([json], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = libName; a.click();
+    };
+    $("importTip").innerHTML = "?? ????????? <b>" + libName + "</b> ????????? NameLibraries ????<br>" +
+      "Windows ???C:\\Users\\?????\\AppData\\LocalLow\\&lt;???&gt;\\&lt;???&gt;\\NameLibraries\\" + type + "\\&lt;br&gt;??????????????????????????" +
+      "??????<a href='gallery.html' style='color:#d9a441'>??????? ?</a>";
+  } catch (e) {
+    setStatus("? ????" + e.message + "?????/?????????????????????????", false);
+  } finally {
+    $("genBtn").disabled = false;
+  }
+};
+</script>
+</body>
+</html>
