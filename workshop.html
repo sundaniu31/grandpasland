@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI ???? ? Grandpas Land ????</title>
+<title>AI 资产工坊 — Grandpas Land 爷爷的地</title>
 <style>
 :root { --dark:#1e2b1a; --panel:#26351f; --gold:#d9a441; --cream:#f5efe0; --line:rgba(245,239,224,.15); }
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -38,106 +38,106 @@ footer a { color:var(--cream); }
 </head>
 <body>
 <nav>
-  <a class="logo" href="index.html">?? Grandpas Land</a>
+  <a class="logo" href="index.html">🌱 Grandpas Land</a>
   <div class="links">
-    <a href="workshop.html" class="active">AI ??</a>
-    <a href="gallery.html">????</a>
-    <a href="docs.html">????</a>
-    <a href="index.html#about">????</a>
+    <a href="workshop.html" class="active">AI 工坊</a>
+    <a href="gallery.html">分享广场</a>
+    <a href="docs.html">使用文档</a>
+    <a href="index.html#about">游戏介绍</a>
   </div>
 </nav>
 <main>
-  <h1>AI ????</h1>
-  <p class="lead">???? AI API Key???????????????????????????.json??Key ??????????????????????</p>
+  <h1>AI 资产工坊</h1>
+  <p class="lead">输入你的 AI API Key，描述你想要的内容，一键生成游戏可直接导入的资产文件（.json）。Key 仅在你的浏览器中使用，不会上传到任何服务器。</p>
 
   <div class="card">
-    <h2>? API ??</h2>
+    <h2>① API 设置</h2>
     <div class="row">
       <div>
-        <label>?????OpenAI ?????</label>
+        <label>接口地址（OpenAI 兼容格式）</label>
         <input id="apiUrl" value="https://api.deepseek.com/v1/chat/completions">
-        <div class="tip">?? DeepSeek?????? OpenAI ???????? https://open.bigmodel.cn/api/paas/v4/chat/completions</div>
+        <div class="tip">默认 DeepSeek。也可填其他 OpenAI 兼容接口，如智谱 https://open.bigmodel.cn/api/paas/v4/chat/completions</div>
       </div>
       <div>
-        <label>???</label>
+        <label>模型名</label>
         <input id="apiModel" value="deepseek-chat">
       </div>
     </div>
     <label>API Key</label>
     <input id="apiKey" type="password" placeholder="sk-...">
-    <div class="tip">Key ????????????localStorage?????????????? AI ???</div>
+    <div class="tip">Key 只保存在你的浏览器本地（localStorage），用于从你的浏览器直接调用 AI 服务。</div>
   </div>
 
   <div class="card">
-    <h2>? ??????</h2>
+    <h2>② 选择资产类型</h2>
     <div class="row">
       <div>
-        <label>???</label>
+        <label>库类型</label>
         <select id="libType">
-          <option value="CityNames">????</option>
-          <option value="NPCNames">NPC ???</option>
-          <option value="CompanyNames">????</option>
-          <option value="FamilyNames">????</option>
-          <option value="Quests">???</option>
-          <option value="Events">???</option>
-          <option value="Festivals">???</option>
-          <option value="SpecialNPCs">?? NPC ?</option>
+          <option value="CityNames">城市名库</option>
+          <option value="NPCNames">NPC 名字库</option>
+          <option value="CompanyNames">公司名库</option>
+          <option value="FamilyNames">家族名库</option>
+          <option value="Quests">支线库</option>
+          <option value="Events">事件库</option>
+          <option value="Festivals">节日库</option>
+          <option value="SpecialNPCs">特定 NPC 库</option>
         </select>
       </div>
       <div>
-        <label>???????????</label>
-        <input id="libName" placeholder="???????">
+        <label>库名（生成文件的名称）</label>
+        <input id="libName" placeholder="例如：江南水乡">
       </div>
     </div>
   </div>
 
   <div class="card" id="nameCard">
-    <h2>? ??????????</h2>
+    <h2>③ 描述你想要的名字风格</h2>
     <div class="row">
       <div>
-        <label>??</label>
+        <label>数量</label>
         <input id="nameCount" type="number" value="30" min="5" max="200">
       </div>
     </div>
-    <label>????</label>
-    <textarea id="nameDesc" placeholder="????????????????????????????????"></textarea>
+    <label>风格描述</label>
+    <textarea id="nameDesc" placeholder="例如：中国江南水乡风格，青石板、烟雨、渔米之乡的味道，两到三个字"></textarea>
   </div>
 
   <div class="card hidden" id="contentCard">
-    <h2>? ????????</h2>
-    <label>???? / ???</label>
-    <textarea id="contentDesc" placeholder="??????????????????????????????????????????"></textarea>
+    <h2>③ 描述你想要的内容</h2>
+    <label>内容描述 / 提示词</label>
+    <textarea id="contentDesc" placeholder="例如：温泉小镇的夏日恋爱支线，玩家帮助旅店老板娘修复温泉设施，期间与一位旅行画师相识"></textarea>
     <div class="row">
-      <div><label>????</label><input id="entryCount" type="number" value="3" min="1" max="20"></div>
-      <div><label>?? Weight</label><input id="weight" type="number" value="10" min="1" max="100"></div>
-      <div><label>???? CooldownDays</label><input id="cooldown" type="number" value="0" min="0" max="365"></div>
+      <div><label>条目数量</label><input id="entryCount" type="number" value="3" min="1" max="20"></div>
+      <div><label>权重 Weight</label><input id="weight" type="number" value="10" min="1" max="100"></div>
+      <div><label>冷却天数 CooldownDays</label><input id="cooldown" type="number" value="0" min="0" max="365"></div>
     </div>
     <div class="row hidden" id="festivalRow">
-      <div><label>????</label>
-        <select id="ruleType"><option value="Periodic">??? Periodic</option><option value="BySeason">??? BySeason</option><option value="ByDayInYear">?????? ByDayInYear</option></select>
+      <div><label>节日规则</label>
+        <select id="ruleType"><option value="Periodic">周期性 Periodic</option><option value="BySeason">按季节 BySeason</option><option value="ByDayInYear">按每年第几天 ByDayInYear</option></select>
       </div>
-      <div><label>???BySeason ??</label>
+      <div><label>季节（BySeason 用）</label>
         <select id="ruleSeason"><option>Spring</option><option>Summer</option><option>Autumn</option><option>Winter</option></select>
       </div>
-      <div><label>?????Periodic ??</label><input id="rulePeriod" type="number" value="15" min="1"></div>
-      <div><label>????</label><input id="ruleDuration" type="number" value="1" min="1"></div>
+      <div><label>周期天数（Periodic 用）</label><input id="rulePeriod" type="number" value="15" min="1"></div>
+      <div><label>持续天数</label><input id="ruleDuration" type="number" value="1" min="1"></div>
     </div>
   </div>
 
-  <button class="btn btn-gold" id="genBtn">? ????</button>
+  <button class="btn btn-gold" id="genBtn">✨ 生成资产</button>
   <div id="status" class="status"></div>
 
   <div class="card hidden" id="resultCard">
-    <h2>? ?????</h2>
+    <h2>④ 预览与下载</h2>
     <textarea class="preview" id="preview"></textarea>
     <div style="margin-top:14px; display:flex; gap:12px; flex-wrap:wrap;">
-      <button class="btn btn-gold" id="dlBtn">? ?? .json ??</button>
-      <button class="btn btn-ghost" onclick="location.reload()">????</button>
+      <button class="btn btn-gold" id="dlBtn">⬇ 下载 .json 文件</button>
+      <button class="btn btn-ghost" onclick="location.reload()">重新生成</button>
     </div>
     <div class="tip" id="importTip"></div>
   </div>
 </main>
-<footer>? 2026 Grandpas Land ? <a href="https://grandpasland.xyz">grandpasland.xyz</a></footer>
+<footer>© 2026 Grandpas Land · <a href="https://grandpasland.xyz">grandpasland.xyz</a></footer>
 <script>
 const NAME_TYPES = ["CityNames","NPCNames","CompanyNames","FamilyNames"];
 const $ = id => document.getElementById(id);
@@ -155,13 +155,13 @@ function setStatus(msg, ok) { const s = $("status"); s.textContent = msg; s.clas
 
 async function callAI(prompt) {
   const url = $("apiUrl").value.trim(), model = $("apiModel").value.trim(), key = $("apiKey").value.trim();
-  if (!key) throw new Error("???? API Key");
+  if (!key) throw new Error("请先填写 API Key");
   const resp = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": "Bearer " + key },
     body: JSON.stringify({ model, messages: [{ role: "user", content: prompt }], temperature: 1.0 })
   });
-  if (!resp.ok) { const t = await resp.text(); throw new Error("API ?? " + resp.status + "?" + t.slice(0, 300)); }
+  if (!resp.ok) { const t = await resp.text(); throw new Error("API 返回 " + resp.status + "：" + t.slice(0, 300)); }
   const data = await resp.json();
   return data.choices[0].message.content;
 }
@@ -179,22 +179,22 @@ $("genBtn").onclick = async () => {
   const type = libType.value, isName = NAME_TYPES.includes(type);
   const libName = ($("libName").value.trim() || "MyLibrary") + ".json";
   try {
-    $("genBtn").disabled = true; setStatus("???? AI ???????? 10-60 ???", true);
+    $("genBtn").disabled = true; setStatus("正在调用 AI 生成，请稍候（约 10-60 秒）…", true);
     let prompt, out;
     if (isName) {
       const n = Math.min(200, Math.max(5, parseInt($("nameCount").value) || 30));
-      prompt = "???????????????? Grandpas Land?????" + type + "?????????" + ($("nameDesc").value || "?????????") +
-        "???? JSON????{\"Items\":[\"??1\",\"??2\"]}?? " + n + " ??????????????????";
+      prompt = "为开放世界农场建设游戏《爷爷的地 Grandpas Land》生成一组" + type + "类型的名称。要求：" + ($("nameDesc").value || "风格自然的中文名称") +
+        "。只输出 JSON，格式：{\"Items\":[\"名称1\",\"名称2\"]}，共 " + n + " 个，不要任何解释文字。名称不能重复。";
       const arr = parseJSON(await callAI(prompt));
       out = { Items: (arr.Items || arr).slice(0, n) };
     } else {
       const cnt = Math.min(20, Math.max(1, parseInt($("entryCount").value) || 3));
-      const base = "???????????????? Grandpas Land???" + type + "????????" + $("contentDesc").value +
-        "???? JSON????{\"Entries\":[{\"Name\":\"???\",\"Description\":\"????????100-200??\"";
+      const base = "为开放世界农场建设游戏《爷爷的地 Grandpas Land》生成" + type + "类型内容。要求：" + $("contentDesc").value +
+        "。只输出 JSON，格式：{\"Entries\":[{\"Name\":\"条目名\",\"Description\":\"详细描述（中文，100-200字）\"";
       let extra = "";
-      if (type === "Quests" || type === "SpecialNPCs") extra = ",\"Stages\":[{\"StageName\":\"???\",\"Description\":\"????\"}](??3-5???)";
+      if (type === "Quests" || type === "SpecialNPCs") extra = ",\"Stages\":[{\"StageName\":\"阶段名\",\"Description\":\"阶段描述\"}](支线3-5个阶段)";
       if (type === "Festivals") extra = ",\"RuleType\":\"" + $("ruleType").value + "\",\"RuleSeason\":\"" + $("ruleSeason").value + "\",\"RulePeriodDays\":" + (parseInt($("rulePeriod").value)||15) + ",\"RuleDurationDays\":" + (parseInt($("ruleDuration").value)||1);
-      prompt = base + extra + ",\"Weight\":" + (parseInt($("weight").value)||10) + ",\"CooldownDays\":" + (parseInt($("cooldown").value)||0) + "}]}?? " + cnt + " ?????????????";
+      prompt = base + extra + ",\"Weight\":" + (parseInt($("weight").value)||10) + ",\"CooldownDays\":" + (parseInt($("cooldown").value)||0) + "}]}，共 " + cnt + " 个条目，不要任何解释文字。";
       const arr = parseJSON(await callAI(prompt));
       out = { Entries: (arr.Entries || arr).slice(0, cnt) };
       out.Entries.forEach(en => { if (!en.Stages) en.Stages = []; if (!en.LinkedEventIds) en.LinkedEventIds = []; });
@@ -202,17 +202,17 @@ $("genBtn").onclick = async () => {
     const json = JSON.stringify(out, null, 2);
     $("preview").value = json;
     $("resultCard").classList.remove("hidden");
-    setStatus("? ????????????????????", true);
+    setStatus("✅ 生成成功！请检查预览内容，然后下载文件。", true);
     $("dlBtn").onclick = () => {
       const blob = new Blob([json], { type: "application/json" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob); a.download = libName; a.click();
     };
-    $("importTip").innerHTML = "?? ????????? <b>" + libName + "</b> ????????? NameLibraries ????<br>" +
-      "Windows ???C:\\Users\\?????\\AppData\\LocalLow\\&lt;???&gt;\\&lt;???&gt;\\NameLibraries\\" + type + "\\&lt;br&gt;??????????????????????????" +
-      "??????<a href='gallery.html' style='color:#d9a441'>??????? ?</a>";
+    $("importTip").innerHTML = "📥 导入方法：把下载的 <b>" + libName + "</b> 放入游戏存档目录的 NameLibraries 文件夹：<br>" +
+      "Windows 路径：C:\\Users\\你的用户名\\AppData\\LocalLow\\&lt;公司名&gt;\\&lt;游戏名&gt;\\NameLibraries\\" + type + "\\&lt;br&gt;然后重新启动游戏，在开局「世界内容」页即可选择该库。" +
+      "做出好内容？<a href='gallery.html' style='color:#d9a441'>去分享广场展示 →</a>";
   } catch (e) {
-    setStatus("? ????" + e.message + "?????/?????????????????????????", false);
+    setStatus("❌ 出错了：" + e.message + "（若为网络/跨域问题，请尝试更换接口地址或使用稳定的网络环境）", false);
   } finally {
     $("genBtn").disabled = false;
   }
