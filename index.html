@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grandpas Land ???? ? ????</title>
+  <meta name="description" content="?????????????????? ? ???? ? ?????">
+  <style>
+    :root { --dark:#1e2b1a; --gold:#d9a441; --cream:#f5efe0; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; background:var(--dark);
+           color:var(--cream); min-height:100vh; display:flex; flex-direction:column; }
+    nav { display:flex; justify-content:space-between; align-items:center; padding:18px 6vw;
+          background:rgba(20,30,16,.9); position:sticky; top:0; }
+    .logo { font-size:1.4rem; font-weight:bold; color:var(--gold); }
+    nav a { color:var(--cream); text-decoration:none; margin-left:24px; }
+    nav a:hover { color:var(--gold); }
+    header { flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center;
+             text-align:center; padding:10vh 6vw;
+             background:radial-gradient(ellipse at bottom,rgba(217,164,65,.15),transparent 60%),
+                        linear-gradient(180deg,#243520,#1e2b1a); }
+    h1 { font-size:clamp(2.2rem,6vw,4rem); letter-spacing:2px; }
+    h1 span { color:var(--gold); }
+    .tagline { margin-top:18px; font-size:clamp(1rem,2.5vw,1.4rem); opacity:.9; }
+    .sub { margin-top:10px; font-size:.95rem; opacity:.6; }
+    .cta { margin-top:40px; display:flex; gap:16px; flex-wrap:wrap; justify-content:center; }
+    .btn { padding:14px 34px; border-radius:8px; font-size:1.05rem; text-decoration:none;
+           font-weight:bold; transition:transform .15s; }
+    .btn:hover { transform:translateY(-2px); }
+    .gold { background:var(--gold); color:#2a2110; }
+    .ghost { border:2px solid var(--cream); color:var(--cream); }
+    section { padding:60px 6vw; max-width:1100px; margin:0 auto; width:100%; }
+    section h2 { color:var(--gold); margin-bottom:16px; font-size:1.5rem; }
+    section p { line-height:1.9; opacity:.85; }
+    .ph { border:2px dashed rgba(245,239,224,.3); border-radius:12px; padding:40px;
+          text-align:center; opacity:.5; margin-top:16px; }
+    footer { text-align:center; padding:26px; font-size:.85rem; opacity:.55;
+             border-top:1px solid rgba(245,239,224,.15); }
+    footer a { color:var(--cream); }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">?? Grandpas Land</div>
+    <div><a href="#about">????</a><a href="#media">?????</a><a href="#devlog">????</a></div>
+  </nav>
+  <header>
+    <h1>Grandpas <span>Land</span></h1>
+    <div class="tagline">??????????????</div>
+    <div class="sub">???? ? ???? ? ???? ?? ????</div>
+    <div class="cta">
+      <a class="btn gold" href="#">Steam ?????????</a>
+      <a class="btn ghost" href="#about">????</a>
+    </div>
+  </header>
+  <section id="about">
+    <h2>??????</h2>
+    <p>?????????????????????????????????????????????????????????????????????</p>
+    <div class="ph">?????????????</div>
+  </section>
+  <section id="media">
+    <h2>?????</h2>
+    <div class="ph">??? + ???????????</div>
+  </section>
+  <section id="devlog">
+    <h2>????</h2>
+    <div class="ph">?????????????</div>
+  </section>
+  <footer>? 2026 Grandpas Land ? <a href="mailto:contact@grandpasland.xyz">contact@grandpasland.xyz</a></footer>
+</body>
+</html>
