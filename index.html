@@ -1,96 +1,13 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grandpas Land 爷爷的地 — 官方网站</title>
-<meta name="description" content="爷爷留下的土地，由你来传承。多人同局 · 开放世界 · 建设冒险。用 AI 生成你的专属世界资产。">
-<style>
-:root { --dark:#1e2b1a; --panel:#26351f; --gold:#d9a441; --cream:#f5efe0; --line:rgba(245,239,224,.15); }
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; background:var(--dark); color:var(--cream); min-height:100vh; }
-nav { display:flex; justify-content:space-between; align-items:center; padding:16px 6vw; background:rgba(20,30,16,.95); position:sticky; top:0; border-bottom:1px solid var(--line); }
-.logo { font-size:1.3rem; font-weight:bold; color:var(--gold); }
-nav a { color:var(--cream); text-decoration:none; margin-left:22px; font-size:.95rem; }
-nav a:hover { color:var(--gold); }
-header { display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:12vh 6vw;
-  background:radial-gradient(ellipse at bottom,rgba(217,164,65,.15),transparent 60%),linear-gradient(180deg,#243520,#1e2b1a); }
-h1 { font-size:clamp(2.2rem,6vw,4rem); letter-spacing:2px; }
-h1 span { color:var(--gold); }
-.tagline { margin-top:18px; font-size:clamp(1rem,2.5vw,1.4rem); opacity:.9; }
-.sub { margin-top:10px; font-size:.95rem; opacity:.6; }
-.cta { margin-top:38px; display:flex; gap:14px; flex-wrap:wrap; justify-content:center; }
-.btn { padding:13px 30px; border-radius:8px; font-size:1rem; text-decoration:none; font-weight:bold; transition:transform .15s; }
-.btn:hover { transform:translateY(-2px); }
-.gold { background:var(--gold); color:#2a2110; }
-.ghost { border:2px solid var(--cream); color:var(--cream); }
-main { max-width:1050px; margin:0 auto; padding:20px 6vw 60px; }
-.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; }
-.feat { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:24px; }
-.feat h3 { color:var(--gold); margin-bottom:10px; font-size:1.1rem; }
-.feat p { font-size:.9rem; opacity:.75; line-height:1.8; }
-.feat a { color:var(--gold); text-decoration:none; font-size:.88rem; font-weight:bold; }
-section { margin-top:50px; }
-section h2 { color:var(--gold); margin-bottom:14px; font-size:1.5rem; }
-section p { line-height:1.9; opacity:.85; }
-.ph { border:2px dashed rgba(245,239,224,.3); border-radius:12px; padding:36px; text-align:center; opacity:.5; margin-top:14px; }
-footer { text-align:center; padding:24px; font-size:.85rem; opacity:.55; border-top:1px solid var(--line); }
-footer a { color:var(--cream); }
-</style>
-</head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="爷爷留下的土地，由你来传承。在 Grandpas Land 的 AI 工坊创造名字、支线、事件与节日，分享你的世界内容。"><meta name="theme-color" content="#dce9df"><title>Grandpas Land 爷爷的地 — 官方网站</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css"></head>
 <body>
-<nav>
-  <div class="logo">🌱 Grandpas Land</div>
-  <div>
-    <a href="workshop.html">AI 工坊</a>
-    <a href="gallery.html">分享广场</a>
-    <a href="docs.html">使用文档</a>
-  </div>
-</nav>
-<header>
-  <h1>Grandpas <span>Land</span></h1>
-  <div class="tagline">爷爷留下的土地，由你来传承。</div>
-  <div class="sub">多人同局 · 开放世界 · 建设冒险 —— 用 AI 创造只属于你的世界</div>
-  <div class="cta">
-    <a class="btn gold" href="workshop.html">✨ 进入 AI 工坊</a>
-    <a class="btn ghost" href="#about">了解游戏</a>
-  </div>
-</header>
-<main>
-  <div class="grid">
-    <div class="feat">
-      <h3>✨ AI 资产工坊</h3>
-      <p>输入你的 AI API Key，用一句话描述，立刻生成城市名库、支线、事件、节日等游戏资产文件，下载即可导入游戏。</p>
-      <a href="workshop.html">开始创造 →</a>
-    </div>
-    <div class="feat">
-      <h3>🎁 分享广场</h3>
-      <p>浏览玩家们创造的资产，按类型和关键词查找，看中了就下载导入你的世界。也别忘了分享你的得意之作。</p>
-      <a href="gallery.html">去逛逛 →</a>
-    </div>
-    <div class="feat">
-      <h3>📖 使用文档</h3>
-      <p>三步上手：生成 → 下载 → 放进文件夹。还包含完整的资产 JSON 格式说明，动手改也行，手写也行。</p>
-      <a href="docs.html">查看文档 →</a>
-    </div>
-  </div>
-
-  <section id="about">
-    <h2>关于这款游戏</h2>
-    <p>你继承了爷爷留下的一片土地。开垦、建造、结识镇上的居民，与来自各地的朋友在同一片世界里冒险。土地会记住你的每一次选择——这就是传承的意义。</p>
-    <div class="ph">游戏特色介绍区块（待填充）</div>
-  </section>
-
-  <section id="media">
-    <h2>截图与视频</h2>
-    <div class="ph">宣传片 + 截图画廊区块（待填充）</div>
-  </section>
-
-  <section id="steam">
-    <h2>Steam 商店页</h2>
-    <div class="ph">Steam 页面即将开放，届时此处为愿望单直达按钮（待填充）</div>
-  </section>
-</main>
-<footer>© 2026 Grandpas Land · <a href="mailto:contact@grandpasland.xyz">contact@grandpasland.xyz</a></footer>
-</body>
-</html>
+<a class="skip" href="#main">跳到主要内容</a>
+<nav class="site-nav" aria-label="主导航"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 27V16M16 18C7 19 4 13 5 7c7 0 12 3 11 11ZM16 16C16 9 21 5 27 6c0 7-4 11-11 10Z"/></svg></span>Grandpas Land</a><div class="nav-links"><a href="index.html" aria-current="page">游戏</a><a href="workshop.html">AI 工坊</a><a href="gallery.html">分享广场</a><a href="docs.html">使用文档</a></div></nav>
+<main class="container" id="main">
+<section class="hero art-hero" aria-labelledby="hero-title"><img class="hero-art" src="images/camp.webp" width="1672" height="941" alt="树荫下的营地，远处是湖泊、石桥与山间城堡的世界概念插画" fetchpriority="high"><div class="hero-copy glass"><div class="eyebrow">Welcome to your own little world.</div><h1 id="hero-title">让世界，<br>生长出你的<br><span class="serif">想象。</span></h1><p class="lead">爷爷留下的土地，由你来传承。与朋友建设、探索，也用 AI 为这片世界写下新的名字、故事和节日。</p><div class="actions"><a class="btn btn-primary" href="workshop.html">开始创造 <span class="icon-arrow" aria-hidden="true">↗</span></a><a class="btn" href="#about">走进爷爷的地 <span aria-hidden="true">↓</span></a></div><div class="hero-note"><span>自己的 API Key</span><span>八类世界内容</span></div></div><span class="art-label">世界概念插画 · 营地与远方</span></section>
+<section aria-labelledby="create-title"><div class="section-head"><div><div class="eyebrow">Create / Collect / Play</div><h2 id="create-title">把灵感，种进世界。</h2><p>从一句描述，到一份可以带进游戏的内容库。</p></div></div><div class="feature-grid"><a class="feature glass" href="workshop.html"><span class="feature-no">01 / CREATE</span><h3>AI 资产工坊</h3><p>描述名字的风格，或构思一段新故事。生成后编辑预览、检查格式，再下载自己的资产库。</p><span class="feature-link">从一个想法开始 <span aria-hidden="true">↗</span></span></a><a class="feature glass" href="gallery.html"><span class="feature-no">02 / DISCOVER</span><h3>分享广场</h3><p>发现玩家创作的世界内容，按类型、时间与标签查找。打开详情，预览并下载喜欢的作品。</p><span class="feature-link">看看大家的世界 <span aria-hidden="true">↗</span></span></a><a class="feature glass" href="docs.html"><span class="feature-no">03 / BRING TO LIFE</span><h3>带进你的游戏</h3><p>找到资产文件夹，了解内容格式和使用方法。让新的名字与故事，成为下一个世界的一部分。</p><span class="feature-link">查看使用指南 <span aria-hidden="true">↗</span></span></a></div></section>
+<section class="home-section" id="about" aria-labelledby="about-title"><div class="about-grid"><div class="about-copy glass"><div class="eyebrow">Welcome to Grandpas Land</div><h2 id="about-title">一片土地，<br>许多种生活的可能。</h2><p>你继承了爷爷留下的一片土地。开垦、建造、结识居民，与朋友在同一片世界里冒险。这片土地的故事，也可以由你亲手续写。</p><p>自定义城市、人物、公司与家族的名字，再为世界创作支线、事件、节日和特定 NPC 内容。可执行的游戏效果以游戏当前支持的规则为准。</p><div class="about-tags"><span class="pill">多人同局</span><span class="pill">开放世界</span><span class="pill">建设与冒险</span><span class="pill">自定义世界内容</span></div></div><div class="steam-card glass" id="steam"><div class="eyebrow">The next chapter</div><h3>在下一段旅程里，<br>相见。</h3><p>Steam 商店页即将开放。上线后，这里会提供商店与愿望单入口。</p><span class="pill">Steam · 敬请期待</span></div></div></section>
+<section class="home-section" id="media" aria-labelledby="art-title"><div class="section-head"><div><div class="eyebrow">Somewhere, a story begins.</div><h2 id="art-title">世界的不同侧面。</h2><p>从海风吹拂的港口，到灯火温暖的小店，再到远方的城堡。</p></div><span class="pill">世界概念插画</span></div><div class="world-gallery"><figure class="world-art glass"><a href="images/coast.webp" target="_blank" rel="noopener noreferrer" aria-label="打开海港概念插画大图"><img src="images/coast.webp" width="1200" height="675" loading="lazy" decoding="async" alt="花草环绕的海边步道、蓝色港湾、帆船与灯塔"></a><figcaption><span>01 / COAST</span><h3>海风与远航</h3><p>小径的尽头，是更辽阔的世界。</p></figcaption></figure><figure class="world-art glass"><a href="images/bakery.webp" target="_blank" rel="noopener noreferrer" aria-label="打开面包店概念插画大图"><img src="images/bakery.webp" width="1200" height="675" loading="lazy" decoding="async" alt="阳光照进木制面包店，店外是鲜花与小镇的石板街道"></a><figcaption><span>02 / EVERYDAY</span><h3>烟火与日常</h3><p>街角的一盏灯，也藏着新的故事。</p></figcaption></figure><figure class="world-art glass"><a href="images/castle.webp" target="_blank" rel="noopener noreferrer" aria-label="打开城堡概念插画大图"><img src="images/castle.webp" width="1200" height="675" loading="lazy" decoding="async" alt="山脉下的城堡与旗帜，城墙外是一片围城营地"></a><figcaption><span>03 / ADVENTURE</span><h3>城堡与冒险</h3><p>当远方响起号角，新的篇章展开。</p></figcaption></figure></div></section>
+</main><footer class="site-footer"><span>© 2026 Grandpas Land · 爷爷的地</span><a href="mailto:contact@grandpasland.xyz">contact@grandpasland.xyz ↗</a></footer>
+</body></html>

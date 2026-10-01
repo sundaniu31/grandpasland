@@ -1,0 +1,15 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const A=require('../assets.js');
+test('edited name libraries retain current contents',()=>assert.deepEqual(A.validate({Items:['修改后的名称','青石镇']},'CityNames').Items,['修改后的名称','青石镇']));
+test('names must be unique nonempty text',()=>{for(const Items of [['重复','重复'],[''],[null],[1]])assert.throws(()=>A.validate({Items},'CityNames'));});
+test('Items and Entries cannot be mixed',()=>assert.throws(()=>A.validate({Items:['名字'],Entries:[]},'NPCNames')));
+test('top-level arrays are rejected',()=>assert.throws(()=>A.validate(['名字'],'CityNames')));
+test('content defaults match game DTO fields',()=>{const entry=A.validate({Entries:[{Name:'花会',Description:'故事'}]},'Festivals').Entries[0];assert.equal(entry.Weight,10);assert.equal(entry.CooldownDays,0);assert.equal(entry.RuleDayInYear,1);assert.equal(entry.RulePeriodDays,15);assert.deepEqual(entry.LinkedEventIds,[]);});
+test('festival calendar rule retains selected day',()=>{const entry=A.validate({Entries:[{Name:'花会',Description:'故事',RuleType:'ByDayInYear',RuleDayInYear:42}]},'Festivals').Entries[0];assert.equal(entry.RuleDayInYear,42);assert.equal(entry.RuleType,'ByDayInYear');});
+test('invalid stages and rule enums fail',()=>{assert.throws(()=>A.validate({Entries:[{Name:'任务',Description:'故事',Stages:'text'}]},'Quests'));assert.throws(()=>A.validate({Entries:[{Name:'任务',Description:'故事',RuleType:'unknown'}]},'Festivals'));});
+test('duplicate content IDs fail',()=>assert.throws(()=>A.validate({Entries:[{Name:'甲',Description:'故事',Id:'same'},{Name:'乙',Description:'故事',Id:'same'}]},'Events')));
+test('invalid number fields fail',()=>{for(const extra of [{Weight:-1},{CooldownDays:-1},{RuleDayInYear:0},{RulePeriodDays:0},{Weight:'10'}])assert.throws(()=>A.validate({Entries:[{Name:'事件',Description:'故事',...extra}]},'Events'));});
+test('AI fenced JSON is accepted but explanatory text is rejected',()=>{assert.deepEqual(A.parseAI('```json\n{"Items":["青石镇"]}\n```'),{Items:['青石镇']});assert.throws(()=>A.parseAI('Here is your JSON: {"Items":["名字"]}'));});
+test('BOM JSON and Chinese names work',()=>assert.deepEqual(A.parseJSON('\uFEFF{"Items":["青石镇"]}'),{Items:['青石镇']}));
+test('filenames remove unsafe characters and reserved device names',()=>{assert.equal(A.fileName('CON'),'_CON.json');assert.equal(A.fileName('青石镇.json'),'青石镇.json');assert.equal(A.fileName('a/b:c'),'a_b_c.json');});
