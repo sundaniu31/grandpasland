@@ -34,7 +34,8 @@ function workOf(issue) {
   return {number:issue.number,title:String(issue.title||'未命名作品').replace(/^【分享】\s*/,''),type,tags,data,error,description:description||'作者还没有填写作品介绍。',author:String(issue.user?.login||'玩家'),date:issue.created_at,comments:Number(issue.comments)||0,url:'https://github.com/'+REPO+'/issues/'+issue.number};
 }
 function element(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
-function badge(text){return element('span','pill',text);}
+function content(tag,cls,text){const el=element(tag,cls,text);el.setAttribute('data-i18n-ignore','');return el;}
+function badge(text,raw=false){return raw?content('span','pill',text):element('span','pill',text);}
 function apiError(response){return response.status===403||response.status===429?'GitHub 请求额度暂时用尽，请稍后再试。':response.status===404?'分享数据暂时不可用，请到社区原帖查看。':'GitHub 返回 HTTP '+response.status+'，请稍后重试。';}
 async function load() {
   $('list').setAttribute('aria-busy','true');
@@ -58,7 +59,7 @@ function renderTags() {
   const tags=Array.from(new Set(works.flatMap(work=>work.tags))).sort((a,b)=>a.localeCompare(b,'zh-CN'));
   $('tagFilters').replaceChildren();
   if(!tags.length)return;
-  ['',...tags].forEach(tag=>{const button=element('button','tag-button',tag||'全部标签');button.type='button';button.setAttribute('aria-pressed',String(tag===selectedTag));button.addEventListener('click',()=>{selectedTag=tag;renderTags();render();});$('tagFilters').append(button);});
+  ['',...tags].forEach(tag=>{const button=element('button','tag-button',tag||'全部标签');if(tag)button.setAttribute('data-i18n-ignore','');button.type='button';button.setAttribute('aria-pressed',String(tag===selectedTag));button.addEventListener('click',()=>{selectedTag=tag;renderTags();render();});$('tagFilters').append(button);});
 }
 function render() {
   const keyword=$('search').value.trim().toLowerCase();
@@ -73,17 +74,17 @@ function render() {
   $('list').className='asset-grid';
   items.forEach(work=>{
     const card=element('article','asset-card glass');
-    const tags=element('div','asset-tags');tags.append(badge(A.TYPES[work.type]));work.tags.forEach(tag=>tags.append(badge(tag)));card.append(tags,element('h3','',work.title),element('p','',work.description.slice(0,120)));
-    const meta=element('div','meta');meta.append(element('span','',work.author+' · '+dateOf(work.date)),element('span','',work.comments+' 条评论'));card.append(meta);
+    const tags=element('div','asset-tags');tags.append(badge(A.TYPES[work.type]));work.tags.forEach(tag=>tags.append(badge(tag,true)));card.append(tags,content('h3','',work.title),content('p','',work.description.slice(0,120)));
+    const meta=element('div','meta');meta.append(content('span','',work.author+' · '+dateOf(work.date)),element('span','',work.comments+' 条评论'));card.append(meta);
     const button=element('button','btn btn-small','查看作品 ↗');button.addEventListener('click',()=>openDetail(work));card.append(button);$('list').append(card);
   });
   const issueParam=Number(new URLSearchParams(location.search).get('asset'));
   if(issueParam&&!$('detailDialog').open){const work=works.find(w=>w.number===issueParam);if(work)openDetail(work);}
 }
-function dateOf(value){const date=new Date(value);return Number.isNaN(date.getTime())?'未知日期':date.toLocaleDateString('zh-CN');}
+function dateOf(value){const date=new Date(value);return Number.isNaN(date.getTime())?'未知日期':date.toLocaleDateString(window.GLI18n?.language||'zh-CN');}
 async function openDetail(work) {
   commentRequest?.abort();commentRequest=new AbortController();const controller=commentRequest;
-  $('detailTitle').textContent=work.title;$('detailTags').replaceChildren(badge(A.TYPES[work.type]),...work.tags.map(badge));$('detailMeta').textContent=work.author+' · '+dateOf(work.date);$('detailDescription').textContent=work.description;
+  $('detailTitle').textContent=work.title;$('detailTags').replaceChildren(badge(A.TYPES[work.type]),...work.tags.map(tag=>badge(tag,true)));$('detailMeta').textContent=work.author+' · '+dateOf(work.date);$('detailDescription').textContent=work.description;
   $('detailSource').href=work.url;$('commentLink').href=work.url+'#issuecomment-new';
   $('detailCode').hidden=!work.data;$('detailStatus').hidden=true;$('detailDownload').disabled=!work.data;
   if(work.data)$('detailCode').textContent=JSON.stringify(work.data,null,2);else A.status($('detailStatus'),work.error,'error');
@@ -98,7 +99,7 @@ async function openDetail(work) {
     if(commentRequest!==controller)return;
     $('comments').replaceChildren();
     if(!comments.length)$('comments').append(element('p','tip','还没有评论。到 GitHub 留下第一条反馈。'));
-    comments.forEach(comment=>{const block=element('article','comment');block.append(element('strong','',comment.user?.login||'玩家'),element('small','', ' · '+dateOf(comment.created_at)),element('p','',comment.body||''));$('comments').append(block);});
+    comments.forEach(comment=>{const block=content('article','comment');block.append(element('strong','',comment.user?.login||'玩家'),element('small','', ' · '+dateOf(comment.created_at)),element('p','',comment.body||''));$('comments').append(block);});
     if(response.headers.get('Link')?.includes('rel="next"'))$('comments').append(element('p','tip','这里展示前 100 条评论，完整讨论请打开原帖。'));
   } catch(error) {if(commentRequest===controller)$('comments').textContent=controller.signal.aborted?'评论读取已停止，可到原帖查看。':(error instanceof TypeError?'评论暂时无法读取，请到原帖查看。':error.message);}finally{clearTimeout(timer);}
 }
@@ -134,4 +135,5 @@ $('shareForm').addEventListener('submit',async event=>{
 });
 const params=new URLSearchParams(location.search);
 if(params.get('share')==='1') {const type=typeOf(params.get('type'));if(type)$('shareType').value=type;$('shareName').value=(params.get('name')||'').slice(0,80);openShare();}
+window.addEventListener('gl-languagechange',()=>{renderTags();render();const current=works.find(work=>work.number===Number(new URLSearchParams(location.search).get('asset')));if(current&&$('detailDialog').open)$('detailMeta').textContent=current.author+' · '+dateOf(current.date);});
 load();

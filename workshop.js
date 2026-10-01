@@ -38,7 +38,7 @@ function snapshot() {
   if(!model||!key||!name)throw new Error('请填写模型名、API Key 和库名');
   const type=$('libType').value,isName=A.NAME_TYPES.includes(type),description=$(isName?'nameDesc':'contentDesc').value.trim();
   if(!description)throw new Error('请填写风格或内容描述');
-  return {endpoint:endpoint.href,model,key,name,type,isName,description,count:Number($(isName?'nameCount':'entryCount').value),weight:Number($('weight').value),cooldown:Number($('cooldown').value),ruleType:$('ruleType').value,ruleSeason:$('ruleSeason').value,ruleDay:Number($('ruleDay').value),rulePeriod:Number($('rulePeriod').value),ruleDuration:Number($('ruleDuration').value)};
+  return {language:window.GLI18n?.language||'zh-CN',endpoint:endpoint.href,model,key,name,type,isName,description,count:Number($(isName?'nameCount':'entryCount').value),weight:Number($('weight').value),cooldown:Number($('cooldown').value),ruleType:$('ruleType').value,ruleSeason:$('ruleSeason').value,ruleDay:Number($('ruleDay').value),rulePeriod:Number($('rulePeriod').value),ruleDuration:Number($('ruleDuration').value)};
 }
 function promptFor(settings) {
   let example;
@@ -48,6 +48,11 @@ function promptFor(settings) {
     if(settings.type==='Quests'||settings.type==='SpecialNPCs')item.Stages=[{StageName:'阶段名称',Description:'阶段详细描述'}];
     if(settings.type==='Festivals')Object.assign(item,{RuleType:settings.ruleType,RuleSeason:settings.ruleSeason,RuleDayInYear:settings.ruleDay,RulePeriodDays:settings.rulePeriod,RuleDurationDays:settings.ruleDuration});
     example={Entries:[item]};
+  }
+  if(settings.language==='en') {
+    if(!settings.isName){example.Entries[0].Name='Entry name';example.Entries[0].Description='A detailed English description, 100–200 words';if(example.Entries[0].Stages.length)example.Entries[0].Stages=[{StageName:'Stage name',Description:'Stage description'}];}
+    else example.Items=['Example name'];
+    return 'Generate '+settings.type+' content for Grandpas Land. Write all names, descriptions and stage text in English. Player prompt: '+settings.description+'\nReturn exactly '+settings.count+' '+(settings.isName?'unique names':'entries')+'. Return only one valid JSON object, without Markdown or explanations. Keep the field names and enum values exactly as shown. '+(settings.type==='Quests'?'Use 3–5 stages per quest. ':'')+'Do not claim that story descriptions have executed gameplay rewards. Format example: '+JSON.stringify(example);
   }
   return '为《爷爷的地 Grandpas Land》生成'+A.TYPES[settings.type]+'。玩家描述：\n'+settings.description+'\n生成 '+settings.count+' 个'+(settings.isName?'不重复的名字':'独立条目')+'。只输出一个合法 JSON 对象，不能包含 Markdown 或解释。字段大小写与下面示例一致，数组长度应为请求数量。'+(settings.type==='Quests'?'每个支线含 3–5 个 Stages。':'')+'不要把故事叙述写成实际已执行的游戏奖励。格式示例：\n'+JSON.stringify(example);
 }
