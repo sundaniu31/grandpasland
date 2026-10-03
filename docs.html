@@ -3,7 +3,7 @@
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Grandpas Land 内容库生成、导入、分享指南与 JSON 字段说明。"><meta name="theme-color" content="#dce9df"><title>使用文档 — Grandpas Land</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css"><script src="i18n.js" defer></script></head>
 <body><a class="skip" href="#main">跳到主要内容</a><nav class="site-nav" aria-label="主导航"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 27V16M16 18C7 19 4 13 5 7c7 0 12 3 11 11ZM16 16C16 9 21 5 27 6c0 7-4 11-11 10Z"/></svg></span>Grandpas Land</a><div class="nav-links"><a href="index.html">游戏</a><a href="workshop.html">AI 工坊</a><a href="gallery.html">分享广场</a><a href="docs.html" aria-current="page">使用文档</a></div><label class="language-control" data-i18n-ignore><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18Z"/></svg><select id="siteLanguage" aria-label="Language / 语言"><option value="zh-CN">简体中文</option><option value="en">English</option></select></label></nav>
 <main class="container" id="main"><div class="page-heading"><div class="eyebrow">A small guide to your world.</div><h1>把灵感带进游戏。</h1><p class="lead">从第一份内容库开始。这里有生成、导入与分享的完整步骤。</p></div><div class="docs-layout"><aside class="docs-nav glass" aria-label="文档目录"><a href="#start">快速开始</a><a href="#api">连接 AI</a><a href="#import">导入资产</a><a href="#format">JSON 格式</a><a href="#share">分享与评论</a><a href="#faq">常见问题</a></aside><article class="docs-content glass">
-<section id="start"><div class="eyebrow">01 / Get started</div><h2>一个文件，一份新的世界内容。</h2><p>资产库是一个 <code>.json</code> 文件，装着一组名字或内容条目。游戏创建世界时可以选择使用这些库。</p><ol><li>打开 <a href="workshop.html">AI 工坊</a>，填写 AI 接口、模型名和自己的 API Key。</li><li>选择资产类型、库名，描述想要的内容，点击生成。</li><li>检查或编辑结果，下载 JSON。下载按钮会校验并保存预览中的最新内容。</li><li>放入对应类型的文件夹，再进入创建世界的内容选择页面。</li></ol><div class="callout">名字库与内容库可以被游戏读取，但描述中的奖励、对话行为或任务机制不会仅凭文字自动执行。实际效果取决于游戏当前实现的内容系统。</div></section>
+<section id="start"><div class="eyebrow">01 / Get started</div><h2>一个文件，一份新的世界内容。</h2><p>资产库是一个 <code>.json</code> 文件，装着一组名字或内容条目。游戏创建世界时可以选择使用这些库。</p><ol><li>打开 <a href="workshop.html">AI 工坊</a>，填写 AI 接口、模型名和自己的 API Key。</li><li>选择资产类型、库名，描述想要的内容，点击生成。</li><li>检查或编辑结果，下载 JSON。下载按钮会校验并保存预览中的最新内容。</li><li>在游戏库选择页面导入 JSON，或放入对应类型的文件夹，再创建世界。</li></ol><div class="callout">名字库可以用于生成世界。事件库通过 TriggerConsequences 调用现有子效果，节日库可触发关联事件。支线和特定 NPC 库目前仅能导入保存，尚未接通外部条目的执行入口。</div></section>
 <section id="api"><div class="eyebrow">02 / Connect</div><h2>使用自己的 AI 接口</h2><p>工坊使用 OpenAI 兼容的 Chat Completions 请求格式。默认接口是 DeepSeek 的 <code>https://api.deepseek.com/v1/chat/completions</code>，模型为 <code>deepseek-chat</code>。其他服务请以其官方文档中的接口地址与模型名为准。</p><p>接口地址必须使用 HTTPS。浏览器会将 Key 作为请求凭据发送到你填写的地址，请确认它属于你信任的 AI 服务商。本站不会代理这次请求。</p><p>Key 默认仅在本次页面中使用。只有勾选“在此设备记住 Key”才会写入浏览器本地存储；可随时点击“清除已保存的 Key”。共享设备建议保持不勾选。</p><div class="callout">如果服务商不允许浏览器跨域调用，浏览器会阻止请求。请使用明确支持浏览器请求的接口，或由你信任的服务部署代理。不要把 Key 放进网址、分享文件或评论中。</div><p>生成费用、请求限额与模型可用性以服务商的当前规定为准。取消或超时仅停止浏览器等待，服务商可能已经处理请求并计费。</p></section>
 <section id="import"><div class="eyebrow">03 / Import</div><h2>把资产放进正确的文件夹</h2><p>当前项目设置的公司名是 <code>DefaultCompany</code>，产品名是 <code>Crownfall1</code>。Windows 路径如下；发行版如果更改了名称，目录也会改变。</p><pre><code>%USERPROFILE%\AppData\LocalLow\DefaultCompany\Crownfall1\NameLibraries\</code></pre><p>按 <code>Win + R</code>，粘贴上述路径并回车。目录尚未生成时，先运行游戏，或手动创建所需文件夹。</p><pre><code>NameLibraries\
   ├─ CityNames\       城市名库
@@ -13,10 +13,10 @@
   ├─ Quests\          支线库
   ├─ Events\          事件库
   ├─ Festivals\       节日库
-  └─ SpecialNPCs\     特定 NPC 库</code></pre><p>例如，把 <code>江南水乡.json</code> 放进 <code>NameLibraries\CityNames\</code>。回到创建世界的库选择页面选择它；如果列表未更新，可重新打开该页面或重启游戏。</p><div class="callout">现有世界可能已经把选择的内容保存到存档快照中。修改外部文件不一定会改变已有存档；建议先在新世界中验证。</div></section>
+  └─ SpecialNPCs\     特定 NPC 库</code></pre><p>例如，把 <code>江南水乡.json</code> 放进 <code>NameLibraries\CityNames\</code>。回到创建世界的库选择页面选择它；如果列表未更新，可重新打开该页面或重启游戏。</p><div class="callout">创建世界时每种类型选择一个库，内容会保存为存档快照。更新外部文件不会自动改写已有世界。节日关联的事件库也必须同时选择。联机时由主机加载和执行这些数据，客户端接收结果；下载者不需要作者的 AI Key。</div></section>
 <section id="format"><div class="eyebrow">04 / File format</div><h2>与游戏一致的 JSON 格式</h2><h3>名字型：Items</h3><p>适用于城市、NPC、公司、家族名字库。每个名字必须是非空文本，不要重复。</p><pre><code>{
   "Items": ["青石镇", "落霞村", "烟雨渡"]
-}</code></pre><h3>内容型：Entries</h3><p>适用于支线、事件、节日、特定 NPC 库。字段名区分大小写。</p><pre><code>{
+}</code></pre><h3>内容型：Entries</h3><p>事件、节日、支线和特定 NPC 共用 Entries，字段名区分大小写。以下阶段示例属于草稿；故事描述本身不执行效果。</p><pre><code>{
   "Entries": [
     {
       "Name": "温泉修复计划",
@@ -25,29 +25,59 @@
         {"StageName": "勘察温泉", "Description": "前往后山查看温泉源头。"}
       ],
       "Id": "hot_spring_repair",
-      "Type": "Quests",
+      "Type": "",
       "Weight": 10,
       "CooldownDays": 0,
       "LinkedEventIds": []
     }
   ]
-}</code></pre><div class="table-wrap"><table><thead><tr><th>字段</th><th>作用与默认值</th></tr></thead><tbody><tr><td><code>Name</code> / <code>Description</code></td><td>名称与描述，工坊要求非空文本。</td></tr><tr><td><code>Stages</code></td><td>阶段数组，每项含 StageName、Description。缺省为空数组。</td></tr><tr><td><code>Id</code></td><td>条目标识。生成时补齐，非空标识不能重复。事件关联时需保持稳定。</td></tr><tr><td><code>Type</code></td><td>类型标识，例如 Quests、Events。实际运行行为由游戏决定。</td></tr><tr><td><code>Weight</code></td><td>权重，默认 10。</td></tr><tr><td><code>CooldownDays</code></td><td>冷却天数，默认 0。</td></tr><tr><td><code>LinkedEventIds</code></td><td>关联事件 Id 的文本数组，默认空数组。</td></tr></tbody></table></div><h3>节日规则</h3><pre><code>{
+}</code></pre><div class="table-wrap"><table><thead><tr><th>字段</th><th>作用与默认值</th></tr></thead><tbody><tr><td><code>Name</code> / <code>Description</code></td><td>名称与描述，工坊要求非空文本。</td></tr><tr><td><code>Stages</code></td><td>阶段数组，每项含 StageName、Description。缺省为空数组。</td></tr><tr><td><code>Id</code></td><td>条目标识。生成时补齐，非空标识不能重复。事件关联时需保持稳定。</td></tr><tr><td><code>Type</code></td><td>旧内容处理器标识，默认空文本。文件夹和分享类型决定库类别，不能用它覆盖原有处理器。</td></tr><tr><td><code>Weight</code></td><td>权重，默认 10。</td></tr><tr><td><code>CooldownDays</code></td><td>冷却天数，默认 0。</td></tr><tr><td><code>LinkedEventIds</code></td><td>关联事件 Id 的文本数组，默认空数组。</td></tr></tbody></table></div><h3>可执行事件：组合现有子效果</h3><p>完整事件通过 Target 选择地点，再组合 TriggerConsequences 中的效果。下面的事件随机选择一座城市，减少其中三名 NPC 的健康，并提高当地已有匕首物品的需求。</p><pre><code>{
+  "SchemaVersion": 1,
+  "ProfileId": "crownfall1-v1",
+  "Entries": [{
+    "Id": "my_library_attack_01",
+    "Name": "{SettlementName}遇到袭击",
+    "Description": "三名居民受伤，城内匕首需求增加。",
+    "Type": "",
+    "EventType": "Bad",
+    "Score": -8,
+    "Tags": "Health, Economy",
+    "Weight": 20,
+    "CooldownDays": 30,
+    "Repeatable": true,
+    "Target": {"RandomSettlement": true},
+    "TriggerConsequences": [{
+      "Type": "ModifyHealthEffect",
+      "Parameters": {
+        "Delta": -7,
+        "TargetMode": "RandomInSettlement",
+        "CharacterKind": "Npc",
+        "TargetCount": 3
+      }
+    }, {
+      "Type": "ModifyDemandEffect",
+      "Parameters": {"ItemId": "weapon_dagger", "Delta": 50}
+    }],
+    "Options": []
+  }]
+}</code></pre><div class="table-wrap"><table><thead><tr><th>字段</th><th>用途</th></tr></thead><tbody><tr><td><code>SchemaVersion</code> / <code>ProfileId</code></td><td>可选的文件协议与游戏兼容目录标识，新生成事件会携带这两个值。</td></tr><tr><td><code>Target</code></td><td>事件地点与角色上下文，可随机选择城市。角色目标由各子效果筛选，支持 NPC 或玩家。</td></tr><tr><td><code>TriggerConsequences</code></td><td>立即执行的效果数组，每项使用已注册的 Type、Parameters，可用容器的 Children 组合。</td></tr><tr><td><code>Options</code></td><td>可选的交互选项；普通世界事件使用空数组即可，不要求玩家选择。</td></tr><tr><td><code>EventType</code> / <code>Score</code> / <code>Tags</code></td><td>事件评价与分类信息，枚举值由游戏兼容目录约束。</td></tr><tr><td><code>Repeatable</code></td><td>是否允许再次触发；仍受冷却规则约束。</td></tr></tbody></table></div><p>分享给其他世界时，优先使用随机城市、城内角色筛选和 {SettlementName} 占位符。固定 ActorId、PlayerId、SettlementId 通常只适用于特定存档。AI 不能仅凭名称创建新疾病、物品或执行代码。目录资源不完整时会显示警告，需要在游戏中确认引用。</p>
+<p>当前兼容目录尚未列出疾病定义，物品标签列表也为空。瘟疫 Buff 和按药材标签涨价的事件需要先在游戏中配置相应资源，再重新导出兼容目录；生成器不能自行创建这些资源。</p><h3>节日规则</h3><pre><code>{
   "Entries": [{
     "Name": "初夏花会",
     "Description": "居民们在广场分享新采的花。",
     "Id": "summer_flower_festival",
-    "Type": "Festivals",
+    "Type": "",
     "Stages": [],
     "Weight": 10,
     "CooldownDays": 0,
     "RuleType": "ByDayInYear",
-    "RuleDayInYear": 30,
+    "RuleDayInYear": 2,
     "RuleSeason": "Summer",
     "RulePeriodDays": 15,
     "RuleDurationDays": 1,
     "LinkedEventIds": []
   }]
-}</code></pre><div class="table-wrap"><table><thead><tr><th>字段</th><th>规则</th></tr></thead><tbody><tr><td><code>RuleType</code></td><td>Periodic：按间隔天数；BySeason：按季节；ByDayInYear：按每年第几天。</td></tr><tr><td><code>RuleDayInYear</code></td><td>ByDayInYear 使用，默认 1。工坊输入范围 1–365，请依据游戏实际年长设置。</td></tr><tr><td><code>RuleSeason</code></td><td>Spring / Summer / Autumn / Winter，默认 Spring。</td></tr><tr><td><code>RulePeriodDays</code></td><td>周期天数，默认 15，必须大于 0。</td></tr><tr><td><code>RuleDurationDays</code></td><td>持续天数，默认 1，必须大于 0。</td></tr></tbody></table></div><p>工坊会补齐游戏支持的缺省字段，下载时保留这些字段。未被游戏读取的额外字段不会保留在下载文件中。</p></section>
-<section id="share"><div class="eyebrow">05 / Share</div><h2>让别人发现你的作品</h2><ol><li>在 <a href="gallery.html">分享广场</a> 点击“分享我的作品”。</li><li>填写名称、类型、介绍，选择 JSON 文件，并添加最多 5 个自定义标签。</li><li>校验通过后打开 GitHub 发布草稿，登录账号并提交。</li><li>返回广场刷新。作品详情可预览、下载并阅读评论。</li></ol><p>标签存储在分享正文中，无需仓库标签权限。较长的 JSON 会提供可复制的发布正文，供你在 GitHub 中粘贴。发表评论使用详情中的“去 GitHub 评论”入口。</p><p>旧分享若没有类型标签，可在原帖正文添加 <code>类型：CityNames</code> 等标识。JSON 推荐放在 <code>```json</code> 代码块中。没有可读取资产或格式校验未通过的帖子会禁用下载。</p></section>
-<section id="faq" class="faq"><div class="eyebrow">06 / A little help</div><h2>常见问题</h2><details><summary>下载后游戏里看不到资产？</summary><p>确认后缀为 .json、子文件夹类型正确、内容使用 Items 或 Entries 对应结构，再重新打开库选择页面。当前目录名称与发行版可能不同。</p></details><details><summary>AI 生成失败或 JSON 校验失败？</summary><p>AI 不保证总能返回正确结构。检查具体错误提示，减少条目数、简化提示词后重试。预览中的手动编辑也必须保持合法 JSON。</p></details><details><summary>为什么下载内容与原始 JSON 有些区别？</summary><p>下载会校验、规范化空白并补齐游戏缺省字段，只保留游戏支持的字段。文件中预览的名称、描述与阶段内容会保留。</p></details><details><summary>分享广场或评论加载失败？</summary><p>浏览器需要访问 GitHub API。网络限制或 GitHub 的未登录请求额度都可能导致失败，可稍后重试或打开 GitHub 原帖查看。</p></details><details><summary>Steam 商店页在哪里？</summary><p>目前还没有配置正式 Steam 商店链接。商店上线后，官网会提供直达入口。</p></details></section>
+}</code></pre><div class="table-wrap"><table><thead><tr><th>字段</th><th>规则</th></tr></thead><tbody><tr><td><code>RuleType</code></td><td>Periodic：按间隔天数；BySeason：按季节；ByDayInYear：按每年第几天。</td></tr><tr><td><code>RuleDayInYear</code></td><td>ByDayInYear 使用，默认 1。兼容目录中的当前默认年长为 3 天，日期不得超过实际游戏年长。</td></tr><tr><td><code>RuleSeason</code></td><td>Spring / Summer / Autumn / Winter，默认 Spring。</td></tr><tr><td><code>RulePeriodDays</code></td><td>周期天数，默认 15，必须大于 0。</td></tr><tr><td><code>RuleDurationDays</code></td><td>持续天数，默认 1，必须大于 0。</td></tr></tbody></table></div><p>校验会保留支持的目标、子效果、选项和阶段字段，并补齐缺省值。未知字段和未注册效果会报错，避免在下载时悄悄丢失行为。结构和参数通过校验，仍需在实际游戏中确认运行结果。</p></section>
+<section id="share"><div class="eyebrow">05 / Share</div><h2>让别人发现你的作品</h2><ol><li>在 <a href="gallery.html">分享广场</a> 点击“分享我的作品”。</li><li>填写名称、类型、介绍，选择 JSON 文件，并添加最多 5 个自定义标签。</li><li>校验通过后打开 GitHub 发布草稿，登录账号并提交。</li><li>返回广场刷新。作品详情可预览、下载并阅读评论。</li></ol><p>标签存储在分享正文中，无需仓库标签权限。较长的 JSON 会提供可复制的发布正文，供你在 GitHub 中粘贴。发表评论使用详情中的“去 GitHub 评论”入口。</p><p>旧分享若没有类型标签，可在原帖正文添加 <code>类型：CityNames</code> 等标识。JSON 推荐放在 <code>```json</code> 代码块中。没有可读取资产或格式校验未通过的帖子会禁用下载。</p><p>每份分享包含一个 JSON 库；超过正文容量需拆分，当前广场不读取附件。关联节日与事件应分别分享，并在介绍中注明另一份库的链接。作品更新应保持事件 Id 稳定，复制为新作品时请使用新的 Id，避免关联混淆。</p></section>
+<section id="faq" class="faq"><div class="eyebrow">06 / A little help</div><h2>常见问题</h2><details><summary>下载后游戏里看不到资产？</summary><p>确认后缀为 .json、子文件夹类型正确、内容使用 Items 或 Entries 对应结构，再重新打开库选择页面。当前目录名称与发行版可能不同。</p></details><details><summary>AI 生成失败或 JSON 校验失败？</summary><p>AI 不保证总能返回正确结构。检查具体错误提示，减少条目数、简化提示词后重试。预览中的手动编辑也必须保持合法 JSON。</p></details><details><summary>为什么下载内容与原始 JSON 有些区别？</summary><p>下载会规范化空白并补齐缺省值，保留预览中支持的名字、描述、阶段、目标和子效果。未知字段会报错，不会静默删除。</p></details><details><summary>分享广场或评论加载失败？</summary><p>浏览器需要访问 GitHub API。网络限制或 GitHub 的未登录请求额度都可能导致失败，可稍后重试或打开 GitHub 原帖查看。</p></details><details><summary>Steam 商店页在哪里？</summary><p>目前还没有配置正式 Steam 商店链接。商店上线后，官网会提供直达入口。</p></details></section>
 </article></div></main><footer class="site-footer"><span>© 2026 Grandpas Land · 爷爷的地</span><a href="workshop.html">开始创造 ↗</a></footer></body></html>

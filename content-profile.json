@@ -1,0 +1,5961 @@
+{
+  "schemaVersion": 1,
+  "profileId": "crownfall1-v1",
+  "unityVersion": "2022.3.62f3c1",
+  "daysPerYear": 3,
+  "enums": {
+    "GameEventType": [
+      "Bad",
+      "Good",
+      "Notice"
+    ],
+    "EventTag": [
+      "None",
+      "Nature",
+      "Social",
+      "Economy",
+      "Politics",
+      "Military",
+      "Health",
+      "Culture"
+    ],
+    "ConditionType": [
+      "Gold",
+      "Health",
+      "Prestige",
+      "Age",
+      "Stat",
+      "HasTag",
+      "HasItem",
+      "NpcLoyalty",
+      "NpcGreed"
+    ],
+    "ComparisonOp": [
+      "GreaterEqual",
+      "Greater",
+      "LessEqual",
+      "Less",
+      "Equal"
+    ],
+    "StatType": [
+      "Charm",
+      "Attack",
+      "Defense",
+      "Health",
+      "Prestige"
+    ]
+  },
+  "effects": {
+    "AcceptQuestEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "QuestId": {
+          "type": "string",
+          "default": ""
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "QuestId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "QuestId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "AddLawEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "CountryId": {
+          "type": "integer",
+          "default": -1
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "LawId": {
+          "type": "string",
+          "default": ""
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "CountryId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "CountryId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "AddTagEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TagName": {
+          "type": "string",
+          "default": ""
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "AddTraitEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "TraitName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "TraitName",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "TraitName"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "AdvanceTimeEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Days": {
+          "type": "integer",
+          "default": 1
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ApplyDiseaseEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "DiseaseName": {
+          "type": "string",
+          "default": "",
+          "resource": "diseases"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "AssignPositionEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "CountryId": {
+          "type": "integer",
+          "default": -1
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "Position": {
+          "type": "string",
+          "enum": [
+            "None",
+            "VillageChief",
+            "Mayor",
+            "GrandCivilian",
+            "Commander"
+          ],
+          "default": "VillageChief"
+        },
+        "Reason": {
+          "type": "string",
+          "default": "Event"
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SettlementCol": {
+          "type": "integer",
+          "default": -1
+        },
+        "SettlementRow": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SettlementCol",
+        "SettlementRow",
+        "CountryId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SettlementCol",
+            "SettlementRow",
+            "CountryId"
+          ],
+          "when": {
+            "Position": "VillageChief"
+          }
+        },
+        {
+          "fields": [
+            "SettlementCol",
+            "SettlementRow",
+            "CountryId"
+          ],
+          "when": {
+            "Position": "Mayor"
+          }
+        },
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ClearFlagEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "Flag": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ConditionEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Condition": {
+          "type": "string",
+          "enum": [
+            "FlagSet",
+            "FlagNotSet"
+          ],
+          "default": "FlagSet"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "Flag": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": true,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "CrashStockEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "CrashType": {
+          "type": "string",
+          "enum": [
+            "Disaster",
+            "War",
+            "CEODeath"
+          ],
+          "default": "Disaster"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "Reason": {
+          "type": "string",
+          "default": ""
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StockId": {
+          "type": "string",
+          "default": ""
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "StockId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "StockId"
+          ],
+          "nonEmpty": true
+        },
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "CureDiseaseEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "DiseaseName": {
+          "type": "string",
+          "default": "",
+          "resource": "diseases"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "DeclareWarEffect": {
+      "parameters": {
+        "AttackerCommanderId": {
+          "type": "integer",
+          "default": -1
+        },
+        "AttackerCountryId": {
+          "type": "integer",
+          "default": -1
+        },
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "DefenderCommanderId": {
+          "type": "integer",
+          "default": -1
+        },
+        "DefenderCountryId": {
+          "type": "integer",
+          "default": -1
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "AttackerCountryId",
+        "DefenderCountryId",
+        "AttackerCommanderId",
+        "DefenderCommanderId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "AttackerCountryId",
+        "DefenderCountryId",
+        "AttackerCommanderId",
+        "DefenderCommanderId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "DeleteNpcEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "DepositEffect": {
+      "parameters": {
+        "Amount": {
+          "type": "integer",
+          "default": 100
+        },
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "UseInputValue": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "DismissFollowerEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "DismissPositionEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "Reason": {
+          "type": "string",
+          "default": "Event"
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "DispatchCharacterEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Difficulty": {
+          "type": "string",
+          "enum": [
+            "Simple",
+            "Medium",
+            "Hard",
+            "Nightmare"
+          ],
+          "default": "Simple"
+        },
+        "DurationDays": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 0
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "QuestId": {
+          "type": "string",
+          "default": ""
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": true,
+      "bindingFields": [
+        "QuestId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "QuestId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "DivorceEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "SpouseId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "SpouseId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "SpouseId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "FleeTargetEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "FleeDistance": {
+          "type": "number",
+          "default": 20.0
+        },
+        "FleeFromCharacterId": {
+          "type": "integer",
+          "default": 0
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "FleeFromCharacterId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "FleeFromCharacterId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "FollowTargetEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "FollowDistance": {
+          "type": "number",
+          "default": 2.0
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "Mode": {
+          "type": "string",
+          "enum": [
+            "Close",
+            "Formation"
+          ],
+          "default": "Close"
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCharacterId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "TargetCharacterId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "TargetCharacterId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "GiveItemEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "ItemId": {
+          "type": "string",
+          "default": "",
+          "resource": "items"
+        },
+        "Qty": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "Target": {
+          "type": "string",
+          "enum": [
+            "Char",
+            "Family",
+            "Settlement"
+          ],
+          "default": "Char"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresCharacterMayVary": true,
+      "characterRules": [
+        {
+          "when": {
+            "Target": "Settlement"
+          },
+          "requiresCharacter": false
+        }
+      ],
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "GiveQuestEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "QuestId": {
+          "type": "string",
+          "default": ""
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "QuestId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "QuestId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "InfectDiseaseEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "DiseaseName": {
+          "type": "string",
+          "default": "",
+          "resource": "diseases"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "KillNpcEffect": {
+      "parameters": {
+        "Cause": {
+          "type": "string",
+          "default": "暗杀"
+        },
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTag": {
+          "type": "string",
+          "default": ""
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "TargetType": {
+          "type": "string",
+          "enum": [
+            "ByPosition",
+            "ByFamily",
+            "Random",
+            "ByTag"
+          ],
+          "default": "Random"
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "LoanEffect": {
+      "parameters": {
+        "Amount": {
+          "type": "integer",
+          "default": 500
+        },
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "DueDays": {
+          "type": "integer",
+          "default": 9
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "UseInputValue": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "MarryEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "SpouseId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "SpouseId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "SpouseId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyAgeEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Delta": {
+          "type": "integer",
+          "default": 1
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyCampaignSupportEffect": {
+      "parameters": {
+        "CampaignPosition": {
+          "type": "string",
+          "enum": [
+            "None",
+            "VillageChief",
+            "Mayor",
+            "GrandCivilian",
+            "Commander"
+          ],
+          "default": "GrandCivilian"
+        },
+        "CandidateId": {
+          "type": "integer",
+          "default": 0
+        },
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Delta": {
+          "type": "number",
+          "default": 10.0
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "CandidateId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "CandidateId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyDemandByTagEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Delta": {
+          "type": "integer",
+          "default": 20
+        },
+        "DurationDays": {
+          "type": "integer",
+          "default": 0,
+          "minimum": 0
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "ItemTag": {
+          "type": "string",
+          "default": "",
+          "resource": "itemTags"
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SettlementId": {
+          "type": "string",
+          "default": ""
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "Target": {
+          "type": "string",
+          "enum": [
+            "TargetLocation",
+            "FixedSettlement"
+          ],
+          "default": "TargetLocation"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SettlementId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SettlementId"
+          ],
+          "when": {
+            "Target": "FixedSettlement"
+          }
+        },
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyDemandEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Delta": {
+          "type": "integer",
+          "default": 10
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "ItemId": {
+          "type": "string",
+          "default": "",
+          "resource": "items"
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SettlementId": {
+          "type": "string",
+          "default": ""
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "Target": {
+          "type": "string",
+          "enum": [
+            "TargetLocation",
+            "FixedSettlement"
+          ],
+          "default": "TargetLocation"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SettlementId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SettlementId"
+          ],
+          "when": {
+            "Target": "FixedSettlement"
+          }
+        },
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyFateEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Delta": {
+          "type": "integer",
+          "default": 1
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyGoldEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Delta": {
+          "type": "integer",
+          "default": 100
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "Target": {
+          "type": "string",
+          "enum": [
+            "Player",
+            "Family",
+            "Settlement"
+          ],
+          "default": "Player"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresCharacterMayVary": true,
+      "characterRules": [
+        {
+          "when": {
+            "Target": "Settlement"
+          },
+          "requiresCharacter": false
+        }
+      ],
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyHappinessEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Delta": {
+          "type": "integer",
+          "default": 5
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyHealRateEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Delta": {
+          "type": "number",
+          "default": 0.2
+        },
+        "DiseaseName": {
+          "type": "string",
+          "default": "",
+          "resource": "diseases"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyHealthEffect": {
+      "parameters": {
+        "Cause": {
+          "type": "string",
+          "default": ""
+        },
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Delta": {
+          "type": "integer",
+          "default": 10
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "IsPercentage": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyNpcGreedEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Delta": {
+          "type": "integer",
+          "default": 10
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyNpcLoyaltyEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Delta": {
+          "type": "integer",
+          "default": 10
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyPersonalityEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "Mode": {
+          "type": "string",
+          "enum": [
+            "Add",
+            "Remove"
+          ],
+          "default": "Add"
+        },
+        "PersonalityName": {
+          "type": "string",
+          "default": ""
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "PersonalityName",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "PersonalityName"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyPrestigeEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Delta": {
+          "type": "integer",
+          "default": 10
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyRelationshipEffect": {
+      "parameters": {
+        "Bidirectional": {
+          "type": "boolean",
+          "default": true
+        },
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Delta": {
+          "type": "number",
+          "default": 10.0
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RelationshipCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "RelationshipTarget": {
+          "type": "string",
+          "enum": [
+            "Player",
+            "SpecificId"
+          ],
+          "default": "Player"
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "RelationshipCharId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "RelationshipCharId"
+          ],
+          "when": {
+            "RelationshipTarget": "SpecificId"
+          }
+        },
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [
+        {
+          "when": {
+            "RelationshipTarget": "Player"
+          },
+          "requiresPlayer": true
+        }
+      ],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyStatEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Delta": {
+          "type": "integer",
+          "default": 1
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "IsPermanent": {
+          "type": "boolean",
+          "default": true
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "RevertDelta": {
+          "type": "integer",
+          "default": 0
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetStat": {
+          "type": "string",
+          "enum": [
+            "Charm",
+            "Attack",
+            "Defense",
+            "Health",
+            "Prestige"
+          ],
+          "default": "Charm"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyStockEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "DailyVolatility": {
+          "type": "number",
+          "default": 0.05
+        },
+        "Direction": {
+          "type": "string",
+          "enum": [
+            "Up",
+            "Down"
+          ],
+          "default": "Up"
+        },
+        "DurationDays": {
+          "type": "integer",
+          "default": 10,
+          "minimum": 0
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "Reason": {
+          "type": "string",
+          "default": ""
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StockId": {
+          "type": "string",
+          "default": ""
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "StockId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "StockId"
+          ],
+          "nonEmpty": true
+        },
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifySupplyByTagEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Delta": {
+          "type": "integer",
+          "default": 20
+        },
+        "DurationDays": {
+          "type": "integer",
+          "default": 0,
+          "minimum": 0
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "ItemTag": {
+          "type": "string",
+          "default": "",
+          "resource": "itemTags"
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SettlementId": {
+          "type": "string",
+          "default": ""
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "Target": {
+          "type": "string",
+          "enum": [
+            "TargetLocation",
+            "FixedSettlement"
+          ],
+          "default": "TargetLocation"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SettlementId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SettlementId"
+          ],
+          "when": {
+            "Target": "FixedSettlement"
+          }
+        },
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifySupplyEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Delta": {
+          "type": "integer",
+          "default": 10
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "ItemId": {
+          "type": "string",
+          "default": "",
+          "resource": "items"
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SettlementId": {
+          "type": "string",
+          "default": ""
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "Target": {
+          "type": "string",
+          "enum": [
+            "TargetLocation",
+            "FixedSettlement"
+          ],
+          "default": "TargetLocation"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SettlementId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SettlementId"
+          ],
+          "when": {
+            "Target": "FixedSettlement"
+          }
+        },
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyTradeTaxRateEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "CountryId": {
+          "type": "integer",
+          "default": -1
+        },
+        "Delta": {
+          "type": "number",
+          "default": 0.05
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "UseTargetLocation": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "CountryId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "CountryId"
+          ],
+          "when": {
+            "UseTargetLocation": false
+          },
+          "minimum": 0
+        },
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyTreasuryEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "CountryId": {
+          "type": "integer",
+          "default": -1
+        },
+        "Delta": {
+          "type": "integer",
+          "default": 1000
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "CountryId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "CountryId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "MoveCharacterEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "DestType": {
+          "type": "string",
+          "enum": [
+            "Hex",
+            "Settlement",
+            "FollowChar"
+          ],
+          "default": "Settlement"
+        },
+        "DestValue": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "DestValue",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "DestValue"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "NewspaperEffect": {
+      "parameters": {
+        "BasePrestige": {
+          "type": "integer",
+          "default": 10
+        },
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Cost": {
+          "type": "integer",
+          "default": 100
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "NewsTitle": {
+          "type": "string",
+          "default": "报社宣传"
+        },
+        "PrestigeCap": {
+          "type": "integer",
+          "default": 200
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "PathfindToEffect": {
+      "parameters": {
+        "AnchorId": {
+          "type": "string",
+          "default": ""
+        },
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "Mode": {
+          "type": "string",
+          "enum": [
+            "WalkTo",
+            "Enter"
+          ],
+          "default": "WalkTo"
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "AnchorId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "AnchorId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "RandomEffect": {
+      "parameters": {
+        "Chance": {
+          "type": "number",
+          "default": 0.5,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": true,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "RecruitFollowerEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "ForceJoin": {
+          "type": "boolean",
+          "default": true
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "Recruiter": {
+          "type": "string",
+          "enum": [
+            "Player",
+            "SpecificId"
+          ],
+          "default": "Player"
+        },
+        "RecruiterCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "RecruiterCharId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "RecruiterCharId"
+          ],
+          "when": {
+            "Recruiter": "SpecificId"
+          }
+        },
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [
+        {
+          "when": {
+            "Recruiter": "Player"
+          },
+          "requiresPlayer": true
+        }
+      ],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "RecruitSoldierEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "CountryId": {
+          "type": "integer",
+          "default": -1
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "CountryId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "CountryId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "RemoveItemEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "ItemId": {
+          "type": "string",
+          "default": "",
+          "resource": "items"
+        },
+        "Qty": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "Target": {
+          "type": "string",
+          "enum": [
+            "Char",
+            "Family",
+            "Settlement"
+          ],
+          "default": "Char"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresCharacterMayVary": true,
+      "characterRules": [
+        {
+          "when": {
+            "Target": "Settlement"
+          },
+          "requiresCharacter": false
+        }
+      ],
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "RemoveLawEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "CountryId": {
+          "type": "integer",
+          "default": -1
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "LawId": {
+          "type": "string",
+          "default": ""
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "CountryId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "CountryId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "RemoveTagEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TagName": {
+          "type": "string",
+          "default": ""
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "RemoveTraitEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "TraitName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "TraitName",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "TraitName"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ReviveNpcEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "SequenceEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": true,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "SetBehaviorEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "State": {
+          "type": "string",
+          "enum": [
+            "Idle",
+            "CommutingToWork",
+            "Working",
+            "CommutingHome",
+            "Leisure",
+            "Sleeping",
+            "Traveling",
+            "AttendingGathering",
+            "Combat",
+            "Fleeing",
+            "Following",
+            "Dating",
+            "Dispatched"
+          ],
+          "default": "Following"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "SetFamilyEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "FamilyFactionId": {
+          "type": "integer",
+          "default": 0
+        },
+        "FatherId": {
+          "type": "integer",
+          "default": 0
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "MotherId": {
+          "type": "integer",
+          "default": 0
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "Role": {
+          "type": "string",
+          "enum": [
+            "Head",
+            "Spouse",
+            "Ancestor",
+            "Sibling",
+            "Child",
+            "DistantRelative"
+          ],
+          "default": "DistantRelative"
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "FamilyFactionId",
+        "FatherId",
+        "MotherId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "FamilyFactionId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "FatherId"
+          ],
+          "minimum": 1
+        },
+        {
+          "fields": [
+            "MotherId"
+          ],
+          "minimum": 1
+        },
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "SetFlagEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "Flag": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "SetTollRateEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "CountryId": {
+          "type": "integer",
+          "default": -1
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SettlementCol": {
+          "type": "integer",
+          "default": 0
+        },
+        "SettlementRow": {
+          "type": "integer",
+          "default": 0
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "Toll": {
+          "type": "integer",
+          "default": 0
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "CountryId",
+        "SettlementCol",
+        "SettlementRow",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "CountryId",
+        "SettlementCol",
+        "SettlementRow"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ShowMessageUIEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Duration": {
+          "type": "number",
+          "default": 3.0
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "MessageKey": {
+          "type": "string",
+          "default": ""
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "TitleKey": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "当前仅输出日志，尚未连接实际消息 UI 或交互物生成。",
+      "status": "logOnly"
+    },
+    "SpawnInteractableEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "InteractionKey": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "ObjectId": {
+          "type": "string",
+          "default": ""
+        },
+        "ObjectName": {
+          "type": "string",
+          "default": ""
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetHex": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "integer",
+              "default": 0
+            },
+            "y": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          "additionalProperties": false,
+          "default": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "TriggerEventId": {
+          "type": "string",
+          "default": ""
+        },
+        "Type": {
+          "type": "string",
+          "enum": [
+            "Tree",
+            "Rock",
+            "Chest",
+            "Npc",
+            "Signpost"
+          ],
+          "default": "Chest"
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "当前仅输出日志，尚未连接实际消息 UI 或交互物生成。",
+      "status": "logOnly"
+    },
+    "SpawnNpcEffect": {
+      "parameters": {
+        "Age": {
+          "type": "integer",
+          "default": 18
+        },
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "FamilyAssignment": {
+          "type": "string",
+          "enum": [
+            "SpecificFamily",
+            "TargetFamily",
+            "NoFamily"
+          ],
+          "default": "NoFamily"
+        },
+        "FamilyId": {
+          "type": "integer",
+          "default": 0
+        },
+        "FamilyRole": {
+          "type": "string",
+          "enum": [
+            "Head",
+            "Spouse",
+            "Ancestor",
+            "Sibling",
+            "Child",
+            "DistantRelative"
+          ],
+          "default": "DistantRelative"
+        },
+        "Gender": {
+          "type": "string",
+          "enum": [
+            "Male",
+            "Female"
+          ],
+          "default": "Male"
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "NpcName": {
+          "type": "string",
+          "default": ""
+        },
+        "RaceName": {
+          "type": "string",
+          "default": "人类"
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpawnNearTarget": {
+          "type": "boolean",
+          "default": true
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "FamilyId",
+        "RaceName",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "FamilyId"
+          ],
+          "when": {
+            "FamilyAssignment": "SpecificFamily"
+          }
+        },
+        {
+          "fields": [
+            "RaceName"
+          ],
+          "nonEmpty": true
+        },
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "StartDialogueEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "Title": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "Title",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "Title"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "SurgeStockEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "Reason": {
+          "type": "string",
+          "default": ""
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StockId": {
+          "type": "string",
+          "default": ""
+        },
+        "SurgeMax": {
+          "type": "number",
+          "default": 0.3
+        },
+        "SurgeMin": {
+          "type": "number",
+          "default": 0.15
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "StockId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "StockId"
+          ],
+          "nonEmpty": true
+        },
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "WithdrawEffect": {
+      "parameters": {
+        "Amount": {
+          "type": "integer",
+          "default": 100
+        },
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "UseInputValue": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "allowsChildren": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    }
+  },
+  "resources": {
+    "diseases": [],
+    "items": [
+      "Apple",
+      "ArmorBlue",
+      "ArmorGreen",
+      "Axe",
+      "Bomb",
+      "Coin",
+      "DeadlineHandgun",
+      "DeadlinePunch",
+      "KoalaCoin",
+      "KoalaGun",
+      "KoalaGunAmmo",
+      "KoalaHealth",
+      "KoalaMetalKey",
+      "KoalaPlasma",
+      "KoalaPlasmaAmmo",
+      "KoalaRifle",
+      "KoalaRifleAmmo",
+      "KoalaShotgun",
+      "KoalaShotgunAmmo",
+      "KoalaSword",
+      "KoalaWoodenKey",
+      "LoftAssaultRifle",
+      "LoftAssaultRifleAmmo",
+      "LoftHandgun",
+      "LoftHandgunAmmo",
+      "LoftShotgun",
+      "LoftShotgunAmmo",
+      "LoftSniperRifle",
+      "LoftSniperRifleAmmo",
+      "LoftSword",
+      "Minigun",
+      "Revolver",
+      "Rifle",
+      "Shotgun",
+      "Sword",
+      "armor_cloth_boots",
+      "armor_cloth_bottom",
+      "armor_cloth_gloves",
+      "armor_cloth_helmet",
+      "armor_cloth_top",
+      "armor_dragon_boots",
+      "armor_dragon_bottom",
+      "armor_dragon_gloves",
+      "armor_dragon_helmet",
+      "armor_dragon_top",
+      "armor_iron_boots",
+      "armor_iron_bottom",
+      "armor_iron_gloves",
+      "armor_iron_helmet",
+      "armor_iron_top",
+      "armor_leather_boots",
+      "armor_leather_bottom",
+      "armor_leather_gloves",
+      "armor_leather_helmet",
+      "armor_leather_top",
+      "armor_steel_boots",
+      "armor_steel_bottom",
+      "armor_steel_gloves",
+      "armor_steel_helmet",
+      "armor_steel_top",
+      "guard_boots",
+      "guard_bottom",
+      "guard_gloves",
+      "guard_helmet",
+      "guard_top",
+      "weapon_armorbreaker",
+      "weapon_battleaxe",
+      "weapon_club",
+      "weapon_dagger",
+      "weapon_dragonblade",
+      "weapon_dragonstaff",
+      "weapon_greataxe",
+      "weapon_greatsword",
+      "weapon_halberd",
+      "weapon_handaxe",
+      "weapon_ironrod",
+      "weapon_kingblade",
+      "weapon_knightblade",
+      "weapon_longsword",
+      "weapon_pickaxe",
+      "weapon_sabre",
+      "weapon_shortsword",
+      "weapon_sickle",
+      "weapon_spear",
+      "weapon_warhammer"
+    ],
+    "itemTags": []
+  },
+  "resourcesComplete": {
+    "diseases": false,
+    "items": true,
+    "itemTags": true
+  }
+}

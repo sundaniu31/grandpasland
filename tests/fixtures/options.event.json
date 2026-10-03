@@ -1,0 +1,30 @@
+{
+  "SchemaVersion": 1,
+  "ProfileId": "crownfall1-v1",
+  "Entries": [
+    {
+      "Id": "Website_ContextProbe",
+      "Name": "{SettlementName}互助会",
+      "Description": "城中居民相互帮助。",
+      "Stages": [{"StageName": "登记", "Description": "记录参与者"}],
+      "Type": "ExistingHandler",
+      "EventType": "Good",
+      "Repeatable": false,
+      "Score": 7,
+      "Tags": "Social, Health",
+      "RumorHint": "居民在讨论互助会",
+      "DescriptionVariants": ["{ActorName}参加了互助会", "{PlayerName}听说了互助会"],
+      "CausalTagModifiers": [{"targetTag": "Health", "probabilityMultiplier": 1.5, "durationDays": 2, "decayOverTime": true}],
+      "Target": {"ActorId": 0, "PlayerId": 0, "SettlementId": "", "RandomSettlement": true},
+      "TriggerConsequences": [
+        {"Type": "SequenceEffect", "Parameters": {}, "Children": [
+          {"Type": "ModifyHealthEffect", "Parameters": {"Delta": -7, "TargetMode": "RandomInSettlement", "CharacterKind": "Npc", "TargetCount": 1}},
+          {"Type": "RandomEffect", "Parameters": {"Chance": 1}, "Children": [{"Type": "ModifyPrestigeEffect", "Parameters": {"Delta": 11, "TargetMode": "Player"}}]}
+        ]}
+      ],
+      "Options": [
+        {"OptionText": "参与互助", "AutoExecute": false, "Tooltip": "需要健康不低于 1", "Conditions": [{"Type": "Health", "Param": "", "Threshold": 1, "Op": "GreaterEqual"}], "Consequences": [{"Type": "ModifyHealthEffect", "Parameters": {"Delta": 2, "TargetMode": "Player"}}], "HasInputField": true, "InputLabel": "参与次数", "InputDefault": 2, "InputMin": 1, "InputMax": 3}
+      ]
+    }
+  ]
+}

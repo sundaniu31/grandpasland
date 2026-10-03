@@ -1,0 +1,24 @@
+{
+  "SchemaVersion": 1,
+  "ProfileId": "crownfall1-v1",
+  "Entries": [
+    {
+      "Id": "Website_PlagueOutbreak",
+      "Name": "{SettlementName}发生了瘟疫",
+      "Description": "城中数人感染瘟疫，药材需求增加。",
+      "Type": "Disease",
+      "EventType": "Bad",
+      "Score": -8,
+      "Tags": "Health, Economy",
+      "Weight": 20,
+      "CooldownDays": 30,
+      "Repeatable": true,
+      "Target": { "RandomSettlement": true },
+      "TriggerConsequences": [
+        {"Type": "InfectDiseaseEffect", "Parameters": {"DiseaseName": "瘟疫", "TargetMode": "RandomInSettlement", "CharacterKind": "Npc", "TargetCount": 3}},
+        {"Type": "ModifyDemandByTagEffect", "Parameters": {"ItemTag": "药材", "Delta": 50, "DurationDays": 15}}
+      ],
+      "Options": []
+    }
+  ]
+}

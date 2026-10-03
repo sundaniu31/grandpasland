@@ -1,6 +1,8 @@
 'use strict';
 const A=window.GLAssets;
+const C=window.GLContent;
 const $=id=>document.getElementById(id);
+const t=(zh,en)=>window.GLI18n?.language==='en'?en:zh;
 const REPO='sundaniu31/grandpasland';
 const API='https://api.github.com/repos/'+REPO;
 const typeByLower=Object.fromEntries(Object.keys(A.TYPES).map(type=>[type.toLowerCase(),type]));
@@ -8,6 +10,7 @@ let works=[];
 let selectedTag='';
 let partial=false;
 let commentRequest=null;
+let profileError='';
 function typeOf(value){return typeByLower[String(value||'').toLowerCase()]||'';}
 function cleanTags(values) {return Array.from(new Set(values.filter(tag=>typeof tag==='string').map(tag=>tag.trim()).filter(tag=>tag&&tag.length<=24&&!/[<>\x00-\x1F]/.test(tag)))).slice(0,5);}
 function metadata(body){const match=(body||'').match(/^\s*<!--\s*gl-asset:\s*(\{[^\n]*\})\s*-->/);if(!match)return {};try{return JSON.parse(match[1]);}catch{return {};}}
@@ -17,20 +20,26 @@ function workOf(issue) {
   const labels=Array.isArray(issue.labels)?issue.labels.map(label=>typeof label==='string'?label:label.name):[];
   const bodyType=body.match(/(?:^|\n)\s*类型\s*[：:]\s*([a-z]+)/i);
   const type=typeOf(meta.type)||labels.map(typeOf).find(Boolean)||typeOf(bodyType?.[1]);
-  const blocks=[...body.matchAll(/```json\s*\r?\n([\s\S]*?)```/gi)];
+  // Match a complete Markdown fence; backticks inside JSON text are ordinary content.
+  const blocks=[...body.matchAll(/^(`{3,}|~{3,})json[^\S\r\n]*\r?\n([\s\S]*?)^\1[^\S\r\n]*$/gim)];
   let data=null,error='',json='';
-  if(blocks.length){json=blocks[0][1].trim();}
+  if(blocks.length){json=blocks[0][2].trim();}
   else {
     const raw=body.replace(/^\s*<!--[\s\S]*?-->/,'').trim();
     if(raw.startsWith('{'))json=raw;
     else {const start=raw.indexOf('{'),end=raw.lastIndexOf('}');if(start>=0&&end>start)json=raw.slice(start,end+1);}
   }
   if(!type)return null;
-  if(json){try{data=A.validate(A.parseJSON(json),type);}catch(e){error=e.message;}}
+  if(json){try{
+    if(C.requiresProfile(type)&&!A.getProfile())throw new Error(profileError||t('游戏兼容目录未加载，请重新加载广场。','Game compatibility profile is not loaded. Reload the gallery.'));
+    const profile=A.getProfile();
+    if(C.requiresProfile(type)&&((meta.schemaVersion!==undefined&&meta.schemaVersion!==profile.schemaVersion)||(meta.profileId&&meta.profileId!==profile.profileId)))throw new Error(t('这份作品使用其他版本的游戏协议，当前版本不能导入。','This creation uses a different game protocol and cannot be imported by this version.'));
+    data=A.validate(A.parseJSON(json),type);
+  }catch(e){error=e.message;}}
   else error='这份分享尚未附上可读取的 JSON，请到原帖查看。';
   const tagLine=body.match(/(?:^|\n)\s*标签\s*[：:]\s*([^\n]+)/);
   const tags=cleanTags([...(Array.isArray(meta.tags)?meta.tags:[]),...(tagLine?tagLine[1].split(/[,，]/):[]),...labels.filter(label=>!typeOf(label))]);
-  const description=body.replace(/<!--[\s\S]*?-->/g,'').replace(/```[\s\S]*?```/g,'').split('\n').filter(line=>line.trim()&&!/^\s*(类型|标签|JSON|资产内容)\s*[：:]/i.test(line)).map(line=>line.replace(/^\s*介绍\s*[：:]\s*/,'')).join('\n').trim().slice(0,2000);
+  const description=body.replace(/<!--[\s\S]*?-->/g,'').replace(/^(`{3,}|~{3,})[^\r\n]*\r?\n[\s\S]*?^\1[^\S\r\n]*$/gm,'').split('\n').filter(line=>line.trim()&&!/^\s*(类型|标签|JSON|资产内容)\s*[：:]/i.test(line)).map(line=>line.replace(/^\s*介绍\s*[：:]\s*/,'')).join('\n').trim().slice(0,2000);
   return {number:issue.number,title:String(issue.title||'未命名作品').replace(/^【分享】\s*/,''),type,tags,data,error,description:description||'作者还没有填写作品介绍。',author:String(issue.user?.login||'玩家'),date:issue.created_at,comments:Number(issue.comments)||0,url:'https://github.com/'+REPO+'/issues/'+issue.number};
 }
 function element(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
@@ -40,6 +49,9 @@ function apiError(response){return response.status===403||response.status===429?
 async function load() {
   $('list').setAttribute('aria-busy','true');
   try {
+    profileError='';partial=false;
+    // A profile error leaves name libraries readable and makes gameplay downloads fail visibly.
+    try{await C.loadProfile();}catch(error){profileError=error.message;}
     const issues=[];
     for(let page=1;page<=10;page++){
       const response=await fetch(API+'/issues?state=open&sort=created&direction=desc&per_page=100&page='+page,{headers:{Accept:'application/vnd.github+json'}});
@@ -86,9 +98,13 @@ async function openDetail(work) {
   commentRequest?.abort();commentRequest=new AbortController();const controller=commentRequest;
   $('detailTitle').textContent=work.title;$('detailTags').replaceChildren(badge(A.TYPES[work.type]),...work.tags.map(tag=>badge(tag,true)));$('detailMeta').textContent=work.author+' · '+dateOf(work.date);$('detailDescription').textContent=work.description;
   $('detailSource').href=work.url;$('commentLink').href=work.url+'#issuecomment-new';
+  $('detailSupport').textContent=C.supportMessage(work.type);
+  $('detailEffects').textContent=C.summary(work.data,work.type);
+  $('detailWarnings').textContent=work.data?A.getValidationWarnings(work.data,work.type,window.GLI18n?.language).join('\n'):'';
+  $('detailWarnings').hidden=!$('detailWarnings').textContent;
   $('detailCode').hidden=!work.data;$('detailStatus').hidden=true;$('detailDownload').disabled=!work.data;
   if(work.data)$('detailCode').textContent=JSON.stringify(work.data,null,2);else A.status($('detailStatus'),work.error,'error');
-  $('detailDownload').onclick=()=>{try{A.download(A.validate(work.data,work.type),work.title);}catch(error){A.status($('detailStatus'),error.message,'error');}};
+  $('detailDownload').onclick=async()=>{try{await C.ensureProfile(work.type);A.download(A.validate(work.data,work.type),work.title);}catch(error){A.status($('detailStatus'),error.message,'error');}};
   $('comments').textContent='正在读取评论…';if(!$('detailDialog').open)$('detailDialog').showModal();
   const address=new URL(location.href);address.searchParams.set('asset',work.number);address.searchParams.delete('share');history.replaceState(null,'',address);
   const timer=setTimeout(()=>controller.abort(),15000);
@@ -118,12 +134,12 @@ $('shareForm').addEventListener('submit',async event=>{
     if(!/\.json$/i.test(file.name))throw new Error('请选择 .json 文件');if(file.size>A.MAX_FILE_BYTES)throw new Error('文件超过 1 MB');
     const type=$('shareType').value,name=$('shareName').value.trim(),description=$('shareDescription').value.trim();
     if(!name||!description)throw new Error('请填写作品名称和介绍');
+    await C.ensureProfile(type);
     const rawTags=$('shareTags').value.split(/[,，]/).map(tag=>tag.trim()).filter(Boolean);const tags=cleanTags(rawTags);
     if(rawTags.length>5||tags.length!==new Set(rawTags).size)throw new Error('请使用最多 5 个标签，每个标签不超过 24 字，不能含尖括号');
     const text=await file.text();if(/(?:ghp_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,}|"(?:apiKey|api_key|Authorization)"\s*:)/i.test(text+'\n'+description))throw new Error('内容可能含有密钥，请删除后再分享');
     const data=A.validate(A.parseJSON(text),type);
-    const body='<!-- gl-asset: '+JSON.stringify({version:1,type,tags})+' -->\n介绍：'+description+'\n类型：'+type+'\n标签：'+tags.join(', ')+'\n\n```json\n'+JSON.stringify(data,null,2)+'\n```';
-    if(body.length>50000)throw new Error('分享内容过大，请拆成更小的库，或在 GitHub 原帖附上文件。');
+    const body=C.issueBody({type,tags,description},data);
     const url=new URL('https://github.com/'+REPO+'/issues/new');url.searchParams.set('title','【分享】'+name);url.searchParams.set('body',body);
     if(draftArea){draftArea.remove();draftArea=null;}
     if(url.href.length>7000){
@@ -135,5 +151,5 @@ $('shareForm').addEventListener('submit',async event=>{
 });
 const params=new URLSearchParams(location.search);
 if(params.get('share')==='1') {const type=typeOf(params.get('type'));if(type)$('shareType').value=type;$('shareName').value=(params.get('name')||'').slice(0,80);openShare();}
-window.addEventListener('gl-languagechange',()=>{renderTags();render();const current=works.find(work=>work.number===Number(new URLSearchParams(location.search).get('asset')));if(current&&$('detailDialog').open)$('detailMeta').textContent=current.author+' · '+dateOf(current.date);});
+window.addEventListener('gl-languagechange',()=>{renderTags();render();const current=works.find(work=>work.number===Number(new URLSearchParams(location.search).get('asset')));if(current&&$('detailDialog').open){$('detailMeta').textContent=current.author+' · '+dateOf(current.date);$('detailSupport').textContent=C.supportMessage(current.type);$('detailEffects').textContent=C.summary(current.data,current.type);$('detailWarnings').textContent=current.data?A.getValidationWarnings(current.data,current.type,window.GLI18n?.language).join('\n'):'';}});
 load();
