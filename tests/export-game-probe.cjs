@@ -42,5 +42,11 @@ for (const [type, source] of Object.entries(data)) {
   fs.writeFileSync(path.join(output, type + '.json'), JSON.stringify(downloaded, null, 2), 'utf8');
 }
 assert.equal(A.validate(data.Events, 'Events').Entries[0].TriggerConsequences[0].Children.length, 3);
+const startupSource = require('./fixtures/startup.event.json');
+const startup = A.validate(A.parseAI(JSON.stringify(startupSource)), 'Events');
+const startupDownload = A.validate(A.parseJSON(JSON.stringify(startup)), 'Events');
+assert.deepEqual(startupDownload, startup, 'Startup branches changed during website validation');
+assert.equal(startupDownload.Entries[1].TriggerConsequences[1].Children[0].WeightedBranches.length, 2);
+fs.writeFileSync(path.join(output, 'StartupEffects.json'), JSON.stringify(startupDownload, null, 2), 'utf8');
 fs.writeFileSync(path.join(output, 'probe.json'), JSON.stringify({ItemId: itemId}, null, 2), 'utf8');
-process.stdout.write('Exported 6 disposable website files; nested effects and metadata survived validation.\n');
+process.stdout.write('Exported 7 disposable website files; startup phases, conditions, both branches, weighted branches and time/scheduling effects survived validation.\n');

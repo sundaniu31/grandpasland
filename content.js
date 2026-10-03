@@ -34,7 +34,7 @@
   function summary(data,type){
     if(!data)return '';
     if(A.NAME_TYPES.includes(type))return t('名字：','Names: ')+data.Items.slice(0,8).join('、')+(data.Items.length>8?'…':'');
-    return data.Entries.map(entry=>entry.Name+' — '+(A.describeEffects(entry,root.GLI18n?.language)||t('无直接子效果。','No direct effects.'))+(entry.LinkedEventIds?.length?t('；关联事件：','; linked events: ')+entry.LinkedEventIds.join(', '):'')).join('\n');
+    return data.Entries.map(entry=>entry.Name+' — '+(requiresProfile(type)?A.describeTrigger(entry,root.GLI18n?.language)+'；':'')+(A.describeEffects(entry,root.GLI18n?.language)||t('无直接子效果。','No direct effects.'))+(entry.LinkedEventIds?.length?t('；关联事件：','; linked events: ')+entry.LinkedEventIds.join(', '):'')).join('\n');
   }
   function issueBody({type,tags,description},data){
     const profile=A.getProfile();

@@ -37,6 +37,53 @@
       "Less",
       "Equal"
     ],
+    "EventTriggerPhase": [
+      "Daily",
+      "WorldStart",
+      "PlayerStart",
+      "Manual"
+    ],
+    "EventConditionType": [
+      "Gold",
+      "Health",
+      "Prestige",
+      "Age",
+      "Stat",
+      "HasTag",
+      "HasItem",
+      "NpcLoyalty",
+      "NpcGreed",
+      "Happiness",
+      "Fate",
+      "Flag",
+      "Year",
+      "DayOfYear",
+      "Hour",
+      "TotalDays",
+      "Season",
+      "Disease",
+      "QuestState",
+      "Minute"
+    ],
+    "ConditionTarget": [
+      "Actor",
+      "Player",
+      "SpecificId"
+    ],
+    "Season": [
+      "Spring",
+      "Summer",
+      "Autumn",
+      "Winter"
+    ],
+    "QuestState": [
+      "WaitingToStart",
+      "Active",
+      "Successful",
+      "Failed",
+      "Abandoned",
+      "Disabled"
+    ],
     "StatType": [
       "Charm",
       "Attack",
@@ -46,7 +93,7 @@
     ]
   },
   "effects": {
-    "AcceptQuestEffect": {
+    "AbandonQuestEffect": {
       "parameters": {
         "CharacterKind": {
           "type": "string",
@@ -56,6 +103,10 @@
             "Player"
           ],
           "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
         },
         "EffectName": {
           "type": "string",
@@ -76,6 +127,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -100,6 +161,103 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": true,
+      "bindingFields": [
+        "QuestId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "QuestId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "AcceptQuestEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "QuestId": {
+          "type": "string",
+          "default": ""
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": true,
@@ -138,6 +296,10 @@
           "type": "integer",
           "default": -1
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -157,6 +319,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -181,6 +353,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": true,
@@ -215,6 +390,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -230,6 +409,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TagName": {
           "type": "string",
@@ -258,6 +447,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -289,6 +481,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -304,6 +500,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -332,8 +538,11 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
-      "supportsStoredNpc": false,
+      "supportsStoredNpc": true,
       "requiresBindings": true,
       "bindingFields": [
         "TraitName",
@@ -342,6 +551,99 @@
       "requiredBindingFields": [
         "TraitName"
       ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "AdvanceMinutesEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "Minutes": {
+          "type": "integer",
+          "default": 60,
+          "minimum": 1,
+          "maximum": 1440000
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
       "bindingRules": [
         {
           "fields": [
@@ -368,7 +670,13 @@
         },
         "Days": {
           "type": "integer",
-          "default": 1
+          "default": 1,
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
         },
         "EffectName": {
           "type": "string",
@@ -385,6 +693,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -409,6 +727,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -445,6 +766,10 @@
           "default": "",
           "resource": "diseases"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -460,6 +785,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -484,6 +819,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": true,
       "requiresBindings": false,
@@ -491,6 +829,100 @@
         "SpecificCharId"
       ],
       "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "AssignBuildingStaffEffect": {
+      "parameters": {
+        "BuildingId": {
+          "type": "string",
+          "default": ""
+        },
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": true,
+      "bindingFields": [
+        "BuildingId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "BuildingId"
+      ],
       "bindingRules": [
         {
           "fields": [
@@ -518,6 +950,10 @@
         "CountryId": {
           "type": "integer",
           "default": -1
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
         },
         "EffectName": {
           "type": "string",
@@ -558,6 +994,16 @@
           "type": "integer",
           "default": 0
         },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
         "TargetCount": {
           "type": "integer",
           "default": 1,
@@ -581,6 +1027,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -624,8 +1073,12 @@
       "contextRules": [],
       "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
     },
-    "ClearFlagEffect": {
+    "AssignResidenceEffect": {
       "parameters": {
+        "BuildingId": {
+          "type": "string",
+          "default": ""
+        },
         "CharacterKind": {
           "type": "string",
           "enum": [
@@ -635,11 +1088,11 @@
           ],
           "default": "Any"
         },
-        "EffectName": {
+        "EffectKey": {
           "type": "string",
           "default": ""
         },
-        "Flag": {
+        "EffectName": {
           "type": "string",
           "default": ""
         },
@@ -654,6 +1107,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -678,6 +1141,207 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": true,
+      "bindingFields": [
+        "BuildingId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "BuildingId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ChooseWarConsequenceEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Consequence": {
+          "type": "string",
+          "enum": [
+            "Reparations",
+            "OccupyCity",
+            "PlunderResources",
+            "CedeTerritory"
+          ],
+          "default": "Reparations"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "WarId": {
+          "type": "integer",
+          "default": 0
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "WarId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "WarId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ClearFlagEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "Flag": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -685,6 +1349,100 @@
         "SpecificCharId"
       ],
       "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "CompleteQuestEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "QuestId": {
+          "type": "string",
+          "default": ""
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": true,
+      "bindingFields": [
+        "QuestId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "QuestId"
+      ],
       "bindingRules": [
         {
           "fields": [
@@ -717,6 +1475,105 @@
           ],
           "default": "FlagSet"
         },
+        "Conditions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "CharacterId": {
+                "type": "integer",
+                "default": null
+              },
+              "Negate": {
+                "type": "boolean",
+                "default": null
+              },
+              "Op": {
+                "type": "string",
+                "enum": [
+                  "GreaterEqual",
+                  "Greater",
+                  "LessEqual",
+                  "Less",
+                  "Equal"
+                ],
+                "default": null
+              },
+              "Param": {
+                "type": "string",
+                "default": null
+              },
+              "QuestState": {
+                "type": "string",
+                "enum": [
+                  "WaitingToStart",
+                  "Active",
+                  "Successful",
+                  "Failed",
+                  "Abandoned",
+                  "Disabled"
+                ],
+                "default": null
+              },
+              "Season": {
+                "type": "string",
+                "enum": [
+                  "Spring",
+                  "Summer",
+                  "Autumn",
+                  "Winter"
+                ],
+                "default": null
+              },
+              "Target": {
+                "type": "string",
+                "enum": [
+                  "Actor",
+                  "Player",
+                  "SpecificId"
+                ],
+                "default": null
+              },
+              "Threshold": {
+                "type": "integer",
+                "default": null
+              },
+              "Type": {
+                "type": "string",
+                "enum": [
+                  "Gold",
+                  "Health",
+                  "Prestige",
+                  "Age",
+                  "Stat",
+                  "HasTag",
+                  "HasItem",
+                  "NpcLoyalty",
+                  "NpcGreed",
+                  "Happiness",
+                  "Fate",
+                  "Flag",
+                  "Year",
+                  "DayOfYear",
+                  "Hour",
+                  "TotalDays",
+                  "Season",
+                  "Disease",
+                  "QuestState",
+                  "Minute"
+                ],
+                "default": null
+              }
+            },
+            "additionalProperties": false,
+            "default": null
+          },
+          "default": []
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -736,6 +1593,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -760,6 +1627,9 @@
         }
       },
       "allowsChildren": true,
+      "allowsElseChildren": true,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -800,6 +1670,10 @@
           ],
           "default": "Disaster"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -819,6 +1693,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "StockId": {
           "type": "string",
@@ -847,6 +1731,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -890,6 +1777,10 @@
           "default": "",
           "resource": "diseases"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -905,6 +1796,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -929,6 +1830,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": true,
       "requiresBindings": false,
@@ -976,6 +1880,10 @@
           "type": "integer",
           "default": -1
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -991,6 +1899,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -1015,7 +1933,10 @@
         }
       },
       "allowsChildren": false,
-      "requiresCharacter": true,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": true,
       "bindingFields": [
@@ -1055,6 +1976,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -1070,6 +1995,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -1094,8 +2029,11 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
-      "supportsStoredNpc": false,
+      "supportsStoredNpc": true,
       "requiresBindings": false,
       "bindingFields": [
         "SpecificCharId"
@@ -1129,6 +2067,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -1144,6 +2086,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -1172,6 +2124,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -1203,6 +2158,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -1218,6 +2177,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -1242,6 +2211,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -1273,6 +2245,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -1292,6 +2268,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -1316,6 +2302,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -1362,6 +2351,10 @@
           "default": 1,
           "minimum": 0
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -1381,6 +2374,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -1405,6 +2408,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": true,
       "requiresBindings": true,
@@ -1439,6 +2445,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -1458,6 +2468,16 @@
         "SpouseId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -1482,6 +2502,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": true,
@@ -1491,6 +2514,100 @@
       ],
       "requiredBindingFields": [
         "SpouseId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "FailQuestEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "QuestId": {
+          "type": "string",
+          "default": ""
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": true,
+      "bindingFields": [
+        "QuestId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "QuestId"
       ],
       "bindingRules": [
         {
@@ -1516,6 +2633,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -1540,6 +2661,16 @@
           "type": "integer",
           "default": 0
         },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
         "TargetCount": {
           "type": "integer",
           "default": 1,
@@ -1563,6 +2694,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": true,
@@ -1597,6 +2731,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -1625,6 +2763,16 @@
           "type": "integer",
           "default": 0
         },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
         "TargetCharacterId": {
           "type": "integer",
           "default": 0
@@ -1652,6 +2800,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": true,
@@ -1686,6 +2837,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -1711,6 +2866,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "Target": {
           "type": "string",
@@ -1744,6 +2909,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresCharacterMayVary": true,
@@ -1784,6 +2952,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -1803,6 +2975,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -1827,6 +3009,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": true,
@@ -1866,6 +3051,10 @@
           "default": "",
           "resource": "diseases"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -1881,6 +3070,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -1905,6 +3104,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": true,
       "requiresBindings": false,
@@ -1940,6 +3142,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -1955,6 +3161,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -1987,14 +3203,18 @@
             "ByPosition",
             "ByFamily",
             "Random",
-            "ByTag"
+            "ByTag",
+            "SelectedTarget"
           ],
-          "default": "Random"
+          "default": "SelectedTarget"
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
-      "supportsStoredNpc": false,
+      "supportsStoredNpc": true,
       "requiresBindings": false,
       "bindingFields": [
         "SpecificCharId"
@@ -2032,6 +3252,10 @@
           "type": "integer",
           "default": 9
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -2047,6 +3271,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -2075,6 +3309,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -2106,6 +3343,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -2125,6 +3366,16 @@
         "SpouseId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -2149,6 +3400,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": true,
@@ -2187,6 +3441,10 @@
           "type": "integer",
           "default": 1
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -2202,6 +3460,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -2226,8 +3494,11 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
-      "supportsStoredNpc": false,
+      "supportsStoredNpc": true,
       "requiresBindings": false,
       "bindingFields": [
         "SpecificCharId"
@@ -2276,6 +3547,10 @@
           "type": "number",
           "default": 10.0
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -2291,6 +3566,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -2315,6 +3600,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": true,
@@ -2358,6 +3646,10 @@
           "default": 0,
           "minimum": 0
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -2382,6 +3674,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "Target": {
           "type": "string",
@@ -2414,6 +3716,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -2458,6 +3763,10 @@
           "type": "integer",
           "default": 10
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -2482,6 +3791,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "Target": {
           "type": "string",
@@ -2514,6 +3833,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -2558,6 +3880,10 @@
           "type": "integer",
           "default": 1
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -2573,6 +3899,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -2597,7 +3933,10 @@
         }
       },
       "allowsChildren": false,
-      "requiresCharacter": true,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": false,
       "bindingFields": [
@@ -2632,6 +3971,10 @@
           "type": "integer",
           "default": 100
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -2647,6 +3990,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "Target": {
           "type": "string",
@@ -2680,8 +4033,11 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
-      "supportsStoredNpc": false,
+      "supportsStoredNpc": true,
       "requiresCharacterMayVary": true,
       "characterRules": [
         {
@@ -2724,6 +4080,10 @@
           "type": "integer",
           "default": 5
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -2739,6 +4099,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -2763,8 +4133,11 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
-      "supportsStoredNpc": false,
+      "supportsStoredNpc": true,
       "requiresBindings": false,
       "bindingFields": [
         "SpecificCharId"
@@ -2803,6 +4176,10 @@
           "default": "",
           "resource": "diseases"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -2818,6 +4195,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -2842,6 +4229,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": true,
       "requiresBindings": false,
@@ -2881,6 +4271,10 @@
           "type": "integer",
           "default": 10
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -2900,6 +4294,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -2924,6 +4328,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": true,
       "requiresBindings": false,
@@ -2959,6 +4366,10 @@
           "type": "integer",
           "default": 10
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -2974,6 +4385,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -2998,8 +4419,11 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
-      "supportsStoredNpc": false,
+      "supportsStoredNpc": true,
       "requiresBindings": false,
       "bindingFields": [
         "SpecificCharId"
@@ -3033,6 +4457,10 @@
           "type": "integer",
           "default": 10
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -3048,6 +4476,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -3072,8 +4510,11 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
-      "supportsStoredNpc": false,
+      "supportsStoredNpc": true,
       "requiresBindings": false,
       "bindingFields": [
         "SpecificCharId"
@@ -3103,6 +4544,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -3131,6 +4576,16 @@
           "type": "integer",
           "default": 0
         },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
         "TargetCount": {
           "type": "integer",
           "default": 1,
@@ -3154,8 +4609,11 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
-      "supportsStoredNpc": false,
+      "supportsStoredNpc": true,
       "requiresBindings": true,
       "bindingFields": [
         "PersonalityName",
@@ -3192,6 +4650,10 @@
           "type": "integer",
           "default": 10
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -3207,6 +4669,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -3231,14 +4703,159 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
-      "supportsStoredNpc": false,
+      "supportsStoredNpc": true,
       "requiresBindings": false,
       "bindingFields": [
         "SpecificCharId"
       ],
       "requiredBindingFields": [],
       "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ModifyPriceMultiplierEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "DurationDays": {
+          "type": "integer",
+          "default": 0,
+          "minimum": 0
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "ItemId": {
+          "type": "string",
+          "default": "",
+          "resource": "items",
+          "resourceWhen": {
+            "Selection": "Item"
+          }
+        },
+        "ItemTag": {
+          "type": "string",
+          "default": "",
+          "resource": "itemTags",
+          "resourceWhen": {
+            "Selection": "Tag"
+          }
+        },
+        "Multiplier": {
+          "type": "number",
+          "default": 1.2,
+          "exclusiveMinimum": 0
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "Selection": {
+          "type": "string",
+          "enum": [
+            "Item",
+            "Tag"
+          ],
+          "default": "Item"
+        },
+        "SettlementId": {
+          "type": "string",
+          "default": ""
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "Target": {
+          "type": "string",
+          "enum": [
+            "TargetLocation",
+            "FixedSettlement"
+          ],
+          "default": "TargetLocation"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SettlementId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SettlementId"
+          ],
+          "when": {
+            "Target": "FixedSettlement"
+          }
+        },
         {
           "fields": [
             "SpecificCharId"
@@ -3270,6 +4887,10 @@
           "type": "number",
           "default": 10.0
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -3298,6 +4919,16 @@
           "type": "integer",
           "default": 0
         },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
         "TargetCount": {
           "type": "integer",
           "default": 1,
@@ -3321,6 +4952,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -3372,6 +5006,10 @@
           "type": "integer",
           "default": 1
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -3395,6 +5033,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -3430,8 +5078,22 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": true,
+      "durationRules": [
+        {
+          "when": {
+            "IsPermanent": false
+          },
+          "excludedTargetStats": [
+            "Health"
+          ],
+          "supportsGenericDuration": true
+        }
+      ],
       "requiresBindings": false,
       "bindingFields": [
         "SpecificCharId"
@@ -3478,6 +5140,10 @@
           "default": 10,
           "minimum": 0
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -3497,6 +5163,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "StockId": {
           "type": "string",
@@ -3525,6 +5201,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -3572,6 +5251,10 @@
           "default": 0,
           "minimum": 0
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -3596,6 +5279,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "Target": {
           "type": "string",
@@ -3628,6 +5321,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -3672,6 +5368,10 @@
           "type": "integer",
           "default": 10
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -3696,6 +5396,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "Target": {
           "type": "string",
@@ -3728,6 +5438,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -3776,6 +5489,10 @@
           "type": "number",
           "default": 0.05
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -3791,6 +5508,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -3819,6 +5546,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -3868,6 +5598,10 @@
           "type": "integer",
           "default": 1000
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -3883,6 +5617,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -3907,6 +5651,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": true,
@@ -3954,6 +5701,10 @@
           "type": "string",
           "default": ""
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -3969,6 +5720,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -3993,8 +5754,11 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
-      "supportsStoredNpc": false,
+      "supportsStoredNpc": true,
       "requiresBindings": true,
       "bindingFields": [
         "DestValue",
@@ -4035,6 +5799,10 @@
           "type": "integer",
           "default": 100
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -4059,6 +5827,16 @@
           "type": "integer",
           "default": 0
         },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
         "TargetCount": {
           "type": "integer",
           "default": 1,
@@ -4082,6 +5860,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -4117,6 +5898,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -4141,6 +5926,16 @@
           "type": "integer",
           "default": 0
         },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
         "TargetCount": {
           "type": "integer",
           "default": 1,
@@ -4164,6 +5959,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": true,
@@ -4204,6 +6002,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -4219,6 +6021,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -4243,6 +6055,9 @@
         }
       },
       "allowsChildren": true,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -4273,6 +6088,10 @@
             "Player"
           ],
           "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
         },
         "EffectName": {
           "type": "string",
@@ -4306,6 +6125,16 @@
           "type": "integer",
           "default": 0
         },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
         "TargetCount": {
           "type": "integer",
           "default": 1,
@@ -4329,6 +6158,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -4380,6 +6212,10 @@
           "type": "integer",
           "default": -1
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -4395,6 +6231,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -4419,6 +6265,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": true,
@@ -4442,6 +6291,207 @@
       "contextRules": [],
       "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
     },
+    "RemoveBuildingStaffEffect": {
+      "parameters": {
+        "BuildingId": {
+          "type": "string",
+          "default": ""
+        },
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": true,
+      "bindingFields": [
+        "BuildingId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "BuildingId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "RemoveEffectEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "MatchKey": {
+          "type": "string",
+          "default": ""
+        },
+        "MatchName": {
+          "type": "string",
+          "default": ""
+        },
+        "MatchType": {
+          "type": "string",
+          "default": ""
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "RemoveAll": {
+          "type": "boolean",
+          "default": true
+        },
+        "RequireMatch": {
+          "type": "boolean",
+          "default": true
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
     "RemoveItemEffect": {
       "parameters": {
         "CharacterKind": {
@@ -4452,6 +6502,10 @@
             "Player"
           ],
           "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
         },
         "EffectName": {
           "type": "string",
@@ -4478,6 +6532,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "Target": {
           "type": "string",
@@ -4511,6 +6575,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresCharacterMayVary": true,
@@ -4555,6 +6622,10 @@
           "type": "integer",
           "default": -1
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -4574,6 +6645,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -4598,6 +6679,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": true,
@@ -4632,6 +6716,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -4647,6 +6735,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TagName": {
           "type": "string",
@@ -4675,6 +6773,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -4706,6 +6807,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -4721,6 +6826,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -4749,8 +6864,11 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
-      "supportsStoredNpc": false,
+      "supportsStoredNpc": true,
       "requiresBindings": true,
       "bindingFields": [
         "TraitName",
@@ -4758,6 +6876,104 @@
       ],
       "requiredBindingFields": [
         "TraitName"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ResolveWarEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "WarId": {
+          "type": "integer",
+          "default": 0
+        },
+        "WinnerCountryId": {
+          "type": "integer",
+          "default": -1
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "WarId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "WarId"
       ],
       "bindingRules": [
         {
@@ -4783,6 +6999,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -4798,6 +7018,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -4822,13 +7052,115 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
-      "supportsStoredNpc": false,
+      "supportsStoredNpc": true,
       "requiresBindings": false,
       "bindingFields": [
         "SpecificCharId"
       ],
       "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ScheduleGameEventEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "DelayDays": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "EventId": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "EventId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "EventId"
+      ],
       "bindingRules": [
         {
           "fields": [
@@ -4853,6 +7185,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -4868,6 +7204,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -4892,8 +7238,102 @@
         }
       },
       "allowsChildren": true,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "SetAgeEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "Value": {
+          "type": "integer",
+          "default": 0
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
       "requiresBindings": false,
       "bindingFields": [
         "SpecificCharId"
@@ -4923,6 +7363,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -4938,6 +7382,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "State": {
           "type": "string",
@@ -4981,6 +7435,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -5011,6 +7468,10 @@
             "Player"
           ],
           "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
         },
         "EffectName": {
           "type": "string",
@@ -5052,6 +7513,16 @@
           "type": "integer",
           "default": 0
         },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
         "TargetCount": {
           "type": "integer",
           "default": 1,
@@ -5075,6 +7546,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": true,
@@ -5112,6 +7586,97 @@
       "contextRules": [],
       "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
     },
+    "SetFateEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "Value": {
+          "type": "integer",
+          "default": 0
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
     "SetFlagEffect": {
       "parameters": {
         "CharacterKind": {
@@ -5122,6 +7687,10 @@
             "Player"
           ],
           "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
         },
         "EffectName": {
           "type": "string",
@@ -5142,6 +7711,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -5166,6 +7745,1128 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "SetGoldEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "Target": {
+          "type": "string",
+          "enum": [
+            "Player",
+            "Family",
+            "Settlement"
+          ],
+          "default": "Player"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "Value": {
+          "type": "integer",
+          "default": 0
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresCharacterMayVary": true,
+      "characterRules": [
+        {
+          "when": {
+            "Target": "Settlement"
+          },
+          "requiresCharacter": false
+        }
+      ],
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "SetHappinessEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "Value": {
+          "type": "integer",
+          "default": 0
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "SetHealthEffect": {
+      "parameters": {
+        "Cause": {
+          "type": "string",
+          "default": ""
+        },
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "IsPercentage": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "Value": {
+          "type": "integer",
+          "default": 50
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "SetNpcGreedEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "Value": {
+          "type": "integer",
+          "default": 0
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "SetNpcLoyaltyEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "Value": {
+          "type": "integer",
+          "default": 0
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "SetPlayerBirthplaceEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "Mode": {
+          "type": "string",
+          "enum": [
+            "Random",
+            "ContextSettlement",
+            "SettlementName",
+            "Hex"
+          ],
+          "default": "ContextSettlement"
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SettlementName": {
+          "type": "string",
+          "default": ""
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetHex": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "integer",
+              "default": 0
+            },
+            "y": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          "additionalProperties": false,
+          "default": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SettlementName",
+        "TargetHex",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SettlementName"
+          ],
+          "when": {
+            "Mode": "SettlementName"
+          }
+        },
+        {
+          "fields": [
+            "TargetHex"
+          ],
+          "when": {
+            "Mode": "Hex"
+          }
+        },
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "建议用于WorldStart：创建玩家前设置出生聚落；对后续新玩家生效，随世界存档保存，要求实际安全聚落落点。"
+    },
+    "SetPrestigeEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "Value": {
+          "type": "integer",
+          "default": 0
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "SetStatEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "IsPermanent": {
+          "type": "boolean",
+          "default": true
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetStat": {
+          "type": "string",
+          "enum": [
+            "Charm",
+            "Attack",
+            "Defense",
+            "Health",
+            "Prestige"
+          ],
+          "default": "Charm"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "Value": {
+          "type": "integer",
+          "default": 10
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": true,
+      "supportsStoredNpc": true,
+      "durationRules": [
+        {
+          "when": {
+            "IsPermanent": false
+          },
+          "excludedTargetStats": [
+            "Health"
+          ],
+          "supportsGenericDuration": true
+        }
+      ],
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "SetTimeEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "DayOfYear": {
+          "type": "integer",
+          "default": 0,
+          "minimum": 0
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "Hour": {
+          "type": "integer",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 23
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "Minute": {
+          "type": "integer",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 59
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "Year": {
+          "type": "integer",
+          "default": 0,
+          "minimum": 0
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "SetTimePausedEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "IsPaused": {
+          "type": "boolean",
+          "default": true
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "SetTimeSpeedEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "Multiplier": {
+          "type": "number",
+          "default": 1.0,
+          "exclusiveMinimum": 0,
+          "maximum": 100
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -5201,6 +8902,10 @@
           "type": "integer",
           "default": -1
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -5224,6 +8929,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -5252,6 +8967,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": true,
@@ -5279,8 +8997,12 @@
       "contextRules": [],
       "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
     },
-    "ShowMessageUIEffect": {
+    "SetWeatherEffect": {
       "parameters": {
+        "ChangeNight": {
+          "type": "boolean",
+          "default": false
+        },
         "CharacterKind": {
           "type": "string",
           "enum": [
@@ -5290,9 +9012,9 @@
           ],
           "default": "Any"
         },
-        "Duration": {
-          "type": "number",
-          "default": 3.0
+        "EffectKey": {
+          "type": "string",
+          "default": ""
         },
         "EffectName": {
           "type": "string",
@@ -5302,9 +9024,9 @@
           "type": "boolean",
           "default": false
         },
-        "MessageKey": {
-          "type": "string",
-          "default": ""
+        "IsNight": {
+          "type": "boolean",
+          "default": false
         },
         "RemainingDays": {
           "type": "integer",
@@ -5313,6 +9035,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -5335,13 +9067,21 @@
           "type": "string",
           "default": ""
         },
-        "TitleKey": {
+        "Weather": {
           "type": "string",
-          "default": ""
+          "enum": [
+            "Sunny",
+            "Rain",
+            "Snow"
+          ],
+          "default": "Sunny"
         }
       },
       "allowsChildren": false,
-      "requiresCharacter": true,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": false,
       "bindingFields": [
@@ -5359,8 +9099,287 @@
         }
       ],
       "contextRules": [],
-      "notes": "当前仅输出日志，尚未连接实际消息 UI 或交互物生成。",
-      "status": "logOnly"
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "ShowMessageUIEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Duration": {
+          "type": "number",
+          "default": 3.0,
+          "minimum": 0
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "MessageKey": {
+          "type": "string",
+          "default": ""
+        },
+        "OpenPanel": {
+          "type": "boolean",
+          "default": true
+        },
+        "Recipient": {
+          "type": "string",
+          "enum": [
+            "Auto",
+            "Broadcast",
+            "ContextPlayer",
+            "TargetPlayer"
+          ],
+          "default": "Auto"
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "Text": {
+          "type": "string",
+          "default": "",
+          "maxLength": 16000
+        },
+        "Title": {
+          "type": "string",
+          "default": "",
+          "maxLength": 256
+        },
+        "TitleKey": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresCharacterMayVary": true,
+      "characterRules": [
+        {
+          "when": {
+            "Recipient": "TargetPlayer"
+          },
+          "requiresCharacter": true
+        }
+      ],
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [
+        {
+          "when": {
+            "Recipient": "ContextPlayer"
+          },
+          "requiresPlayer": true
+        }
+      ],
+      "notes": "复用通知说明面板。Duration=0手动关闭；Recipient=Auto在玩家上下文中私发，否则广播。"
+    },
+    "ShowStoryPanelEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "Duration": {
+          "type": "number",
+          "default": 0.0,
+          "minimum": 0
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "MessageKey": {
+          "type": "string",
+          "default": ""
+        },
+        "OpenPanel": {
+          "type": "boolean",
+          "default": true
+        },
+        "Recipient": {
+          "type": "string",
+          "enum": [
+            "Auto",
+            "Broadcast",
+            "ContextPlayer",
+            "TargetPlayer"
+          ],
+          "default": "Auto"
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        },
+        "Text": {
+          "type": "string",
+          "default": "",
+          "maxLength": 16000
+        },
+        "Title": {
+          "type": "string",
+          "default": "",
+          "maxLength": 256
+        },
+        "TitleKey": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresCharacterMayVary": true,
+      "characterRules": [
+        {
+          "when": {
+            "Recipient": "TargetPlayer"
+          },
+          "requiresCharacter": true
+        }
+      ],
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [
+        {
+          "when": {
+            "Recipient": "ContextPlayer"
+          },
+          "requiresPlayer": true
+        }
+      ],
+      "notes": "复用通知说明面板。Duration=0手动关闭；Recipient=Auto在玩家上下文中私发，否则广播。"
     },
     "SpawnInteractableEffect": {
       "parameters": {
@@ -5372,6 +9391,10 @@
             "Player"
           ],
           "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
         },
         "EffectName": {
           "type": "string",
@@ -5400,6 +9423,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -5457,7 +9490,10 @@
         }
       },
       "allowsChildren": false,
-      "requiresCharacter": true,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": false,
       "bindingFields": [
@@ -5475,8 +9511,8 @@
         }
       ],
       "contextRules": [],
-      "notes": "当前仅输出日志，尚未连接实际消息 UI 或交互物生成。",
-      "status": "logOnly"
+      "notes": "需要注册包含EventInteractable的Mirror网络预制体；缺少资源时明确失败。",
+      "requiresNetworkPrefabBinding": true
     },
     "SpawnNpcEffect": {
       "parameters": {
@@ -5492,6 +9528,10 @@
             "Player"
           ],
           "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
         },
         "EffectName": {
           "type": "string",
@@ -5554,6 +9594,16 @@
           "type": "integer",
           "default": 0
         },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
         "TargetCount": {
           "type": "integer",
           "default": 1,
@@ -5577,8 +9627,11 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
-      "supportsStoredNpc": false,
+      "supportsStoredNpc": true,
       "requiresBindings": false,
       "bindingFields": [
         "FamilyId",
@@ -5624,6 +9677,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -5639,6 +9696,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -5667,6 +9734,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": true,
@@ -5701,6 +9771,10 @@
           ],
           "default": "Any"
         },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
         "EffectName": {
           "type": "string",
           "default": ""
@@ -5720,6 +9794,16 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "StockId": {
           "type": "string",
@@ -5756,6 +9840,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": false,
       "supportsStoredNpc": false,
       "requiresBindings": false,
@@ -5783,12 +9870,8 @@
       "contextRules": [],
       "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
     },
-    "WithdrawEffect": {
+    "TriggerGameEventEffect": {
       "parameters": {
-        "Amount": {
-          "type": "integer",
-          "default": 100
-        },
         "CharacterKind": {
           "type": "string",
           "enum": [
@@ -5797,6 +9880,104 @@
             "Player"
           ],
           "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "EventId": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": true,
+      "bindingFields": [
+        "EventId",
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [
+        "EventId"
+      ],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "WeightedRandomEffect": {
+      "parameters": {
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
         },
         "EffectName": {
           "type": "string",
@@ -5813,6 +9994,107 @@
         "SpecificCharId": {
           "type": "integer",
           "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
+        },
+        "TargetCount": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "TargetMode": {
+          "type": "string",
+          "enum": [
+            "Self",
+            "Player",
+            "SpecificId",
+            "AllInSettlement",
+            "RandomInSettlement",
+            "ByTag"
+          ],
+          "default": "Self"
+        },
+        "TargetTagName": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": true,
+      "supportsGenericDuration": false,
+      "requiresCharacter": false,
+      "supportsStoredNpc": false,
+      "requiresBindings": false,
+      "bindingFields": [
+        "SpecificCharId"
+      ],
+      "requiredBindingFields": [],
+      "bindingRules": [
+        {
+          "fields": [
+            "SpecificCharId"
+          ],
+          "when": {
+            "TargetMode": "SpecificId"
+          }
+        }
+      ],
+      "contextRules": [],
+      "notes": "需要绑定游戏中已有的对话、任务、锚点、角色、国家、聚落或特质/性格配置；外部文件不会创建这些定义或保证编号适用于其他存档。"
+    },
+    "WithdrawEffect": {
+      "parameters": {
+        "Amount": {
+          "type": "integer",
+          "default": 100
+        },
+        "CharacterKind": {
+          "type": "string",
+          "enum": [
+            "Any",
+            "Npc",
+            "Player"
+          ],
+          "default": "Any"
+        },
+        "EffectKey": {
+          "type": "string",
+          "default": ""
+        },
+        "EffectName": {
+          "type": "string",
+          "default": ""
+        },
+        "IsLethal": {
+          "type": "boolean",
+          "default": false
+        },
+        "RemainingDays": {
+          "type": "integer",
+          "default": -1
+        },
+        "SpecificCharId": {
+          "type": "integer",
+          "default": 0
+        },
+        "StackPolicy": {
+          "type": "string",
+          "enum": [
+            "Stack",
+            "Ignore",
+            "Refresh",
+            "Replace"
+          ],
+          "default": "Stack"
         },
         "TargetCount": {
           "type": "integer",
@@ -5841,6 +10123,9 @@
         }
       },
       "allowsChildren": false,
+      "allowsElseChildren": false,
+      "allowsWeightedBranches": false,
+      "supportsGenericDuration": false,
       "requiresCharacter": true,
       "supportsStoredNpc": false,
       "requiresBindings": false,

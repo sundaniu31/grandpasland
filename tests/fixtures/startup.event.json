@@ -1,0 +1,52 @@
+{
+  "SchemaVersion": 1,
+  "ProfileId": "crownfall1-v1",
+  "Entries": [
+    {
+      "Id": "__website_startup_world",
+      "Name": "网站启动回归检查",
+      "Description": "仅用于外部文件跨端回归，不作为游戏内容安装。",
+      "TriggerPhase": "WorldStart",
+      "TriggerConditions": [{"Type": "Year", "Threshold": 1}],
+      "Target": {},
+      "Options": [],
+      "TriggerConsequences": [
+        {"Type": "SetPlayerBirthplaceEffect", "Parameters": {"Mode": "Random"}},
+        {"Type": "AdvanceMinutesEffect", "Parameters": {"Minutes": 60}},
+        {"Type": "ScheduleGameEventEffect", "Parameters": {"EventId": "__website_startup_followup", "DelayDays": 1}}
+      ]
+    },
+    {
+      "Id": "__website_startup_player",
+      "Name": "网站新玩家回归检查",
+      "Description": "验证服务器玩家上下文、说明面板与分支。",
+      "TriggerPhase": "PlayerStart",
+      "Target": {},
+      "Options": [],
+      "TriggerConsequences": [
+        {"Type": "ShowStoryPanelEffect", "Parameters": {"Title": "外部文件回归", "Text": "只用于验证玩家定向说明面板。", "Recipient": "ContextPlayer"}},
+        {
+          "Type": "ConditionEffect",
+          "Parameters": {"Conditions": [{"Type": "Health", "Target": "Actor", "Threshold": 0, "Op": "Greater"}]},
+          "Children": [{
+            "Type": "WeightedRandomEffect",
+            "WeightedBranches": [
+              {"Weight": 1, "Children": [{"Type": "SetGoldEffect", "Parameters": {"Value": 125}}]},
+              {"Weight": 2, "Children": [{"Type": "SetGoldEffect", "Parameters": {"Value": 150}}]}
+            ]
+          }],
+          "ElseChildren": [{"Type": "SetGoldEffect", "Parameters": {"Value": 0}}]
+        }
+      ]
+    },
+    {
+      "Id": "__website_startup_followup",
+      "Name": "网站延后回归检查",
+      "Description": "不进入每日池，只由前序排期触发。",
+      "TriggerPhase": "Manual",
+      "TriggerConditions": [{"Type": "Minute", "Threshold": 0}],
+      "Options": [],
+      "TriggerConsequences": [{"Type": "SetFlagEffect", "Parameters": {"Flag": "__WebsiteScheduledFollowup"}}]
+    }
+  ]
+}

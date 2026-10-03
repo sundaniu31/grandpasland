@@ -108,9 +108,9 @@ test('published guide examples validate against the real exported game profile',
   assert.equal(examples.length,4);
   ['CityNames','Quests','Events','Festivals'].forEach((type,index)=>assert.doesNotThrow(()=>A.validate(examples[index],type),type+' guide example'));
 });
-async function generateFixture(effects,{changeProfile=()=>{},target={RandomSettlement:true},options=[]}={}){
+async function generateFixture(effects,{changeProfile=()=>{},target={RandomSettlement:true},options=[],triggerPhase='Daily',triggerConditions=[]}={}){
   const config=profile();changeProfile(config);
-  const data={Entries:[{Id:'generation_guard',Name:'目标校验事件',Description:'检查外部效果组合',Target:target,TriggerConsequences:effects,Options:options}]};
+  const data={Entries:[{Id:'generation_guard',Name:'目标校验事件',Description:'检查外部效果组合',TriggerPhase:triggerPhase,TriggerConditions:triggerConditions,Target:target,TriggerConsequences:effects,Options:options}]};
   const workshop=page('workshop.js',async url=>url==='content-profile.json'?response(config):response({choices:[{message:{content:JSON.stringify(data)}}]}));
   await workshop.element('generatorForm').fire('submit');return workshop;
 }
@@ -139,7 +139,7 @@ test('portable generation rejects fixed targets and unbound immediate actors but
   const relationship={Type:'ModifyRelationshipEffect',Parameters:{Delta:5,TargetMode:'RandomInSettlement',CharacterKind:'Npc',RelationshipTarget:'Player'}};
   const playerRules=config=>{config.effects.ModifyRelationshipEffect.contextRules=[{when:{RelationshipTarget:'Player'},requiresPlayer:true}];};
   const unboundRelation=await generateFixture([relationship],{changeProfile:playerRules});assert.equal(unboundRelation.element('status').dataset.kind,'error');assert.match(unboundRelation.element('status').textContent,/玩家上下文/);
-  const boundRelation=await generateFixture([],{changeProfile:playerRules,options:[{OptionText:'结交居民',Consequences:[relationship]}]});assert.equal(boundRelation.element('status').dataset.kind,'success',boundRelation.element('status').textContent);
+  const boundRelation=await generateFixture([],{changeProfile:playerRules,options:[{OptionText:'结交玩家',Consequences:[{...relationship,Parameters:{...relationship.Parameters,CharacterKind:'Player'}}]}]});assert.equal(boundRelation.element('status').dataset.kind,'success',boundRelation.element('status').textContent);
 });
 test('AI cannot invent disease resources even when the resource catalog is incomplete',async()=>{
   const missing=await generateFixture([{Type:'InfectDiseaseEffect',Parameters:{DiseaseName:'不存在的疫病',TargetMode:'RandomInSettlement',CharacterKind:'Npc'}}],{changeProfile:config=>{config.resources.diseases=[];config.resourcesComplete.diseases=false;}});
@@ -152,7 +152,8 @@ test('dynamic settlement inventory targets need no actor and unsupported NPC gro
   const effects=inventoryTypes.map(Type=>({Type,Parameters:{Target:'Settlement',...(Type==='ModifyGoldEffect'?{Delta:5}:{ItemId:'weapon_dagger',Qty:1})}}));
   const settlement=await generateFixture(effects,{changeProfile:config=>{for(const Type of inventoryTypes)config.effects[Type].characterRules=[{when:{Target:'Settlement'},requiresCharacter:false}];}});
   assert.equal(settlement.element('status').dataset.kind,'success',settlement.element('status').textContent);
-  const unsupported=await generateFixture([{Type:'ModifyPrestigeEffect',Parameters:{TargetMode:'RandomInSettlement',CharacterKind:'Npc',Delta:5}}]);assert.equal(unsupported.element('status').dataset.kind,'error');assert.match(unsupported.element('status').textContent,/不支持离场 NPC/);
+  // Exercise the catalog guard explicitly; prestige now has a real stored-NPC bridge.
+  const unsupported=await generateFixture([{Type:'ModifyPrestigeEffect',Parameters:{TargetMode:'RandomInSettlement',CharacterKind:'Npc',Delta:5}}],{changeProfile:config=>{config.effects.ModifyPrestigeEffect.supportsStoredNpc=false;}});assert.equal(unsupported.element('status').dataset.kind,'error');assert.match(unsupported.element('status').textContent,/不支持离场 NPC/);
   const players=await generateFixture([{Type:'ModifyPrestigeEffect',Parameters:{TargetMode:'AllInSettlement',CharacterKind:'Player',Delta:5}}]);assert.equal(players.element('status').dataset.kind,'success',players.element('status').textContent);
 });
 test('context guidance is shown only when a provider actually reports a context error',async()=>{
@@ -160,4 +161,78 @@ test('context guidance is shown only when a provider actually reports a context 
     const workshop=page('workshop.js',async url=>url==='content-profile.json'?response(profile()):{ok:false,status:400,json:async()=>({error:{message}})});
     await workshop.element('generatorForm').fire('submit');assert.equal(workshop.element('status').dataset.kind,'error');assert.equal(workshop.element('status').textContent.includes('上下文超限'),isContext);
   }
+});
+
+test('startup/branch AI response -> edited download -> GitHub draft -> gallery keeps the full new protocol',async()=>{
+  const source=JSON.parse(read('tests/fixtures/startup.event.json')),calls=[];
+  const workshop=page('workshop.js',async(url,options)=>{
+    calls.push({url,options});
+    return url==='content-profile.json'?response(profile()):response({choices:[{message:{content:JSON.stringify(source)}}]});
+  });
+  workshop.element('entryCount').value='3';workshop.element('triggerPhase').value='WorldStart';
+  await workshop.element('generatorForm').fire('submit');
+  assert.equal(workshop.element('status').dataset.kind,'success',workshop.element('status').textContent);
+  assert.match(JSON.parse(calls.find(call=>call.url.startsWith('https://provider')).options.body).messages[1].content,/本次主要触发阶段：WorldStart/);
+  assert.match(workshop.element('effectSummary').textContent,/新玩家创建/);assert.match(workshop.element('effectSummary').textContent,/加权只选一支/);
+  const edited=JSON.parse(workshop.element('preview').value);
+  edited.Entries[1].TriggerConsequences[1].Children[0].WeightedBranches[1].Weight=4;
+  edited.Entries[1].TriggerConsequences[1].ElseChildren[0].Parameters.Value=5;
+  workshop.element('preview').value=JSON.stringify(edited);await workshop.element('dlBtn').fire('click');
+  assert.equal(workshop.downloads.length,1,workshop.element('resultStatus').textContent);
+  const downloaded=workshop.downloads[0].data;
+  const gallery=page('gallery.js',async url=>url==='content-profile.json'?response(profile()):response([]));await settle();
+  gallery.element('shareFile').files=[{name:'startup.json',size:5000,text:async()=>JSON.stringify(downloaded)}];await gallery.element('shareForm').fire('submit');
+  assert.equal(gallery.element('shareStatus').dataset.kind,'success',gallery.element('shareStatus').textContent);
+  const draft=gallery.element('shareForm').children.at(-1),body=draft.children.find(el=>el.id==='draftBody')?.value||new URL(draft.children.find(el=>el.href)?.href).searchParams.get('body');
+  gallery.context.issue={number:5,title:'【分享】启动分支测试',body,labels:[],user:{login:'tester'},created_at:'2026-10-03T00:00:00Z',comments:0};
+  const work=vm.runInContext('workOf(issue)',gallery.context);assert.equal(work.error,'');gallery.context.selectedWork=work;
+  await vm.runInContext('openDetail(selectedWork)',gallery.context);await gallery.element('detailDownload').onclick();
+  assert.deepEqual(gallery.downloads[0].data,downloaded);
+  assert.equal(downloaded.Entries[1].TriggerConsequences[1].Children[0].WeightedBranches[1].Weight,4);
+  assert.equal(downloaded.Entries[1].TriggerConsequences[1].ElseChildren[0].Parameters.Value,5);
+  saveOutput('StartupEffects.json',downloaded);
+});
+
+test('all generated branches enforce portable references and real leaves',async()=>{
+  const bad={Type:'StartDialogueEffect',Parameters:{Title:'not_installed'}};
+  for(const effect of [{Type:'ConditionEffect',Parameters:{Flag:'known'},Children:[{Type:'SetFlagEffect',Parameters:{Flag:'valid'}}],ElseChildren:[bad]},{Type:'WeightedRandomEffect',WeightedBranches:[{Weight:1,Children:[{Type:'SetFlagEffect',Parameters:{Flag:'valid'}}]},{Weight:0,Children:[bad]}]}]){
+    const workshop=await generateFixture([effect]);assert.equal(workshop.element('status').dataset.kind,'error');assert.match(workshop.element('status').textContent,/手动绑定/);
+  }
+  const empty=await generateFixture([{Type:'WeightedRandomEffect',WeightedBranches:[{Weight:1,Children:[]}]}]);assert.equal(empty.element('status').dataset.kind,'error');assert.match(empty.element('status').textContent,/没有可执行/);
+  const missing=await generateFixture([{Type:'ConditionEffect',Parameters:{Conditions:[{Type:'Disease',Param:'missing'}]},Children:[{Type:'SetFlagEffect',Parameters:{Flag:'valid'}}]}],{triggerPhase:'PlayerStart'});
+  assert.equal(missing.element('status').dataset.kind,'error');assert.match(missing.element('status').textContent,/目录尚未提供/);
+});
+
+test('new player context and nested settlement-selected actors support valid conditions without global character IDs',async()=>{
+  const self={Type:'SetGoldEffect',Parameters:{Value:20}};
+  const player=await generateFixture([self],{triggerPhase:'PlayerStart',target:{},triggerConditions:[{Type:'Health',Target:'Player',Threshold:0,Op:'Greater'}]});assert.equal(player.element('status').dataset.kind,'success',player.element('status').textContent);
+  const world=await generateFixture([self],{triggerPhase:'WorldStart',target:{}});assert.equal(world.element('status').dataset.kind,'error');
+  const nested=await generateFixture([{Type:'ConditionEffect',Parameters:{TargetMode:'RandomInSettlement',CharacterKind:'Npc',Conditions:[{Type:'Health',Threshold:0,Op:'Greater'}]},Children:[{Type:'ModifyHealthEffect',Parameters:{Delta:-1}}]}]);assert.equal(nested.element('status').dataset.kind,'success',nested.element('status').textContent);
+  const unsupported=await generateFixture([{Type:'SequenceEffect',Parameters:{TargetMode:'RandomInSettlement',CharacterKind:'Npc'},Children:[{Type:'ModifyRelationshipEffect',Parameters:{RelationshipTarget:'Player'}}]}],{triggerPhase:'PlayerStart'});assert.equal(unsupported.element('status').dataset.kind,'error');assert.match(unsupported.element('status').textContent,/不支持离场/);
+});
+
+test('generation rejects unavailable condition targets and prefab bindings while preserving manual edit support',async()=>{
+  const base=[{Type:'SetFlagEffect',Parameters:{Flag:'valid'}}];
+  for(const condition of [{Type:'Health'},{Type:'Health',Target:'SpecificId',CharacterId:123},{Type:'QuestState',Param:'uninstalled'}]){
+    const workshop=await generateFixture(base,{triggerConditions:[condition]});assert.equal(workshop.element('status').dataset.kind,'error');
+  }
+  const prefab=await generateFixture([{Type:'SpawnInteractableEffect',Parameters:{ObjectId:'unregistered'}}]);assert.equal(prefab.element('status').dataset.kind,'error');assert.match(prefab.element('status').textContent,/联机预制体/);
+  const unknown=await generateFixture([{Type:'TriggerGameEventEffect',Parameters:{EventId:'missing'}}]);assert.equal(unknown.element('status').dataset.kind,'error');assert.match(unknown.element('status').textContent,/手动绑定/);
+});
+
+test('portable world birth policies require a supplied settlement or the true random mode',async()=>{
+  const contextual={Type:'SetPlayerBirthplaceEffect',Parameters:{Mode:'ContextSettlement'}};
+  const missing=await generateFixture([contextual],{triggerPhase:'WorldStart',target:{}});assert.equal(missing.element('status').dataset.kind,'error');assert.match(missing.element('status').textContent,/事件城市/);
+  const selected=await generateFixture([contextual],{triggerPhase:'WorldStart'});assert.equal(selected.element('status').dataset.kind,'success',selected.element('status').textContent);
+  const random=await generateFixture([{Type:'SetPlayerBirthplaceEffect',Parameters:{Mode:'Random'}}],{triggerPhase:'WorldStart',target:{}});assert.equal(random.element('status').dataset.kind,'success',random.element('status').textContent);
+  const fixed=await generateFixture([{Type:'SetPlayerBirthplaceEffect',Parameters:{Mode:'Hex',TargetHex:{x:1,y:1}}}],{triggerPhase:'WorldStart'});assert.equal(fixed.element('status').dataset.kind,'error');assert.match(fixed.element('status').textContent,/手动绑定/);
+});
+
+test('new generated item-price effects need no unused item tag and context-private stories need a player',async()=>{
+  const price=await generateFixture([{Type:'ModifyPriceMultiplierEffect',Parameters:{ItemId:'weapon_dagger',Multiplier:1.25,DurationDays:2}}]);assert.equal(price.element('status').dataset.kind,'success',price.element('status').textContent);
+  const missingTag=await generateFixture([{Type:'ModifyPriceMultiplierEffect',Parameters:{Selection:'Tag',ItemTag:'uninstalled_tag',Multiplier:1.25}}]);assert.equal(missingTag.element('status').dataset.kind,'error');
+  const privateStory={Type:'ShowStoryPanelEffect',Parameters:{Recipient:'ContextPlayer',Text:'private story'}};
+  const world=await generateFixture([privateStory],{triggerPhase:'WorldStart'});assert.equal(world.element('status').dataset.kind,'error');assert.match(world.element('status').textContent,/玩家上下文/);
+  const player=await generateFixture([privateStory],{triggerPhase:'PlayerStart',target:{}});assert.equal(player.element('status').dataset.kind,'success',player.element('status').textContent);
+  const settlement=await generateFixture([{Type:'SetGoldEffect',Parameters:{Target:'Settlement',Value:25}}]);assert.equal(settlement.element('status').dataset.kind,'success',settlement.element('status').textContent);
 });

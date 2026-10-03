@@ -7,13 +7,14 @@ let activeRequest = null;
 let resultType = null;
 let resultName = null;
 let profileLoadError = '';
-const fieldIds = ['apiUrl','apiModel','apiKey','rememberKey','libType','libName','nameCount','nameDesc','contentDesc','entryCount','weight','cooldown','ruleType','ruleSeason','ruleDay','rulePeriod','ruleDuration'];
+const fieldIds = ['apiUrl','apiModel','apiKey','rememberKey','libType','libName','nameCount','nameDesc','contentDesc','entryCount','weight','cooldown','triggerPhase','ruleType','ruleSeason','ruleDay','rulePeriod','ruleDuration'];
 function enableGroup(id, enabled) {$(id).hidden=!enabled;$(id).querySelectorAll('input,select,textarea').forEach(el=>{el.disabled=!enabled;el.required=enabled;});}
 function updateFields() {
   const type=$('libType').value;
   const isName=A.NAME_TYPES.includes(type);
   enableGroup('nameFields',isName);
   enableGroup('contentFields',!isName);
+  enableGroup('eventFields',type==='Events');
   enableGroup('festivalFields',type==='Festivals');
   const festival=type==='Festivals';
   enableGroup('periodField',festival&&$('ruleType').value==='Periodic');
@@ -53,7 +54,7 @@ function snapshot() {
   if(!model||!key||!name)throw new Error('请填写模型名、API Key 和库名');
   const type=$('libType').value,isName=A.NAME_TYPES.includes(type),description=$(isName?'nameDesc':'contentDesc').value.trim();
   if(!description)throw new Error('请填写风格或内容描述');
-  return {language:window.GLI18n?.language||'zh-CN',endpoint:endpoint.href,model,key,name,type,isName,description,count:Number($(isName?'nameCount':'entryCount').value),weight:Number($('weight').value),cooldown:Number($('cooldown').value),ruleType:$('ruleType').value,ruleSeason:$('ruleSeason').value,ruleDay:Number($('ruleDay').value),rulePeriod:Number($('rulePeriod').value),ruleDuration:Number($('ruleDuration').value)};
+  return {language:window.GLI18n?.language||'zh-CN',endpoint:endpoint.href,model,key,name,type,isName,description,count:Number($(isName?'nameCount':'entryCount').value),weight:Number($('weight').value),cooldown:Number($('cooldown').value),triggerPhase:type==='Events'?($('triggerPhase').value || 'Daily'):'Daily',ruleType:$('ruleType').value,ruleSeason:$('ruleSeason').value,ruleDay:Number($('ruleDay').value),rulePeriod:Number($('rulePeriod').value),ruleDuration:Number($('ruleDuration').value)};
 }
 function promptFor(settings) {
   const request=settings.language==='en'?'Generate '+settings.type+' for Grandpas Land. Write names and descriptions in English. Player request: '+settings.description+'\nReturn exactly '+settings.count+' '+(settings.isName?'unique names':'entries')+'. Return only valid JSON, without Markdown.':'为《爷爷的地 Grandpas Land》生成'+A.TYPES[settings.type]+'。玩家描述：\n'+settings.description+'\n生成 '+settings.count+' 个'+(settings.isName?'不重复的名字':'独立条目')+'。只输出合法 JSON，不要 Markdown。';
@@ -92,35 +93,53 @@ function showSummary(data,type){
 function checkGeneratedGameplay(data,type){
   if(!C.requiresProfile(type))return;
   const profile=A.getProfile();
+  const localEventIds=new Set(data.Entries.map(entry=>entry.Id || 'content_'+entry.Name));
   for(const entry of data.Entries){
     if(entry.Target?.ActorId||entry.Target?.PlayerId||entry.Target?.SettlementId)throw new Error(t('AI 不能为通用世界事件编造固定角色或城市。请使用随机城市与城内目标筛选；特定存档的绑定可在预览中手动编辑。','AI must not invent fixed characters or settlements for portable world events. Use a random settlement and settlement target filters; bindings for a specific save can be edited manually in the preview.'));
-    function walk(list,hasChoiceActor=false){
+    const initial={actor:entry.TriggerPhase==='PlayerStart',player:entry.TriggerPhase==='PlayerStart',storedActor:false};
+    function checkConditions(conditions,context){
+      for(const condition of conditions||[]){
+        const needs=A.getConditionRequirements(condition);
+        if(needs.requiresBinding)throw new Error(t('AI 条件引用了需要手动绑定的角色或任务：','AI conditions reference a character or quest that needs manual binding: ')+condition.Type);
+        if(needs.resource&&!(profile.resources?.[needs.resource]||[]).includes(condition.Param))throw new Error(t('AI 条件引用了目录尚未提供的游戏资源：','AI conditions reference a game resource not provided by the profile: ')+condition.Param);
+        if(needs.requiresActor&&!context.actor||needs.requiresPlayer&&!context.player)throw new Error(t('AI 条件缺少角色或玩家上下文：','AI conditions lack actor or player context: ')+condition.Type);
+      }
+    }
+    checkConditions(entry.TriggerConditions,initial);
+    function walk(list,context=initial){
       let hasLeaf=false;
       for(const effect of list||[]){
         const spec=profile.effects[effect.Type];
         if(spec.status==='logOnly')throw new Error(t('AI 使用了尚未实现的效果：','AI used an unimplemented effect: ')+effect.Type);
-        const bindings=A.getEffectBindings(effect);
+        if(spec.requiresNetworkPrefabBinding)throw new Error(t('AI 使用的效果需要游戏已注册的联机预制体，请先手动配置并绑定：','This effect needs a registered game network prefab. Configure and bind it manually first: ')+effect.Type);
+        const internalEventLink=['TriggerGameEventEffect','ScheduleGameEventEffect'].includes(effect.Type) && localEventIds.has(effect.Parameters?.EventId);
+        const bindings=A.getEffectBindings(effect).filter(binding=>!(internalEventLink && binding.fields.every(field=>field==='EventId')));
         if(bindings.length)throw new Error(t('AI 使用的效果需要游戏中已有的资源或世界编号，请先手动绑定：','This generated effect needs existing game resources or world identifiers. Bind them manually first: ')+effect.Type+' ('+bindings.flatMap(binding=>binding.fields).join(', ')+')');
         const parameter=key=>effect.Parameters?.[key]??spec.parameters?.[key]?.default;
-        for(const [field,descriptor] of Object.entries(spec.parameters||{})){
-          const value=parameter(field);
-          if(descriptor.resource&&value&&(profile.resources?.[descriptor.resource]||[]).includes(value)===false)throw new Error(t('AI 引用了兼容目录尚未提供的游戏资源，请先在游戏中配置并导出：','AI referenced a game resource not present in this profile. Configure it in the game and export the profile first: ')+effect.Type+'.'+field+' = '+value);
-        }
+        for(const ref of A.getEffectResourceReferences(effect))if(ref.value&&!(profile.resources?.[ref.resource]||[]).includes(ref.value))throw new Error(t('AI 引用了兼容目录尚未提供的游戏资源，请先在游戏中配置并导出：','AI referenced a game resource not present in this profile. Configure it in the game and export the profile first: ')+effect.Type+'.'+ref.field+' = '+ref.value);
         const needsCharacter=A.effectRequiresCharacter(effect);
         const contextNeeds=A.getEffectContextRequirements(effect);
         const mode=parameter('TargetMode');
         if(parameter('SpecificCharId')>0||parameter('SettlementId')||(needsCharacter&&['SpecificId','ByTag'].includes(mode)))throw new Error(t('AI 使用了依赖特定世界的角色或地点绑定：','AI used a character or location binding tied to a specific world: ')+effect.Type);
-        if(!hasChoiceActor&&(contextNeeds.requiresActor||contextNeeds.requiresPlayer))throw new Error(t('自动世界事件缺少角色或玩家上下文，请使用城内筛选，或把需要玩家的效果放在交互选项后果中：','Automatic world events lack actor or player context. Use settlement filters, or put player-dependent effects in an interactive option: ')+effect.Type);
-        const groupTarget=needsCharacter&&['AllInSettlement','RandomInSettlement'].includes(mode);
-        if(groupTarget&&!hasChoiceActor&&!entry.Target?.RandomSettlement)throw new Error(t('城内角色效果需要选择事件城市，请设置 Target.RandomSettlement：','Settlement character effects need an event location. Set Target.RandomSettlement: ')+effect.Type);
-        if(groupTarget&&!hasChoiceActor&&parameter('CharacterKind')!=='Player'&&!spec.supportsStoredNpc)throw new Error(t('此效果不支持离场 NPC，不能用于自动事件的随机 NPC 群体。请选择支持离场 NPC 的效果，或在交互中手动绑定：','This effect does not support off-scene NPCs and cannot target a random NPC group in an automatic event. Use an effect supporting stored NPCs, or bind the targets in an interaction: ')+effect.Type);
-        if(spec.allowsChildren)hasLeaf=walk(effect.Children,hasChoiceActor)||hasLeaf;
-        else hasLeaf=true;
+        if(contextNeeds.requiresActor&&!context.actor||contextNeeds.requiresPlayer&&!context.player)throw new Error(t('自动世界事件缺少角色或玩家上下文，请使用城内筛选，或把需要玩家的效果放在交互选项后果中：','Automatic world events lack actor or player context. Use settlement filters, or put player-dependent effects in an interactive option: ')+effect.Type);
+        const groupTarget=['AllInSettlement','RandomInSettlement'].includes(mode);
+        const needsSettlement=groupTarget||['TargetLocation','Settlement'].includes(parameter('Target'))||effect.Type==='SetPlayerBirthplaceEffect'&&parameter('Mode')==='ContextSettlement';
+        if(needsSettlement&&!context.actor&&!entry.Target?.RandomSettlement)throw new Error(t('城内效果需要选择事件城市，请设置 Target.RandomSettlement：','Settlement effects need an event location. Set Target.RandomSettlement: ')+effect.Type);
+        const selected={...context};
+        if(groupTarget){selected.actor=true;selected.storedActor=parameter('CharacterKind')!=='Player';}
+        else if(mode==='Player'){selected.actor=context.player;selected.storedActor=false;}
+        if(needsCharacter&&selected.storedActor&&!spec.supportsStoredNpc)throw new Error(t('此效果不支持离场 NPC，不能用于自动事件的随机 NPC 群体。请选择支持离场 NPC 的效果，或在交互中手动绑定：','This effect does not support off-scene NPCs and cannot target a random NPC group in an automatic event. Use an effect supporting stored NPCs, or bind the targets in an interaction: ')+effect.Type);
+        checkConditions(parameter('Conditions'),selected);
+        if(spec.allowsChildren||spec.allowsElseChildren||spec.allowsWeightedBranches){
+          hasLeaf=walk(effect.Children,selected)||hasLeaf;
+          hasLeaf=walk(effect.ElseChildren,selected)||hasLeaf;
+          for(const branch of effect.WeightedBranches||[]){const branchLeaf=walk(branch.Children,selected);if(branch.Weight>0)hasLeaf=branchLeaf||hasLeaf;}
+        }else hasLeaf=true;
       }
       return hasLeaf;
     }
     let hasLeaf=walk(entry.TriggerConsequences);
-    for(const option of entry.Options||[])hasLeaf=walk(option.Consequences,!option.AutoExecute)||hasLeaf;
+    for(const option of entry.Options||[])hasLeaf=walk(option.Consequences,option.AutoExecute?initial:{actor:true,player:true,storedActor:false})||hasLeaf;
     if(type==='Events'&&!hasLeaf)throw new Error(t('AI 返回的事件没有可执行子效果，请明确需要改变的游戏状态后重新生成。','The generated event contains no executable effects. Specify the game state changes and generate again.'));
   }
 }
@@ -146,6 +165,7 @@ $('generatorForm').addEventListener('submit',async event=>{
       if(!entry||typeof entry!=='object'||Array.isArray(entry))return;
       entry.Id=entry.Id||'gl_'+settings.type.toLowerCase()+'_'+Date.now().toString(36)+'_'+(index+1);
       entry.Weight=settings.weight;entry.CooldownDays=settings.cooldown;
+      if(settings.type==='Events'&&entry.TriggerPhase===undefined)entry.TriggerPhase=settings.triggerPhase;
       if(settings.type==='Festivals')Object.assign(entry,{RuleType:settings.ruleType,RuleSeason:settings.ruleSeason,RuleDayInYear:settings.ruleDay,RulePeriodDays:settings.rulePeriod,RuleDurationDays:settings.ruleDuration});
     });
     const checked=A.validate(data,settings.type);

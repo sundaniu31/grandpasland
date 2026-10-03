@@ -40,6 +40,8 @@
     "Description": "三名居民受伤，城内匕首需求增加。",
     "Type": "",
     "EventType": "Bad",
+    "TriggerPhase": "Daily",
+    "TriggerConditions": [],
     "Score": -8,
     "Tags": "Health, Economy",
     "Weight": 20,
@@ -61,7 +63,7 @@
     "Options": []
   }]
 }</code></pre><div class="table-wrap"><table><thead><tr><th>字段</th><th>用途</th></tr></thead><tbody><tr><td><code>SchemaVersion</code> / <code>ProfileId</code></td><td>可选的文件协议与游戏兼容目录标识，新生成事件会携带这两个值。</td></tr><tr><td><code>Target</code></td><td>事件地点与角色上下文，可随机选择城市。角色目标由各子效果筛选，支持 NPC 或玩家。</td></tr><tr><td><code>TriggerConsequences</code></td><td>立即执行的效果数组，每项使用已注册的 Type、Parameters，可用容器的 Children 组合。</td></tr><tr><td><code>Options</code></td><td>可选的交互选项；普通世界事件使用空数组即可，不要求玩家选择。</td></tr><tr><td><code>EventType</code> / <code>Score</code> / <code>Tags</code></td><td>事件评价与分类信息，枚举值由游戏兼容目录约束。</td></tr><tr><td><code>Repeatable</code></td><td>是否允许再次触发；仍受冷却规则约束。</td></tr></tbody></table></div><p>分享给其他世界时，优先使用随机城市、城内角色筛选和 {SettlementName} 占位符。固定 ActorId、PlayerId、SettlementId 通常只适用于特定存档。AI 不能仅凭名称创建新疾病、物品或执行代码。目录资源不完整时会显示警告，需要在游戏中确认引用。</p>
-<p>当前兼容目录尚未列出疾病定义，物品标签列表也为空。瘟疫 Buff 和按药材标签涨价的事件需要先在游戏中配置相应资源，再重新导出兼容目录；生成器不能自行创建这些资源。</p><h3>节日规则</h3><pre><code>{
+<p>当前兼容目录尚未列出疾病定义，物品标签列表也为空。瘟疫 Buff 和按药材标签涨价的事件需要先在游戏中配置相应资源，再重新导出兼容目录；生成器不能自行创建这些资源。</p><h3>触发时机、条件与分支</h3><p>事件的 TriggerPhase 默认为 Daily，加入每日随机候选池。WorldStart 在新世界创建、玩家出生前执行一次；PlayerStart 在每名新玩家创建后执行一次。两类启动事件只执行自动效果，不能加入交互选项，也不受 Repeatable 默认值影响。Manual 只由显式调用、排期或关联事件触发，不进入每日随机池。</p><p>TriggerConditions 是事件触发前必须全部满足的条件。它与 ConditionEffect.Parameters.Conditions 使用相同的条件格式：Type、Target、CharacterId、Param、Threshold、Op、Negate、Season、QuestState。Target 为 Actor、Player 或 SpecificId；具体字段与枚举以游戏兼容目录为准。选项自己的 Conditions 仍使用原来的 Type、Param、Threshold、Op 格式。</p><p>ConditionEffect 满足条件时执行 Children，不满足时执行 ElseChildren。缺少角色或系统时，两支都会中止；Negate 也不会把缺少上下文变为成功。WeightedRandomEffect 使用 WeightedBranches，每支包含 Weight 和 Children，按非负权重只选一支，至少一支权重大于零。分支字段放在效果对象上，不要放进 Parameters。</p><p>PlayerStart 的 Actor 和 Player 由服务器绑定新玩家，不需要填写固定角色编号。WorldStart、Daily 和 Manual 不保证有角色上下文；城内筛选可以为子效果提供目标，部分效果仍要求已加载角色。故事面板可广播或发给上下文玩家，玩家定向面板应在 PlayerStart 或已有玩家上下文中使用。</p><p>后续事件通过 TriggerGameEventEffect.EventId 立即调用，或通过 ScheduleGameEventEffect 的 EventId、正数 DelayDays 排期。同一文件中的事件编号可直接互相引用；跨库编号须在游戏中启用对应库。时间效果支持指定前向日期时刻、推进分钟、暂停恢复和倍速；跨过的每一天照常结算，不能倒退。通用 RemainingDays 只用于支持恢复的效果，容器的所有分支也必须支持恢复。</p><p>生成器会检查所有分支的资源与上下文依赖。需要游戏联机预制体的交互物体只能先手动配置、绑定；网站文件不会替你安装预制体、疾病或物品定义。</p><h3>节日规则</h3><pre><code>{
   "Entries": [{
     "Name": "初夏花会",
     "Description": "居民们在广场分享新采的花。",
