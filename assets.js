@@ -1,21 +1,26 @@
 /* Shared game-compatible library validation. No keys or account credentials. */
 (function (root) {
   'use strict';
-  const TYPES = Object.freeze({CityNames:'城市名库',NPCNames:'NPC 名字库',CompanyNames:'公司名库',FamilyNames:'家族名库',Quests:'支线库',Events:'事件库',Festivals:'节日库',SpecialNPCs:'特定 NPC 库'});
-  const NAME_TYPES = ['CityNames','NPCNames','CompanyNames','FamilyNames'];
-  const MAX_FILE_BYTES = 1024 * 1024;
+  const TYPES = Object.freeze({CityNames:'城市名库',NPCNames:'NPC 名字库',CompanyNames:'公司名库',FamilyNames:'家族名库',CountryNames:'国家名库',Dialogues:'对话库',Items:'物品库',Quests:'支线库',Events:'事件库',Festivals:'节日库',SpecialNPCs:'特定 NPC 库'});
+  const NAME_TYPES = ['CityNames','NPCNames','CompanyNames','FamilyNames','CountryNames'];
+  const MAX_FILE_BYTES = 10 * 1024 * 1024;
   const GAME_PATH = '%USERPROFILE%\\AppData\\LocalLow\\DefaultCompany\\Crownfall1\\NameLibraries\\';
   const INT_MIN = -2147483648, INT_MAX = 2147483647;
   const SUPPORTED_PROFILE_ID = 'crownfall1-v1';
-  const GAMEPLAY_FIELDS = ['EventType','TriggerPhase','TriggerConditions','Repeatable','Score','Tags','RumorHint','DescriptionVariants','CausalTagModifiers','Target','TriggerConsequences','Options'];
+  const GAMEPLAY_FIELDS = ['EventType','TriggerPhase','TriggerConditions','Repeatable','Score','Tags','IsPrivate','FactKind','RumorHint','DescriptionVariants','CausalTagModifiers','Target','TriggerConsequences','Options'];
   const ENTRY_FIELDS = ['Name','Description','Stages','Id','Type','Weight','CooldownDays','RuleType','RuleDayInYear','RuleSeason','RulePeriodDays','RuleDurationDays','LinkedEventIds',...GAMEPLAY_FIELDS];
   let profile = null;
+  function protocols() {
+    if (root.GLProtocols) return root.GLProtocols;
+    if (typeof module !== 'undefined' && module.exports) return require('./library-protocols.js');
+    throw new Error('请刷新页面以加载对话与物品协议 library-protocols.js');
+  }
   function object(value) {return value !== null && typeof value === 'object' && !Array.isArray(value);}
   function fields(value, allowed, path) {
     if (!object(value)) throw new Error(path+' 必须是对象');
     for (const key of Object.keys(value)) if (!allowed.includes(key)) throw new Error(path+'.'+key+' 是游戏不支持的字段');
   }
-  function string(value, field, required = false, max = 10000) {
+  function string(value, field, required = false, max = INT_MAX) {
     if (value === undefined && !required) return '';
     if (typeof value !== 'string') throw new Error(field + ' 必须是文本');
     const text = value.trim();
@@ -67,30 +72,38 @@
   }
   function getProfile() {return profile;}
   function requireProfile(path) {if (!profile) throw new Error(path+' 需要先加载游戏内容协议 content-profile.json，请刷新页面后重试');return profile;}
-  function resource(value, kind, path) {
+  // These defaults are shipped in DiseaseDefaultContent/Resources, even when a stopped
+  // Editor exports an incomplete disease registry. Completeness remains unchanged.
+  function getKnownResourceValues(kind,additional=null) {
+    const values=profile?.resources?.[kind] || [];
+    return [...new Set([...values,...(kind === 'diseases' && profile?.resourcesComplete?.diseases !== true ? ['感冒','痢疾','风寒','食物中毒','瘟疫'] : []),...(additional?.[kind] || [])])];
+  }
+  function hasKnownResource(kind,value,additional=null) {return getKnownResourceValues(kind,additional).includes(value);}
+  function resource(value, kind, path, additional = null) {
     if (!value || !kind) return;
-    const active=requireProfile(path), available=active.resources?.[kind] || [];
+    const active=requireProfile(path), available=[...getKnownResourceValues(kind),...(additional?.[kind] || [])];
     if (active.resourcesComplete?.[kind] === true && !available.includes(value)) throw new Error(path+' 引用了游戏资源目录中不存在的值：'+value);
   }
   function resourceEnabled(descriptor,parameter) {
     return !descriptor.resourceWhen || typeof parameter === 'function' && Object.entries(descriptor.resourceWhen).every(([key,value])=>parameter(key) === value);
   }
-  function descriptorValue(value, descriptor, path, depth = 0, parameter = null) {
+  function descriptorValue(value, descriptor, path, depth = 0, parameter = null, additional = null) {
     if (!object(descriptor) || depth > 32) throw new Error(path+' 的协议配置无效');
     if (descriptor.enum) return descriptor.enumFlags || descriptor.flags ? flags(value,undefined,descriptor.enum,path) : enumValue(value,undefined,descriptor.enum,path);
     switch (descriptor.type) {
       case 'integer': return integer(value,undefined,path,descriptor.minimum ?? INT_MIN,descriptor.maximum ?? INT_MAX);
       case 'number': {
         const clean=number(value,undefined,path,descriptor.minimum ?? -3.4028234663852886e38,descriptor.maximum ?? 3.4028234663852886e38);
+        if (clean !== undefined && descriptor.numericFormat === 'float32' && !Number.isFinite(Math.fround(clean))) throw new Error(path+' 超出游戏 float32 范围');
         if (clean !== undefined && (typeof descriptor.exclusiveMinimum === 'number' && (clean <= descriptor.exclusiveMinimum || Math.fround(clean) <= descriptor.exclusiveMinimum) || typeof descriptor.exclusiveMaximum === 'number' && (clean >= descriptor.exclusiveMaximum || Math.fround(clean) >= descriptor.exclusiveMaximum))) throw new Error(path+' 必须在游戏浮点精度的开区间限制内');
         return clean;
       }
       case 'boolean': return boolean(value,undefined,path);
-      case 'string': {const text=string(value,path,false,descriptor.maxLength ?? 10000);if (resourceEnabled(descriptor,parameter)) resource(text,descriptor.resource,path);return text;}
-      case 'array': return array(value,path,descriptor.maxItems ?? 1024).map((item,index) => descriptorValue(item,descriptor.items,path+'['+index+']',depth+1,parameter));
+      case 'string': {const text=string(value,path,descriptor.nonBlank === true,descriptor.maxLength ?? INT_MAX);if (resourceEnabled(descriptor,parameter)) resource(text,descriptor.resource,path,additional);return text;}
+      case 'array': return array(value,path,descriptor.maxItems ?? 1024).map((item,index) => descriptorValue(item,descriptor.items,path+'['+index+']',depth+1,parameter,additional));
       case 'object': {
         fields(value,Object.keys(descriptor.properties || {}),path);
-        const clean={};for (const [key,item] of Object.entries(value)) clean[key]=descriptorValue(item,descriptor.properties[key],path+'.'+key,depth+1,parameter);
+        const clean={};for (const [key,item] of Object.entries(value)) clean[key]=descriptorValue(item,descriptor.properties[key],path+'.'+key,depth+1,parameter,additional);
         return clean;
       }
       default: throw new Error(path+' 的参数类型不受支持');
@@ -106,9 +119,32 @@
       if (typeof input === 'string') {try {input=parseJSON(input);}catch (error) {throw new Error(at+'.Parameters '+error.message);}}
       fields(input,Object.keys(spec.parameters || {}),at+'.Parameters');
       const rawParameter=key=>Object.hasOwn(input,key)?input[key]:spec.parameters?.[key]?.default;
-      const parameters={};for (const [key,item] of Object.entries(input)) parameters[key]=descriptorValue(item,spec.parameters[key],at+'.Parameters.'+key,0,rawParameter);
-      if (type === 'ConditionEffect' && Object.hasOwn(parameters,'Conditions')) parameters.Conditions=eventConditions(parameters.Conditions,at+'.Parameters.Conditions');
+      const parameters={};for (const [key,item] of Object.entries(input)) parameters[key]=descriptorValue(item,spec.parameters[key],at+'.Parameters.'+key,0,rawParameter,state.resources);
+      if (type === 'ConditionEffect' && Object.hasOwn(parameters,'Conditions')) parameters.Conditions=eventConditions(parameters.Conditions,at+'.Parameters.Conditions',state.resources);
       const parameter=(key) => Object.hasOwn(parameters,key) ? parameters[key] : spec.parameters?.[key]?.default;
+      // Constraints apply to constructor defaults too: omitting a required ID is
+      // not a way to bypass the game's validation of the resulting effect.
+      for (const [key,desc] of Object.entries(spec.parameters || {})) {
+        if (desc.type === 'string' && desc.nonBlank && !String(parameter(key) ?? '').trim()) throw new Error(at+'.Parameters.'+key+' 不能为空');
+        if (desc.type === 'integer' || desc.type === 'number') descriptorValue(parameter(key),desc,at+'.Parameters.'+key,0,parameter,state.resources);
+        if (desc.resource && resourceEnabled(desc,parameter)) resource(parameter(key),desc.resource,at+'.Parameters.'+key,state.resources);
+      }
+      for (const group of spec.requiredAnyOf || []) if (!group.some(field => String(parameter(field) ?? '').trim())) throw new Error(at+'.Parameters 至少需要 '+group.join(' 或 '));
+      for (const rule of spec.parameterRules || []) if (Object.entries(rule.when || {}).every(([key,value])=>parameter(key) === value)) {
+        for (const [key,constraint] of Object.entries(rule.fields || {})) {
+          const value=parameter(key), path=at+'.Parameters.'+key;
+          if (constraint.nonBlank && !String(value ?? '').trim()) throw new Error(path+' 不能为空');
+          if (constraint.minimum !== undefined && !(typeof value === 'number' && value >= constraint.minimum)) throw new Error(path+' 必须大于等于 '+constraint.minimum);
+          if (constraint.maximum !== undefined && !(typeof value === 'number' && value <= constraint.maximum)) throw new Error(path+' 必须小于等于 '+constraint.maximum);
+          if (constraint.enum) enumValue(value,undefined,constraint.enum,path);
+          if (constraint.format === 'positiveInt32String' && !(/^\d+$/.test(value) && Number(value) >= 1 && Number(value) <= INT_MAX)) throw new Error(path+' 必须是正数 Int32 编号文本');
+          if (constraint.format === 'hexCoordinates' && !(typeof value === 'string' && /^-?\d+\s*,\s*-?\d+$/.test(value) && value.split(',').every(part=>Number(part) >= INT_MIN && Number(part) <= INT_MAX))) throw new Error(path+' 必须为 Int32 范围的 x,y 坐标文本');
+        }
+      }
+      for (const rule of spec.fieldComparisons || []) {
+        const left=parameter(rule.left), right=parameter(rule.right);
+        if (rule.op === 'LessEqual' && !(left <= right) || rule.op === 'NotEqual' && left === right || rule.op === 'NotEqualWhenBothPositive' && left > 0 && right > 0 && left === right) throw new Error(at+'.Parameters.'+rule.left+' 与 '+rule.right+' 不满足 '+rule.op);
+      }
       if (parameter('TargetMode') === 'SpecificId' && !(parameter('SpecificCharId') > 0)) throw new Error(at+'.Parameters.SpecificCharId 必须大于 0');
       if (parameter('TargetMode') === 'RandomInSettlement' && !(parameter('TargetCount') > 0)) throw new Error(at+'.Parameters.TargetCount 必须大于 0');
       if (parameter('TargetMode') === 'ByTag' && !parameter('TargetTagName')) throw new Error(at+'.Parameters.TargetTagName 不能为空');
@@ -117,12 +153,12 @@
       if (parameter('Target') === 'FixedSettlement' && !parameter('SettlementId')) throw new Error(at+'.Parameters.SettlementId 不能为空');
       if (['InfectDiseaseEffect','ModifyHealRateEffect'].includes(type) && !parameter('DiseaseName')) throw new Error(at+'.Parameters.DiseaseName 不能为空');
       if (/^Modify(Supply|Demand)(ByTag)?Effect$/.test(type) && !(parameter(type.includes('ByTag') ? 'ItemTag' : 'ItemId'))) throw new Error(at+'.Parameters.'+(type.includes('ByTag') ? 'ItemTag' : 'ItemId')+' 不能为空');
-      if (['GiveItemEffect','RemoveItemEffect'].includes(type) && !parameter('ItemId')) throw new Error(at+'.Parameters.ItemId 不能为空');
       for (const [field,desc] of Object.entries(spec.parameters || {})) if (desc.resource && resourceEnabled(desc,parameter) && !parameter(field) && !(type === 'CureDiseaseEffect' && field === 'DiseaseName')) throw new Error(at+'.Parameters.'+field+' 不能为空');
       if (parameter('DurationDays') < 0) throw new Error(at+'.Parameters.DurationDays 不能小于 0');
       for (const field of spec.requiredBindingFields || []) if (spec.parameters?.[field]?.type === 'string' && !parameter(field)) throw new Error(at+'.Parameters.'+field+' 不能为空');
       if (['SetFlagEffect','ClearFlagEffect'].includes(type) && !parameter('Flag')) throw new Error(at+'.Parameters.Flag 不能为空');
       if (type === 'SetTimeEffect' && parameter('DayOfYear') > active.daysPerYear) throw new Error(at+'.Parameters.DayOfYear 超过当前游戏每年的天数');
+      if (type === 'SetTimeEffect' && parameter('Year') > 0 && (parameter('Year')-1)*active.daysPerYear+Math.max(1,parameter('DayOfYear'))-1 > (active.calendar?.maximumAbsoluteDay ?? INT_MAX)) throw new Error(at+'.Parameters 日期超出游戏支持的绝对天数');
       if (type === 'SetPlayerBirthplaceEffect' && parameter('Mode') === 'SettlementName' && !parameter('SettlementName')) throw new Error(at+'.Parameters.SettlementName 不能为空');
       if (['ModifyStatEffect','SetStatEffect'].includes(type) && parameter('IsPermanent') === false && parameter('TargetStat') === 'Health') throw new Error(at+'.Parameters.TargetStat 临时健康上限无法安全恢复，请使用永久设置');
       if (type === 'ConditionEffect' && !(parameter('Conditions') || []).length && !parameter('Flag')) throw new Error(at+'.Parameters.Conditions 或旧参数 Flag 不能为空');
@@ -143,51 +179,56 @@
       return result;
     });
   }
-  function eventConditions(value,path) {
-    const values=array(value,path,100), active=requireProfile(path);
+  function validateEffects(value,path='UseEffects',resources=null) {return effectList(value,path,{count:0,resources});}
+  function eventConditions(value,path,resources=null) {
+    const values=array(value,path,INT_MAX), active=requireProfile(path);
     if (!values.length) return [];
     for (const key of ['EventConditionType','ConditionTarget','Season','QuestState']) if (!Array.isArray(active.enums[key])) throw new Error(path+' 需要更新游戏内容协议：缺少 '+key);
     return values.map((item,index)=>{
-      const at=path+'['+index+']';fields(item,['Type','Target','CharacterId','Param','Threshold','Op','Negate','Season','QuestState'],at);
-      const clean={Type:enumValue(item.Type,'Health',active.enums.EventConditionType,at+'.Type'),Target:enumValue(item.Target,'Actor',active.enums.ConditionTarget,at+'.Target'),CharacterId:integer(item.CharacterId,0,at+'.CharacterId',INT_MIN,INT_MAX),Param:string(item.Param,at+'.Param',false,200),Threshold:integer(item.Threshold,0,at+'.Threshold',INT_MIN,INT_MAX),Op:enumValue(item.Op,'GreaterEqual',active.enums.ComparisonOp,at+'.Op'),Negate:boolean(item.Negate,false,at+'.Negate'),Season:enumValue(item.Season,'Spring',active.enums.Season,at+'.Season'),QuestState:enumValue(item.QuestState,'Active',active.enums.QuestState,at+'.QuestState')};
+      const at=path+'['+index+']';fields(item,['Type','Target','CharacterId','Param','Threshold','Op','Negate','Season','QuestState','RelationshipTarget','RelationshipCharacterId'],at);
+      const clean={Type:enumValue(item.Type,'Health',active.enums.EventConditionType,at+'.Type'),Target:enumValue(item.Target,'Actor',active.enums.ConditionTarget,at+'.Target'),CharacterId:integer(item.CharacterId,0,at+'.CharacterId',INT_MIN,INT_MAX),Param:string(item.Param,at+'.Param'),Threshold:integer(item.Threshold,0,at+'.Threshold',INT_MIN,INT_MAX),Op:enumValue(item.Op,'GreaterEqual',active.enums.ComparisonOp,at+'.Op'),Negate:boolean(item.Negate,false,at+'.Negate'),Season:enumValue(item.Season,'Spring',active.enums.Season,at+'.Season'),QuestState:enumValue(item.QuestState,'Active',active.enums.QuestState,at+'.QuestState'),RelationshipTarget:enumValue(item.RelationshipTarget,'Spouse',active.enums.ConditionTarget,at+'.RelationshipTarget'),RelationshipCharacterId:integer(item.RelationshipCharacterId,0,at+'.RelationshipCharacterId',INT_MIN,INT_MAX)};
       if (clean.Target === 'SpecificId' && clean.CharacterId <= 0) throw new Error(at+'.CharacterId 必须大于 0');
+      if (clean.Type === 'Relationship' && clean.RelationshipTarget === 'SpecificId' && clean.RelationshipCharacterId <= 0) throw new Error(at+'.RelationshipCharacterId 必须大于 0');
       if (['Stat','HasTag','HasItem','Flag','Disease','QuestState'].includes(clean.Type) && !clean.Param) throw new Error(at+'.Param 不能为空');
       if (clean.Type === 'Stat') enumValue(clean.Param,undefined,active.enums.StatType || [],at+'.Param');
-      if (clean.Type === 'HasItem') resource(clean.Param,'items',at+'.Param');
-      if (clean.Type === 'Disease') resource(clean.Param,'diseases',at+'.Param');
+      if (clean.Type === 'HasItem') resource(clean.Param,'items',at+'.Param',resources);
+      if (clean.Type === 'Disease') resource(clean.Param,'diseases',at+'.Param',resources);
       return clean;
     });
   }
-  function condition(value, path) {
+  function condition(value, path,resources=null) {
     fields(value,['Type','Param','Threshold','Op'],path);const active=requireProfile(path);
     const clean={Type:enumValue(value.Type,'Gold',active.enums.ConditionType,path+'.Type'),Param:string(value.Param,path+'.Param',false,200),Threshold:integer(value.Threshold,0,path+'.Threshold',INT_MIN,INT_MAX),Op:enumValue(value.Op,'GreaterEqual',active.enums.ComparisonOp,path+'.Op')};
     if (['Stat','HasTag','HasItem'].includes(clean.Type) && !clean.Param) throw new Error(path+'.Param 不能为空');
     if (clean.Type === 'Stat' && active.enums.StatType) enumValue(clean.Param,undefined,active.enums.StatType,path+'.Param');
-    if (clean.Type === 'HasItem') resource(clean.Param,'items',path+'.Param');
+    if (clean.Type === 'HasItem') resource(clean.Param,'items',path+'.Param',resources);
     return clean;
   }
-  function gameplay(entry, clean, path) {
+  function gameplay(entry, clean, path,resources=null) {
     const active=requireProfile(path);
     clean.EventType=enumValue(entry.EventType,'Notice',active.enums.GameEventType,path+'.EventType');
     clean.TriggerPhase=enumValue(entry.TriggerPhase,'Daily',active.enums.EventTriggerPhase || ['Daily'],path+'.TriggerPhase');
-    clean.TriggerConditions=eventConditions(entry.TriggerConditions,path+'.TriggerConditions');
+    clean.TriggerConditions=eventConditions(entry.TriggerConditions,path+'.TriggerConditions',resources);
     clean.Repeatable=boolean(entry.Repeatable,true,path+'.Repeatable');
     clean.Score=integer(entry.Score,0,path+'.Score',-10,10);
     clean.Tags=flags(entry.Tags,'None',active.enums.EventTag,path+'.Tags');
+    clean.IsPrivate=boolean(entry.IsPrivate,false,path+'.IsPrivate');
+    clean.FactKind=entry.FactKind === undefined ? 'EventExecution' : string(entry.FactKind,path+'.FactKind');
     clean.RumorHint=string(entry.RumorHint,path+'.RumorHint');
-    clean.DescriptionVariants=array(entry.DescriptionVariants,path+'.DescriptionVariants',100).map((text,index) => string(text,path+'.DescriptionVariants['+index+']',true));
-    clean.CausalTagModifiers=array(entry.CausalTagModifiers,path+'.CausalTagModifiers',100).map((value,index) => {
+    clean.DescriptionVariants=array(entry.DescriptionVariants,path+'.DescriptionVariants',INT_MAX).map((text,index) => string(text,path+'.DescriptionVariants['+index+']'));
+    clean.CausalTagModifiers=array(entry.CausalTagModifiers,path+'.CausalTagModifiers',INT_MAX).map((value,index) => {
       const at=path+'.CausalTagModifiers['+index+']';fields(value,['targetTag','probabilityMultiplier','durationDays','decayOverTime'],at);
       const multiplier=number(value.probabilityMultiplier,1,at+'.probabilityMultiplier',0);
       if (Math.fround(multiplier) <= 0) throw new Error(at+'.probabilityMultiplier 必须大于 0');
       return {targetTag:flags(value.targetTag,'None',active.enums.EventTag,at+'.targetTag'),probabilityMultiplier:multiplier,durationDays:integer(value.durationDays,1,at+'.durationDays',1,INT_MAX),decayOverTime:boolean(value.decayOverTime,false,at+'.decayOverTime')};
     });
-    const target=entry.Target === undefined ? {} : entry.Target;fields(target,['ActorId','PlayerId','SettlementId','RandomSettlement'],path+'.Target');
-    clean.Target={ActorId:integer(target.ActorId,0,path+'.Target.ActorId',0,INT_MAX),PlayerId:integer(target.PlayerId,0,path+'.Target.PlayerId',0,INT_MAX),SettlementId:string(target.SettlementId,path+'.Target.SettlementId',false,200),RandomSettlement:boolean(target.RandomSettlement,false,path+'.Target.RandomSettlement')};
-    clean.TriggerConsequences=effectList(entry.TriggerConsequences,path+'.TriggerConsequences',{count:0});
-    clean.Options=array(entry.Options,path+'.Options',100).map((value,index) => {
+    const target=entry.Target === undefined ? {} : entry.Target;fields(target,['ActorId','PlayerId','SettlementId','RandomSettlement','Selection','MinPrestige','MinAge','MaxAge','CharacterKind','BindSpouse','BindLover','LoverMinRelationship'],path+'.Target');
+    clean.Target={ActorId:integer(target.ActorId,0,path+'.Target.ActorId',0,INT_MAX),PlayerId:integer(target.PlayerId,0,path+'.Target.PlayerId',0,INT_MAX),SettlementId:string(target.SettlementId,path+'.Target.SettlementId'),RandomSettlement:boolean(target.RandomSettlement,false,path+'.Target.RandomSettlement'),Selection:enumValue(target.Selection,'Existing',active.enums.EventActorSelection || ['Existing','AdultInSettlement','MarriedInSettlement','PregnantInSettlement','AffairInSettlement'],path+'.Target.Selection'),MinPrestige:integer(target.MinPrestige,0,path+'.Target.MinPrestige',0,INT_MAX),MinAge:integer(target.MinAge,18,path+'.Target.MinAge',0,INT_MAX),MaxAge:integer(target.MaxAge,120,path+'.Target.MaxAge',0,INT_MAX),CharacterKind:enumValue(target.CharacterKind,'Any',['Any','Npc','Player'],path+'.Target.CharacterKind'),BindSpouse:boolean(target.BindSpouse,false,path+'.Target.BindSpouse'),BindLover:boolean(target.BindLover,false,path+'.Target.BindLover'),LoverMinRelationship:number(target.LoverMinRelationship,0,path+'.Target.LoverMinRelationship',-100,100)};
+    if (clean.Target.MaxAge < clean.Target.MinAge || clean.Target.Selection !== 'Existing' && clean.Target.MinAge < 18) throw new Error(path+'.Target 角色年龄范围无效；筛选事件角色必须成年');
+    clean.TriggerConsequences=effectList(entry.TriggerConsequences,path+'.TriggerConsequences',{count:0,resources});
+    clean.Options=array(entry.Options,path+'.Options',INT_MAX).map((value,index) => {
       const at=path+'.Options['+index+']';fields(value,['OptionText','AutoExecute','Tooltip','Conditions','Consequences','HasInputField','InputLabel','InputDefault','InputMin','InputMax'],at);
-      const option={OptionText:value.OptionText === undefined ? '继续' : string(value.OptionText,at+'.OptionText',true,200),AutoExecute:boolean(value.AutoExecute,false,at+'.AutoExecute'),Tooltip:string(value.Tooltip,at+'.Tooltip'),Conditions:array(value.Conditions,at+'.Conditions',100).map((item,i) => condition(item,at+'.Conditions['+i+']')),Consequences:effectList(value.Consequences,at+'.Consequences',{count:0}),HasInputField:boolean(value.HasInputField,false,at+'.HasInputField'),InputLabel:value.InputLabel === undefined ? '输入数值' : string(value.InputLabel,at+'.InputLabel',false,200),InputDefault:integer(value.InputDefault,1,at+'.InputDefault',INT_MIN,INT_MAX),InputMin:integer(value.InputMin,1,at+'.InputMin',INT_MIN,INT_MAX),InputMax:integer(value.InputMax,100,at+'.InputMax',INT_MIN,INT_MAX)};
+      const option={OptionText:value.OptionText === undefined ? '继续' : string(value.OptionText,at+'.OptionText',true),AutoExecute:boolean(value.AutoExecute,false,at+'.AutoExecute'),Tooltip:string(value.Tooltip,at+'.Tooltip'),Conditions:array(value.Conditions,at+'.Conditions',INT_MAX).map((item,i) => condition(item,at+'.Conditions['+i+']',resources)),Consequences:effectList(value.Consequences,at+'.Consequences',{count:0,resources}),HasInputField:boolean(value.HasInputField,false,at+'.HasInputField'),InputLabel:value.InputLabel === undefined ? '输入数值' : string(value.InputLabel,at+'.InputLabel'),InputDefault:integer(value.InputDefault,1,at+'.InputDefault',INT_MIN,INT_MAX),InputMin:integer(value.InputMin,1,at+'.InputMin',INT_MIN,INT_MAX),InputMax:integer(value.InputMax,100,at+'.InputMax',INT_MIN,INT_MAX)};
       if (option.HasInputField && (option.InputMin > option.InputMax || option.InputDefault < option.InputMin || option.InputDefault > option.InputMax)) throw new Error(at+' 的输入默认值必须在 InputMin 与 InputMax 之间');
       return option;
     });
@@ -196,7 +237,7 @@
   }
   function parseJSON(text) {
     if (typeof text !== 'string' || !text.trim()) throw new Error('没有可读取的 JSON 内容');
-    if (new TextEncoder().encode(text).length > MAX_FILE_BYTES) throw new Error('文件超过 1 MB');
+    if (new TextEncoder().encode(text).length > MAX_FILE_BYTES) throw new Error('文件超过 10 MiB');
     const source=text.trim().replace(/^\uFEFF/, '');let parsed;
     try {parsed=JSON.parse(source);} catch {throw new Error('JSON 无法解析，请检查引号、逗号与括号');}
     // JSON.parse silently overwrites repeated object fields; the game's reader rejects them.
@@ -235,41 +276,48 @@
     const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
     return parseJSON(fenced ? fenced[1] : trimmed);
   }
-  function validate(data, type) {
+  function validateMetadata(data,{required=false}={}) {
+    const metadata={};
+    if (required || data.SchemaVersion !== undefined) metadata.SchemaVersion=integer(data.SchemaVersion,undefined,'SchemaVersion',1,1);
+    if (required && metadata.SchemaVersion === undefined) throw new Error('SchemaVersion 必须明确为 1');
+    if (required || data.ProfileId !== undefined) {
+      metadata.ProfileId=string(data.ProfileId,'ProfileId',true,200);
+      if (metadata.ProfileId !== (profile?.profileId || SUPPORTED_PROFILE_ID)) throw new Error('ProfileId 与当前游戏协议不兼容：'+metadata.ProfileId);
+    }
+    return metadata;
+  }
+  function validate(data, type,resources=null) {
     if (!Object.hasOwn(TYPES, type)) throw new Error('请选择支持的资产类型');
     if (!object(data)) throw new Error('JSON 顶层必须是对象');
+    if (['Dialogues','Items'].includes(type)) return protocols().validate(data,type,api,resources);
     const isName = NAME_TYPES.includes(type);
     const key = isName ? 'Items' : 'Entries';
     if (Object.hasOwn(data, isName ? 'Entries' : 'Items')) throw new Error('文件同时包含 Items 和 Entries，请核对资产类型');
     fields(data,[key,'SchemaVersion','ProfileId'],'JSON');
     let bytes;try {bytes=new TextEncoder().encode(JSON.stringify(data)).length;}catch {throw new Error('内容必须是可序列化的 JSON 对象');}
-    if (bytes > MAX_FILE_BYTES) throw new Error('文件超过 1 MB');
-    const metadata={};
-    if (data.SchemaVersion !== undefined) metadata.SchemaVersion=integer(data.SchemaVersion,1,'SchemaVersion',1,1);
-    if (data.ProfileId !== undefined) {
-      metadata.ProfileId=string(data.ProfileId,'ProfileId',true,200);
-      if (metadata.ProfileId !== (profile?.profileId || SUPPORTED_PROFILE_ID)) throw new Error('ProfileId 与当前游戏协议不兼容：'+metadata.ProfileId);
-    }
+    if (bytes > MAX_FILE_BYTES) throw new Error('文件超过 10 MiB');
+    const metadata=validateMetadata(data);
     if (!Array.isArray(data[key]) || data[key].length === 0) throw new Error('需要非空的 ' + key + ' 数组');
     if (data[key].length > 5000) throw new Error('单个库最多支持 5000 个条目');
     if (isName) {
-      const items = data.Items.map((item, index) => string(item, '第 ' + (index + 1) + ' 个名字', true, 120));
-      if (new Set(items).size !== items.length) throw new Error('名字重复，请删除重复项');
+      const items = [...new Set(data.Items.filter(item=>item !== null).map((item, index) => string(item, '第 ' + (index + 1) + ' 个名字', false, type === 'CountryNames' ? 100 : INT_MAX)).filter(Boolean))];
+      if (!items.length) throw new Error('Items 至少需要一个有效名字');
       return {...metadata,Items:items};
     }
     const ids = new Set();
     const entries = data.Entries.map((entry, index) => {
       const prefix = '条目 ' + (index + 1) + ' · ';
       fields(entry,ENTRY_FIELDS,'Entries['+index+']');
-      const clean = {Name:string(entry.Name, prefix+'Name',true,200),Description:string(entry.Description,prefix+'Description',true),Stages:[]};
-      clean.Stages = array(entry.Stages,prefix+'Stages',100).map((stage, stageIndex) => {
+      const clean = {Name:string(entry.Name, prefix+'Name',true,type === 'Quests' ? 100 : INT_MAX),Description:string(entry.Description,prefix+'Description',false,type === 'Quests' ? 8000 : INT_MAX),Stages:[]};
+      clean.Stages = array(entry.Stages,prefix+'Stages',type === 'Quests' ? 100 : INT_MAX).map((stage, stageIndex) => {
         fields(stage,['StageName','Description'],prefix+'Stages['+stageIndex+']');
-        return {StageName:string(stage.StageName,prefix+'阶段 '+(stageIndex+1)+' 名称',true,200),Description:string(stage.Description,prefix+'阶段描述',true)};
+        return {StageName:string(stage.StageName,prefix+'阶段 '+(stageIndex+1)+' 名称',type === 'Quests',type === 'Quests' ? 100 : INT_MAX),Description:string(stage.Description,prefix+'阶段描述',false,type === 'Quests' ? 8000 : INT_MAX)};
       });
-      clean.Id = string(entry.Id,prefix+'Id',false,200);
-      clean.Type = string(entry.Type,prefix+'Type',false,80);
-      clean.Weight = integer(entry.Weight,10,prefix+'Weight',1,100000);
-      clean.CooldownDays = integer(entry.CooldownDays,0,prefix+'CooldownDays',0,100000);
+      if (type === 'Quests' && new Set(clean.Stages.map(stage=>stage.StageName)).size !== clean.Stages.length) throw new Error(prefix+'Stages 阶段名称不能重复');
+      clean.Id = string(entry.Id,prefix+'Id');
+      clean.Type = string(entry.Type,prefix+'Type');
+      clean.Weight = integer(entry.Weight,10,prefix+'Weight',0,INT_MAX);
+      clean.CooldownDays = integer(entry.CooldownDays,0,prefix+'CooldownDays',0,INT_MAX);
       clean.RuleType = enumValue(entry.RuleType,'Periodic',['Periodic','BySeason','ByDayInYear'],prefix+'RuleType');
       clean.RuleDayInYear = integer(entry.RuleDayInYear,1,prefix+'RuleDayInYear',1,INT_MAX);
       if (type === 'Festivals' && clean.RuleType === 'ByDayInYear') {
@@ -277,31 +325,32 @@
         integer(clean.RuleDayInYear,1,prefix+'RuleDayInYear',1,active.daysPerYear);
       }
       clean.RuleSeason = enumValue(entry.RuleSeason,'Spring',['Spring','Summer','Autumn','Winter'],prefix+'RuleSeason');
-      clean.RulePeriodDays = integer(entry.RulePeriodDays,15,prefix+'RulePeriodDays',1,100000);
-      clean.RuleDurationDays = integer(entry.RuleDurationDays,1,prefix+'RuleDurationDays',1,100000);
-      clean.LinkedEventIds = array(entry.LinkedEventIds,prefix+'LinkedEventIds',1000).map(id => string(id,prefix+'关联事件 Id',true,200));
+      clean.RulePeriodDays = integer(entry.RulePeriodDays,15,prefix+'RulePeriodDays',1,INT_MAX);
+      clean.RuleDurationDays = integer(entry.RuleDurationDays,1,prefix+'RuleDurationDays',1,INT_MAX);
+      clean.LinkedEventIds = array(entry.LinkedEventIds,prefix+'LinkedEventIds',INT_MAX).map(id => string(id,prefix+'关联事件 Id',true));
       if (new Set(clean.LinkedEventIds).size !== clean.LinkedEventIds.length) throw new Error(prefix+'LinkedEventIds 不能重复');
-      if (profile || GAMEPLAY_FIELDS.some(field => Object.hasOwn(entry,field))) gameplay(entry,clean,'Entries['+index+']');
+      if (profile || GAMEPLAY_FIELDS.some(field => Object.hasOwn(entry,field))) gameplay(entry,clean,'Entries['+index+']',resources);
       const effectiveId=clean.Id || 'content_'+clean.Name;
       if (ids.has(effectiveId)) throw new Error('条目 Id 重复：'+effectiveId);ids.add(effectiveId);
       return clean;
     });
     const result={...metadata,Entries:entries};
-    if (new TextEncoder().encode(JSON.stringify(result)).length > MAX_FILE_BYTES) throw new Error('规范化后的文件超过 1 MB，请减少条目或描述长度');
+    if (new TextEncoder().encode(JSON.stringify(result)).length > MAX_FILE_BYTES) throw new Error('规范化后的文件超过 10 MiB，请减少条目或描述长度');
     return result;
   }
-  function buildGenerationPrompt(settings) {
-    const english=settings.language === 'en';
-    if (NAME_TYPES.includes(settings.type)) return english ? 'Return only {"Items":["name"]}. Each name is unique nonempty text, at most 120 characters. Do not add gameplay fields.' : '仅输出 {"Items":["名字"]}，每个名字为不重复的非空文本，最多 120 个字符。';
-    if (['Quests','SpecialNPCs'].includes(settings.type)) return (english?'This library is a narrative draft; the game has no external gameplay execution entry point yet. Return only Entries with Name,Description,Id,Type:"",Stages:[{StageName,Description}],Weight,CooldownDays. Do not add gameplay effects or invent rewards that the game executes. ':'此类库是内容草稿，游戏尚无外部玩法执行入口。仅输出 Entries，其中使用 Name、Description、Id、Type:""、Stages:[{StageName,Description}]、Weight、CooldownDays。不要添加子效果或编造游戏已执行的奖励。')+JSON.stringify({Entries:[{Name:english?'Entry name':'条目名称',Description:english?'Story description':'故事描述',Id:'author_library_entry_01',Type:'',Stages:[{StageName:english?'Stage name':'阶段名称',Description:english?'Stage description':'阶段描述'}],Weight:settings.weight ?? 10,CooldownDays:settings.cooldown ?? 0}]});
-    const active=requireProfile('生成内容');
-    const phase=settings.triggerPhase || 'Daily';
-    const example={SchemaVersion:1,ProfileId:active.profileId,Entries:[{Id:'author_library_event_01',Name:english?'Event name':'事件名称',Description:english?'What happens':'事件描述',Type:'',Weight:settings.weight ?? 10,CooldownDays:settings.cooldown ?? 0,EventType:'Notice',TriggerPhase:phase,TriggerConditions:[],Repeatable:!['WorldStart','PlayerStart'].includes(phase),Score:0,Tags:'None',Target:{RandomSettlement:true},TriggerConsequences:[],Options:[]}]};
+  function getGenerationCatalog({allowLibraryEventReferences=true}={}) {
+    const active=requireProfile('生成效果目录');
     const catalog={};
     for (const [key,spec] of Object.entries(active.effects)) {
-      const internalEventLink=['TriggerGameEventEffect','ScheduleGameEventEffect'].includes(key);
+      const internalEventLink=allowLibraryEventReferences && ['TriggerGameEventEffect','ScheduleGameEventEffect'].includes(key);
       if (spec.status === 'logOnly' || spec.requiresNetworkPrefabBinding || spec.requiresBindings === true && !internalEventLink) continue;
-      const parameters={};for (const [field,desc] of Object.entries(spec.parameters || {})) parameters[field]=Object.fromEntries(Object.entries(desc).filter(([name]) => !['description','title'].includes(name)));
+      function compact(desc) {
+        const clean={};for (const [name,value] of Object.entries(desc)) {
+          if (['description','title','numericFormat'].includes(name) || name === 'minimum' && (value === INT_MIN || value <= -3.40282346e38) || name === 'maximum' && (value === INT_MAX || value >= 3.40282346e38)) continue;
+          clean[name]=name === 'properties' ? Object.fromEntries(Object.entries(value).map(([key,item])=>[key,compact(item)])) : name === 'items' && object(value) ? compact(value) : value;
+        }return clean;
+      }
+      const parameters={};for (const [field,desc] of Object.entries(spec.parameters || {})) parameters[field]=compact(desc);
       catalog[key]={parameters,allowsChildren:!!spec.allowsChildren,requiresCharacter:!!spec.requiresCharacter,supportsStoredNpc:!!spec.supportsStoredNpc};
       if (spec.allowsElseChildren) catalog[key].allowsElseChildren=true;
       if (spec.allowsWeightedBranches) catalog[key].allowsWeightedBranches=true;
@@ -311,6 +360,7 @@
       if (spec.bindingRules?.length) catalog[key].bindingRules=spec.bindingRules;
       if (spec.characterRules?.length) catalog[key].characterRules=spec.characterRules;
       if (spec.contextRules?.length) catalog[key].contextRules=spec.contextRules;
+      for (const field of ['parameterRules','requiredAnyOf','fieldComparisons','inactiveParameters','targetCharacterKinds']) if (spec[field]?.length) catalog[key][field]=spec[field];
     }
     // The exported catalog repeats inherited fields. Keep their exact descriptors once in the prompt.
     const specs=Object.values(catalog), commonParameters={};
@@ -318,6 +368,18 @@
       if (specs.every(spec => JSON.stringify(spec.parameters[field]) === JSON.stringify(desc))) commonParameters[field]=desc;
     }
     for (const spec of specs) for (const field of Object.keys(commonParameters)) delete spec.parameters[field];
+    return {catalog,commonParameters};
+  }
+  function buildGenerationPrompt(settings) {
+    const english=settings.language === 'en';
+    if (['Dialogues','Items'].includes(settings.type)) return protocols().buildGenerationPrompt(settings,api);
+    if (NAME_TYPES.includes(settings.type)) return english ? 'Return only {"SchemaVersion":1,"ProfileId":"crownfall1-v1","Items":["name"]}. Each name is unique nonempty text.'+(settings.type === 'CountryNames' ? ' Country names have at most 100 UTF-16 code units.' : '')+' A name pool does not create cities, NPCs, families or countries. Do not add gameplay fields.' : '仅输出 {"SchemaVersion":1,"ProfileId":"crownfall1-v1","Items":["名字"]}，每个名字为不重复的非空文本。'+(settings.type === 'CountryNames' ? '国家名最多 100 个 UTF-16 字符单位。' : '')+'名字库是随机取名池，不会创建城市、NPC、家族或国家，不要加入玩法字段。';
+    if (['Quests','SpecialNPCs'].includes(settings.type)) return (english?'This library is a narrative draft; the game has no external gameplay execution entry point yet. Return only SchemaVersion:1,ProfileId:"crownfall1-v1",Entries with Name,Description,Id,Type:"",Stages:[{StageName,Description}],Weight,CooldownDays. Quests: Name/StageName <=100 UTF-16 units, descriptions <=8000, <=100 uniquely named stages. Do not add gameplay effects or invent rewards that the game executes. ':'此类库是内容草稿，游戏尚无外部玩法执行入口。仅输出 SchemaVersion:1、ProfileId:"crownfall1-v1"、Entries，其中使用 Name、Description、Id、Type:""、Stages:[{StageName,Description}]、Weight、CooldownDays。Quests 的名称与阶段名最多100个 UTF-16 字符单位，说明最多8000，阶段最多100个且名称不重复。不要添加子效果或编造游戏已执行的奖励。')+JSON.stringify({SchemaVersion:1,ProfileId:SUPPORTED_PROFILE_ID,Entries:[{Name:english?'Entry name':'条目名称',Description:english?'Story description':'故事描述',Id:'author_library_entry_01',Type:'',Stages:[{StageName:english?'Stage name':'阶段名称',Description:english?'Stage description':'阶段描述'}],Weight:settings.weight ?? 10,CooldownDays:settings.cooldown ?? 0}]});
+    const active=requireProfile('生成内容');
+    if (settings.type === 'Festivals') return (english?'Return only this JSON shape. A festival schedules an existing event through LinkedEventIds; it does not create an event, item, disease or effect definition. Do not invent event IDs. If no selected event library is provided, use LinkedEventIds:[] and state the missing dependency in the later validation warning. RuleType: Periodic/BySeason/ByDayInYear; RuleSeason: Spring/Summer/Autumn/Winter; RulePeriodDays and RuleDurationDays are positive Int32 values. ByDayInYear uses RuleDayInYear 1–':'仅输出此 JSON 形态。节日通过 LinkedEventIds 调用已有事件，不会创建事件、物品、疾病或子效果。不得编造关联事件编号；没有提供同时选用的事件库时，使用 LinkedEventIds:[]，缺少依赖由后续预检提示。RuleType 为 Periodic/BySeason/ByDayInYear，RuleSeason 为 Spring/Summer/Autumn/Winter，RulePeriodDays 与 RuleDurationDays 为正数 Int32，ByDayInYear 的 RuleDayInYear 范围 1–')+active.daysPerYear+'。'+JSON.stringify({SchemaVersion:1,ProfileId:active.profileId,Entries:[{Id:'author.festival.harvest',Name:english?'Harvest day':'收获日',Description:english?'Celebrate the harvest.':'庆祝本次丰收。',RuleType:'Periodic',RulePeriodDays:3,RuleDurationDays:1,RuleDayInYear:1,RuleSeason:'Autumn',LinkedEventIds:[]}]});
+    const phase=settings.triggerPhase || 'Daily';
+    const example={SchemaVersion:1,ProfileId:active.profileId,Entries:[{Id:'author_library_event_01',Name:english?'Event name':'事件名称',Description:english?'What happens':'事件描述',Type:'',Weight:settings.weight ?? 10,CooldownDays:settings.cooldown ?? 0,EventType:'Notice',TriggerPhase:phase,TriggerConditions:[],Repeatable:!['WorldStart','PlayerStart'].includes(phase),Score:0,Tags:'None',Target:{RandomSettlement:true},TriggerConsequences:[],Options:[]}]};
+    const {catalog,commonParameters}=getGenerationCatalog();
     const rules=english ? [
       'Use exact case-sensitive game fields and enum names. Type is an optional legacy handler key, not the library category; leave it empty unless a known handler is required.',
       'Compose executable effects only from the catalog below. Each effect is {Type,Parameters:{...},Children:[]}. Parameters contain public configuration fields only. Unknown types/fields and numeric enum values are forbidden. Add actual TriggerConsequences for Events; prose alone does not change the game.',
@@ -347,7 +409,22 @@
       '仅 allowsChildren:true 支持 Children，allowsElseChildren 支持 ElseChildren，allowsWeightedBranches 支持 WeightedBranches；嵌套最多 32 层，每组后果最多 1024 个效果与加权分支节点。SpecificId 要求正数 SpecificCharId；RandomInSettlement 要求正数 TargetCount；RemainingDays 为 -1 或正数，且必须支持该持续机制；Chance 在 0–1 之间。输入满足 InputMin <= InputDefault <= InputMax。',
       '节日 RuleType 为 Periodic/BySeason/ByDayInYear，RuleSeason 为 Spring/Summer/Autumn/Winter，周期与持续天数为正数。RuleDayInYear 范围 1–'+active.daysPerYear+'。Quests、SpecialNPCs 当前属于内容草稿，尚无外部玩法执行入口。'
     ];
-    return rules.join('\n')+'\n'+(english?'Root example: ':'根对象示例：')+JSON.stringify(example)+'\n'+(english?'Game enums: ':'游戏枚举：')+JSON.stringify(active.enums)+'\n'+(english?'Common parameters: ':'公共参数：')+JSON.stringify(commonParameters)+'\n'+(english?'Effect catalog: ':'效果目录：')+JSON.stringify(catalog)+'\n'+(english?'Game resources: ':'游戏资源：')+JSON.stringify(active.resources || {})+'\n'+(english?'Resource catalog completeness: ':'资源目录完整性：')+JSON.stringify(active.resourcesComplete || {});
+    const compatibility=english ? [
+      'Target accepts ActorId,PlayerId,SettlementId,RandomSettlement,Selection,MinPrestige,MinAge,MaxAge,CharacterKind,BindSpouse,BindLover,LoverMinRelationship. Selection Existing uses the caller actor; AdultInSettlement/MarriedInSettlement/PregnantInSettlement/AffairInSettlement select an actual actor in the contextual settlement. MinAge>=18 for selection; MaxAge>=MinAge; MinPrestige>=0; LoverMinRelationship -100..100. CharacterKind Any/Npc/Player. Spouse/Lover/Mother/Father must resolve from context, never the global hero.',
+      'Full event conditions additionally accept RelationshipTarget and RelationshipCharacterId. Relationship checks both persons; SpecificId requires a positive matching ID. Option Conditions remain the separate nine ConditionType variants, with no Target or relationship fields. Optional event IsPrivate/FactKind are preserved in history.',
+      'All catalog parameterRules, requiredAnyOf and fieldComparisons apply to defaults as well as supplied fields. Use only supported enum variants. inactiveParameters do not perform a Buff action on instantaneous effects/containers. Effect execution is not a transaction: a later failure does not roll back earlier changes.',
+      'Disease defaults 感冒/痢疾/风寒/食物中毒/瘟疫 are shipped by the game even when its Editor disease registry export is incomplete. These are known references, not new disease definitions; import/runtime still confirms availability. A false resource-completeness flag is a warning, not permission to invent arbitrary resources.',
+      'Single JSON <=10 MiB, <=5000 entries. Use stable unique IDs, explicit SchemaVersion:1 and ProfileId:crownfall1-v1. Standard JSON only, no comments, duplicate keys, Markdown or explanation. A selected event library runs server-side and only the contextual player may answer its interactive event.'
+    ] : [
+      '完整 Target 字段为 ActorId、PlayerId、SettlementId、RandomSettlement、Selection、MinPrestige、MinAge、MaxAge、CharacterKind、BindSpouse、BindLover、LoverMinRelationship。Selection=Existing 使用调用方角色；AdultInSettlement/MarriedInSettlement/PregnantInSettlement/AffairInSettlement 从事件城市选取实际角色。筛选角色 MinAge>=18、MaxAge>=MinAge、MinPrestige>=0、LoverMinRelationship 范围 -100..100，CharacterKind 为 Any/Npc/Player。Spouse/Lover/Mother/Father 从事件上下文解析，不得绑定全局主角。',
+      '完整事件条件另有 RelationshipTarget、RelationshipCharacterId。Relationship 要核对两名角色，SpecificId 要有对应正数编号。选项 Conditions 仍只能用九类 ConditionType，不能混入 Target 或关系条件字段。事件可用 IsPrivate、FactKind，保留到历史记录。',
+      '目录 parameterRules、requiredAnyOf、fieldComparisons 对填写值和省略后的默认值都生效，枚举只用目录支持的模式。inactiveParameters 不会让即时效果或容器变成 Buff。效果执行不是事务，后一个效果失败不会回滚前面已经进行的改动。',
+      '感冒、痢疾、风寒、食物中毒、瘟疫是游戏打包的默认疾病，即使 Editor 导出的 diseases 注册目录暂不完整仍属于已知引用，不是新疾病定义；最终以游戏导入与运行时核对为准。资源完整性 false 是预警，不是可以编造任意引用的许可。',
+      '单个 JSON 不超过10 MiB、最多5000条，使用稳定唯一 Id，明确输出 SchemaVersion:1、ProfileId:crownfall1-v1。只输出标准 JSON，不能有注释、重复字段、Markdown 或说明文字。事件由服务器执行，交互事件只由绑定的上下文玩家回答。'
+    ];
+    const corrected=rules.map(text=>text.replace('Target allows ActorId,PlayerId,SettlementId,RandomSettlement only.','Target fields are listed in the complete rules below.').replace('Target 只支持 ActorId、PlayerId、SettlementId、RandomSettlement。','完整 Target 字段见后面的补充规则。').replace('Negate,Season,QuestState}', 'Negate,Season,QuestState,RelationshipTarget,RelationshipCharacterId}'));
+    const resources=Object.fromEntries([...new Set([...Object.keys(active.resources || {}),...Object.keys(settings.packageResources || {})])].map(kind=>[kind,getKnownResourceValues(kind,settings.packageResources)]));
+    return [...corrected,...compatibility].join('\n')+'\n'+(english?'Root example: ':'根对象示例：')+JSON.stringify(example)+'\n'+(english?'Game enums: ':'游戏枚举：')+JSON.stringify(active.enums)+'\n'+(english?'Common parameters: ':'公共参数：')+JSON.stringify(commonParameters)+'\n'+(english?'Effect catalog: ':'效果目录：')+JSON.stringify(catalog)+'\n'+(english?'Game resources: ':'游戏资源：')+JSON.stringify(resources)+'\n'+(english?'Resource catalog completeness: ':'资源目录完整性：')+JSON.stringify(active.resourcesComplete || {});
   }
   function walkEffects(entry, visit) {
     function walk(list,ancestors,option) {for (const effect of list || []) {
@@ -361,23 +438,28 @@
   }
   const WORLD_CONDITIONS=['Flag','Fate','Year','DayOfYear','Hour','Minute','TotalDays','Season'];
   function getConditionRequirements(condition) {
-    return {requiresActor:!WORLD_CONDITIONS.includes(condition.Type) && condition.Target === 'Actor',requiresPlayer:!WORLD_CONDITIONS.includes(condition.Type) && condition.Target === 'Player',requiresBinding:condition.Target === 'SpecificId' || condition.Type === 'QuestState',resource:condition.Type === 'Disease'?'diseases':condition.Type === 'HasItem'?'items':null};
+    const targets=WORLD_CONDITIONS.includes(condition.Type) ? [] : [condition.Target || 'Actor',...(condition.Type === 'Relationship' ? [condition.RelationshipTarget || 'Spouse'] : [])];
+    return {requiresActor:targets.some(target=>['Actor','Spouse','Lover','Mother','Father'].includes(target)),requiresPlayer:targets.includes('Player'),requiresBinding:targets.includes('SpecificId') || condition.Type === 'QuestState',requiresSpouse:targets.includes('Spouse'),requiresLover:targets.includes('Lover'),resource:condition.Type === 'Disease'?'diseases':condition.Type === 'HasItem'?'items':null};
   }
   function describeCondition(condition,language='zh-CN') {
     const english=language === 'en';
-    const names={Gold:['金币','gold'],Health:['健康','health'],Prestige:['声望','prestige'],Age:['年龄','age'],Stat:['属性','stat'],HasTag:['标签','tag'],HasItem:['持有物品','held item'],NpcLoyalty:['忠诚','loyalty'],NpcGreed:['贪婪','greed'],Happiness:['幸福','happiness'],Fate:['命运','fate'],Flag:['世界标记','world flag'],Year:['年份','year'],DayOfYear:['年内天数','day of year'],Hour:['小时','hour'],Minute:['分钟','minute'],TotalDays:['累计天数','elapsed days'],Season:['季节','season'],Disease:['疾病','disease'],QuestState:['任务状态','quest state']};
+    const names={Gold:['金币','gold'],Health:['健康','health'],Prestige:['声望','prestige'],Age:['年龄','age'],Stat:['属性','stat'],HasTag:['标签','tag'],HasItem:['持有物品','held item'],NpcLoyalty:['忠诚','loyalty'],NpcGreed:['贪婪','greed'],Happiness:['幸福','happiness'],Fate:['命运','fate'],Flag:['世界标记','world flag'],Year:['年份','year'],DayOfYear:['年内天数','day of year'],Hour:['小时','hour'],Minute:['分钟','minute'],TotalDays:['累计天数','elapsed days'],Season:['季节','season'],Disease:['疾病','disease'],QuestState:['任务状态','quest state'],HasSpouse:['婚姻','has spouse'],ActivePregnancy:['孕期','active pregnancy'],HasAffair:['婚外关系','has affair'],AffairDiscovered:['关系被发现','affair discovered'],AffairExposed:['关系被揭露','affair exposed'],Relationship:['关系值','relationship']};
     const label=(names[condition.Type] || [condition.Type,condition.Type])[english?1:0];
-    const target=WORLD_CONDITIONS.includes(condition.Type)?'':condition.Target === 'SpecificId'?(english?'character #':'角色 #')+condition.CharacterId+' ':condition.Target === 'Player'?(english?'player ':'玩家 '):(english?'actor ':'事件角色 ');
+    const targetNames={Actor:['事件角色','actor'],Player:['玩家','player'],Spouse:['伴侣','spouse'],Lover:['情人','lover'],Mother:['母亲','mother'],Father:['父亲','father']};
+    const describeTarget=(name,id)=>name === 'SpecificId' ? (english?'character #':'角色 #')+id : (targetNames[name || 'Actor'] || [name,name])[english?1:0];
+    const target=WORLD_CONDITIONS.includes(condition.Type)?'':describeTarget(condition.Target,condition.CharacterId)+' ';
     const ops={GreaterEqual:'≥',Greater:'>',LessEqual:'≤',Less:'<',Equal:'='};
-    const value=condition.Type === 'Season'?condition.Season:condition.Type === 'QuestState'?condition.Param+' = '+condition.QuestState:condition.Type === 'Flag'||condition.Type === 'HasTag'||condition.Type === 'Disease'?condition.Param:((condition.Param?condition.Param+' ':'')+(ops[condition.Op] || '≥')+' '+condition.Threshold);
+    const value=condition.Type === 'Relationship' ? (english?'with ':'与 ')+describeTarget(condition.RelationshipTarget || 'Spouse',condition.RelationshipCharacterId)+' '+(ops[condition.Op] || '≥')+' '+condition.Threshold : condition.Type === 'Season'?condition.Season:condition.Type === 'QuestState'?condition.Param+' = '+condition.QuestState:condition.Type === 'Flag'||condition.Type === 'HasTag'||condition.Type === 'Disease'?condition.Param:((condition.Param?condition.Param+' ':'')+(ops[condition.Op] || '≥')+' '+condition.Threshold);
     return (condition.Negate?(english?'not: ':'取反：'):'')+target+label+' '+value;
   }
-  function describeTrigger(entry,language='zh-CN') {
+  function describeTrigger(entry,language='zh-CN',type=null) {
+    if (['Dialogues','Items'].includes(type)) return protocols().describeTrigger(entry,type,language);
     const english=language === 'en', phase=entry.TriggerPhase || 'Daily';
     const names={Daily:['每日候选','daily candidate'],WorldStart:['新世界创建','new world'],PlayerStart:['新玩家创建','new player'],Manual:['显式调用/排期','explicit call/schedule']};
     return (names[phase] || [phase,phase])[english?1:0]+(entry.TriggerConditions?.length?(english?'; requires: ':'；需满足：')+entry.TriggerConditions.map(condition=>describeCondition(condition,language)).join(english?' and ':' 且 '):'');
   }
-  function describeEffects(entry, language = 'zh-CN') {
+  function describeEffects(entry, language = 'zh-CN',type=null) {
+    if (['Dialogues','Items'].includes(type) || entry.UseEffects || entry.Conversations || entry.Lines || entry.Profiles) return protocols().describeEffects(entry,type || (entry.UseEffects?'Items':'Dialogues'),language);
     const english=language === 'en', summaries=[];
     const parameter=(effect,key) => effect.Parameters?.[key] ?? profile?.effects[effect.Type]?.parameters?.[key]?.default;
     function targetText(effect) {
@@ -430,25 +512,31 @@
     const prefix=english?'Effects: ':'效果：';
     return summaries.length ? prefix+summaries.slice(0,12).join('；')+(summaries.length > 12 ? ' … ('+summaries.length+')' : '') : (english?'No executable effect configured':'未配置可执行子效果');
   }
-  function getValidationWarnings(data, type, language = 'zh-CN') {
-    const checked=validate(data,type), english=language === 'en', warnings=new Set();
-    if (NAME_TYPES.includes(type)) return [];
+  function getValidationWarnings(data, type, language = 'zh-CN',resources=null) {
+    if (['Dialogues','Items'].includes(type)) return protocols().getValidationWarnings(data,type,api,language,resources);
+    const checked=validate(data,type,resources), english=language === 'en', warnings=new Set();
+    if (NAME_TYPES.includes(type)) return data.Items.some(item=>item === null || typeof item === 'string' && !item.trim()) || checked.Items.length !== data.Items.length ? [english?'Blank, null and duplicate names are ignored, as in the game.':'空白、null 和重复名字会按游戏规则忽略。'] : [];
     if (['Quests','SpecialNPCs'].includes(type)) warnings.add(english?'This library currently loads as narrative data; the game has no external gameplay execution entry point.':'此类库当前仅加载内容数据，游戏尚无外部玩法执行入口。');
     for (const entry of checked.Entries) {
       if (entry.LinkedEventIds.length) warnings.add(english?'Linked event IDs require selecting the corresponding event library in the game.':'关联事件编号需要在游戏中同时选择对应事件库。');
       if (entry.Target?.ActorId || entry.Target?.PlayerId || entry.Target?.SettlementId) warnings.add(english?'Fixed character IDs or settlement names are tied to a particular world.':'固定角色编号或聚落名称依赖特定世界，分享后需要重新绑定。');
       if (entry.TriggerPhase === 'Manual') warnings.add(english?'Manual events need an explicit event call, a schedule or a linked trigger; they do not enter the daily random pool.':'Manual 事件需要显式调用、排期或关联触发，不会进入每日随机池。');
+      if (type === 'Events' && entry.Weight === 0) warnings.add(english?'Weight 0 is not a disable switch: runtime priority is at least 1.':'Weight=0 不会停用事件，运行时优先级仍至少为1。');
+      if (type === 'Festivals' && !entry.LinkedEventIds.length) warnings.add(english?'This festival has no linked event: it can mark a holiday but has no linked executable consequences.':'这个节日没有关联事件，可以标记节期，但尚未关联可执行后果。');
       const localIds=new Set(checked.Entries.map(value=>value.Id || 'content_'+value.Name));
       const startupPlayer=entry.TriggerPhase === 'PlayerStart';
+      const selectedActor=entry.Target?.Selection && entry.Target.Selection !== 'Existing';
+      if (selectedActor && !entry.Target?.SettlementId && !entry.Target?.RandomSettlement) warnings.add(english?'Actor selection needs a settlement from the caller context, or Target.RandomSettlement.':'筛选事件角色需要调用方城市上下文，或设置 Target.RandomSettlement。');
       function warnConditions(conditions,hasActor,hasPlayer) {
         for (const condition of conditions || []) {
           const needed=getConditionRequirements(condition);
           if (needed.requiresBinding) warnings.add(english?'Some conditions refer to fixed characters or quests; verify those bindings in the target game world.':'部分条件引用固定角色或任务，需要在目标游戏世界核对绑定。');
           if (needed.requiresActor && !hasActor || needed.requiresPlayer && !hasPlayer) warnings.add(english?'Some conditions require an actor/player supplied before the event or branch is evaluated.':'部分条件需要在事件或分支判断前提供实际角色或玩家上下文。');
-          if (needed.resource && profile?.resourcesComplete?.[needed.resource] !== true) warnings.add(english?'The '+needed.resource+' resource catalog is incomplete; condition references need verification in the game.':needed.resource+' 资源目录不完整，条件引用还需要游戏确认。');
+          if (entry.Target?.Selection !== 'AffairInSettlement' && (needed.requiresSpouse && !entry.Target?.BindSpouse || needed.requiresLover && !entry.Target?.BindLover)) warnings.add(english?'Family/relationship conditions need the matching spouse/lover in the event context; consider BindSpouse/BindLover and a matching actor selection.':'家属或关系条件需要事件上下文绑定相应伴侣或情人，请核对 BindSpouse/BindLover 与角色筛选。');
+          if (needed.resource && profile?.resourcesComplete?.[needed.resource] !== true && !(resources?.[needed.resource] || []).includes(condition.Param)) warnings.add(english?'The '+needed.resource+' resource catalog is incomplete; condition references need verification in the game.':needed.resource+' 资源目录不完整，条件引用还需要游戏确认。');
         }
       }
-      warnConditions(entry.TriggerConditions,!!entry.Target?.ActorId || startupPlayer,!!entry.Target?.PlayerId || startupPlayer);
+      warnConditions(entry.TriggerConditions,!!entry.Target?.ActorId || startupPlayer || selectedActor,!!entry.Target?.PlayerId || startupPlayer);
     walkEffects(entry,(effect,ancestors,option) => {
         const spec=profile?.effects[effect.Type];if (!spec) return;
         if (spec.status === 'logOnly') warnings.add(english?effect.Type+' currently only writes a game log; it does not display a UI or spawn an object.':effect.Type+' 当前仅输出游戏日志，尚未实现显示界面或生成物体。');
@@ -466,13 +554,16 @@
           if (param('Mode') === 'ContextSettlement' && !entry.Target?.SettlementId && !entry.Target?.RandomSettlement && entry.TriggerPhase !== 'PlayerStart') warnings.add(english?'The birthplace effect needs a settlement from the runtime context, or Target.RandomSettlement.':'出生地效果需要运行时城市上下文或 Target.RandomSettlement。');
         }
         const requirements=getEffectContextRequirements(effect), interactive=option && option.AutoExecute === false;
-        const boundActor=!!entry.Target?.ActorId || startupPlayer || interactive || ancestors.some(parent=>['AllInSettlement','RandomInSettlement','SpecificId','ByTag','Player'].includes(parent.effect.Parameters?.TargetMode ?? profile?.effects[parent.effect.Type]?.parameters?.TargetMode?.default));
+        const boundActor=!!entry.Target?.ActorId || startupPlayer || selectedActor || interactive || ancestors.some(parent=>['AllInSettlement','RandomInSettlement','SpecificId','ByTag','Player'].includes(parent.effect.Parameters?.TargetMode ?? profile?.effects[parent.effect.Type]?.parameters?.TargetMode?.default));
         const boundPlayer=!!entry.Target?.PlayerId || startupPlayer || interactive;
         if ((requirements.requiresActor && !boundActor) || (requirements.requiresPlayer && !boundPlayer)) warnings.add(english?'Some effects require an actor/player supplied by the runtime event context.':'部分效果需要运行时事件上下文提供实际角色或玩家。');
+        if (spec.targetCharacterKinds?.length && (param('CharacterKind') !== 'Any' && !spec.targetCharacterKinds.includes(param('CharacterKind')) || mode === 'Player' && !spec.targetCharacterKinds.includes('Player'))) warnings.add(english?effect.Type+' only supports '+spec.targetCharacterKinds.join('/')+' targets.':effect.Type+' 只支持 '+spec.targetCharacterKinds.join('/')+' 类型目标，请核对 CharacterKind 与 TargetMode。');
+        if (entry.Target?.Selection !== 'AffairInSettlement' && (requirements.requiresSpouse && !entry.Target?.BindSpouse || requirements.requiresLover && !entry.Target?.BindLover || requirements.requiresPartner && !entry.Target?.BindSpouse && !entry.Target?.BindLover)) warnings.add(english?'Spouse/Lover effects need the matching family binding from event context.':'Spouse/Lover 效果需要事件上下文绑定实际伴侣或情人，请核对 BindSpouse/BindLover。');
+        for (const field of spec.inactiveParameters || []) if (Object.hasOwn(effect.Parameters || {},field) && param(field) !== spec.parameters?.[field]?.default) warnings.add(english?effect.Type+'.'+field+' is inactive for this effect and does not apply Buff stacking/expiry.':effect.Type+'.'+field+' 对此效果不生效，不能据此实现 Buff 叠加或到期。');
         warnConditions(param('Conditions'),boundActor || ['AllInSettlement','RandomInSettlement','SpecificId','ByTag','Player'].includes(mode),boundPlayer);
         if (effect.Type === 'SetTimeEffect') warnings.add(english?'Setting time only succeeds for a forward date/time within 1000 days; crossed days still run daily settlement.':'设置时间仅允许向前且最多跨越 1000 天，跨过的每一天仍进行每日结算。');
         if (effectRequiresCharacter(effect) && !spec.supportsStoredNpc && ['AllInSettlement','RandomInSettlement'].includes(mode) && param('CharacterKind') !== 'Player') warnings.add(english?'Some group effects require active characters and do not support stored/off-scene NPCs.':'部分群体效果要求已加载角色，不支持离场 NPC 数据。');
-        for (const ref of getEffectResourceReferences(effect)) if (ref.value && profile.resourcesComplete?.[ref.resource] !== true) warnings.add(english?'The '+ref.resource+' resource catalog is incomplete; the game must verify this reference at import/runtime.':ref.resource+' 资源目录不完整，此引用还需游戏导入或运行时确认。');
+        for (const ref of getEffectResourceReferences(effect)) if (ref.value && profile.resourcesComplete?.[ref.resource] !== true && !(resources?.[ref.resource] || []).includes(ref.value)) warnings.add(english?'The '+ref.resource+' resource catalog is incomplete; the game must verify this reference at import/runtime.':ref.resource+' 资源目录不完整，此引用还需游戏导入或运行时确认。');
       });
     }
     return Array.from(warnings).slice(0,20);
@@ -528,10 +619,25 @@
     const spec=profile?.effects[effect.Type];if (!spec) return {requiresActor:false,requiresPlayer:false};
     const parameter=(key) => effect.Parameters?.[key] ?? spec.parameters?.[key]?.default;
     const mode=parameter('TargetMode');
-    const requirements={requiresActor:mode === 'Self' && effectRequiresCharacter(effect),requiresPlayer:mode === 'Player'};
+    const requirements={requiresActor:['Self','Spouse','Lover','Mother','Father'].includes(mode) && effectRequiresCharacter(effect),requiresPlayer:mode === 'Player'};
+    // World effects executing once ignore TargetMode; other effects and containers
+    // resolve family roles before their children run.
+    function requireRole(role) {
+      if (role === 'Spouse') requirements.requiresSpouse=true;
+      if (role === 'Lover') requirements.requiresLover=true;
+    }
+    if (!(spec.executesOnce && !effectRequiresCharacter(effect))) requireRole(mode);
+    if (effect.Type === 'ModifyRelationshipEffect') requireRole(parameter('RelationshipTarget'));
+    if (effect.Type === 'DiscoverAffairEffect') {
+      if (parameter('Discoverer') === 'Lover') requirements.requiresLover=true;
+      if (parameter('Discoverer') === 'Player') requirements.requiresPlayer=true;
+      // Spouse may also come from the affair record, even without a context role.
+    }
     for (const rule of spec.contextRules || []) if (Object.entries(rule.when || {}).every(([key,value]) => parameter(key) === value)) {
       requirements.requiresActor ||= rule.requiresActor === true;
       requirements.requiresPlayer ||= rule.requiresPlayer === true;
+      if (effect.Type === 'MarryEffect' && rule.requiresRole === 'Spouse') requirements.requiresPartner=true;
+      else requireRole(rule.requiresRole);
     }
     return requirements;
   }
@@ -545,8 +651,8 @@
     const anchor = document.createElement('a');anchor.href=url;anchor.download=fileName(name);document.body.append(anchor);anchor.click();anchor.remove();setTimeout(() => URL.revokeObjectURL(url),1000);
   }
   function status(element, message, kind = 'success') {element.textContent=message;element.dataset.kind=kind;element.hidden=false;}
-  function count(data) {return (data.Items || data.Entries).length;}
-  const api = {TYPES,NAME_TYPES,MAX_FILE_BYTES,GAME_PATH,configureProfile,getProfile,parseJSON,parseAI,validate,buildGenerationPrompt,describeEffects,describeTrigger,describeCondition,getValidationWarnings,getEffectBindings,effectRequiresCharacter,getEffectContextRequirements,getConditionRequirements,effectSupportsDuration,getEffectResourceReferences,fileName,download,status,count};
+  function count(data,type=null) {if (['Dialogues','Items'].includes(type) || data.Lines || data.Conversations || data.Profiles) return protocols().count(data,type || 'Dialogues');return (data.Items || data.Entries || []).length;}
+  const api = {TYPES,NAME_TYPES,MAX_FILE_BYTES,GAME_PATH,configureProfile,getProfile,getKnownResourceValues,hasKnownResource,parseJSON,parseAI,validate,validateMetadata,validateEffects,validateOptionCondition:condition,getGenerationCatalog,buildGenerationPrompt,describeEffects,describeTrigger,describeCondition,getValidationWarnings,getEffectBindings,effectRequiresCharacter,getEffectContextRequirements,getConditionRequirements,effectSupportsDuration,getEffectResourceReferences,fileName,download,status,count};
   if (typeof module !== 'undefined' && module.exports) module.exports=api;
   root.GLAssets=api;
 })(typeof window !== 'undefined' ? window : globalThis);

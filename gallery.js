@@ -5,7 +5,8 @@ const $=id=>document.getElementById(id);
 const t=(zh,en)=>window.GLI18n?.language==='en'?en:zh;
 const REPO='sundaniu31/grandpasland';
 const API='https://api.github.com/repos/'+REPO;
-const typeByLower=Object.fromEntries(Object.keys(A.TYPES).map(type=>[type.toLowerCase(),type]));
+const GALLERY_TYPES={...A.TYPES,ModPack:'模组内容包'};
+const typeByLower=Object.fromEntries(Object.keys(GALLERY_TYPES).map(type=>[type.toLowerCase(),type]));
 let works=[];
 let selectedTag='';
 let partial=false;
@@ -22,7 +23,7 @@ function workOf(issue) {
   const type=typeOf(meta.type)||labels.map(typeOf).find(Boolean)||typeOf(bodyType?.[1]);
   // Match a complete Markdown fence; backticks inside JSON text are ordinary content.
   const blocks=[...body.matchAll(/^(`{3,}|~{3,})json[^\S\r\n]*\r?\n([\s\S]*?)^\1[^\S\r\n]*$/gim)];
-  let data=null,error='',json='';
+  let data=null,error='',json='',packageUrl='';
   if(blocks.length){json=blocks[0][2].trim();}
   else {
     const raw=body.replace(/^\s*<!--[\s\S]*?-->/,'').trim();
@@ -30,17 +31,25 @@ function workOf(issue) {
     else {const start=raw.indexOf('{'),end=raw.lastIndexOf('}');if(start>=0&&end>start)json=raw.slice(start,end+1);}
   }
   if(!type)return null;
-  if(json){try{
+  const zipped=meta.format==='zip';
+  if(zipped){try{
+    if(meta.version!==2||!['Items','ModPack'].includes(type))throw new Error(t('ZIP 分享元信息不兼容，请用新版广场表单重新生成分享正文。','ZIP sharing metadata is incompatible. Regenerate the post with the current gallery form.'));
+    if(meta.schemaVersion!==1||meta.profileId!=='crownfall1-v1')throw new Error(t('这份内容包使用其他版本的游戏协议，请核对原帖。','This package advertises a different game protocol. Check the original post.'));
+    packageUrl=C.validatePackageUrl(meta.packageUrl);
+  }catch(e){error=e.message;}}
+  else if(json){try{
+    if(type==='ModPack')throw new Error(t('模组内容包需要保留分类目录的完整 ZIP 附件。','Mod packs need a complete ZIP attachment preserving category directories.'));
     if(C.requiresProfile(type)&&!A.getProfile())throw new Error(profileError||t('游戏兼容目录未加载，请重新加载广场。','Game compatibility profile is not loaded. Reload the gallery.'));
     const profile=A.getProfile();
-    if(C.requiresProfile(type)&&((meta.schemaVersion!==undefined&&meta.schemaVersion!==profile.schemaVersion)||(meta.profileId&&meta.profileId!==profile.profileId)))throw new Error(t('这份作品使用其他版本的游戏协议，当前版本不能导入。','This creation uses a different game protocol and cannot be imported by this version.'));
+    if((meta.schemaVersion!==undefined&&meta.schemaVersion!==(profile?.schemaVersion||1))||(meta.profileId&&meta.profileId!==(profile?.profileId||'crownfall1-v1')))throw new Error(t('这份作品使用其他版本的游戏协议，当前版本不能导入。','This creation uses a different game protocol and cannot be imported by this version.'));
     data=A.validate(A.parseJSON(json),type);
+    if(type==='Items')error=t('这份分享仅有物品 JSON，没有实际 PNG 图标；请让作者补充完整 ZIP 包链接。','This post contains item JSON without actual PNG icons. Ask the author to add a complete ZIP package link.');
   }catch(e){error=e.message;}}
   else error='这份分享尚未附上可读取的 JSON，请到原帖查看。';
   const tagLine=body.match(/(?:^|\n)\s*标签\s*[：:]\s*([^\n]+)/);
   const tags=cleanTags([...(Array.isArray(meta.tags)?meta.tags:[]),...(tagLine?tagLine[1].split(/[,，]/):[]),...labels.filter(label=>!typeOf(label))]);
   const description=body.replace(/<!--[\s\S]*?-->/g,'').replace(/^(`{3,}|~{3,})[^\r\n]*\r?\n[\s\S]*?^\1[^\S\r\n]*$/gm,'').split('\n').filter(line=>line.trim()&&!/^\s*(类型|标签|JSON|资产内容)\s*[：:]/i.test(line)).map(line=>line.replace(/^\s*介绍\s*[：:]\s*/,'')).join('\n').trim().slice(0,2000);
-  return {number:issue.number,title:String(issue.title||'未命名作品').replace(/^【分享】\s*/,''),type,tags,data,error,description:description||'作者还没有填写作品介绍。',author:String(issue.user?.login||'玩家'),date:issue.created_at,comments:Number(issue.comments)||0,url:'https://github.com/'+REPO+'/issues/'+issue.number};
+  return {number:issue.number,title:String(issue.title||'未命名作品').replace(/^【分享】\s*/,''),type,tags,data,error,packageUrl,format:zipped?'zip':'json',downloadable:!error&&(!!packageUrl||!!data),description:description||'作者还没有填写作品介绍。',author:String(issue.user?.login||'玩家'),date:issue.created_at,comments:Number(issue.comments)||0,url:'https://github.com/'+REPO+'/issues/'+issue.number};
 }
 function element(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
 function content(tag,cls,text){const el=element(tag,cls,text);el.setAttribute('data-i18n-ignore','');return el;}
@@ -86,7 +95,7 @@ function render() {
   $('list').className='asset-grid';
   items.forEach(work=>{
     const card=element('article','asset-card glass');
-    const tags=element('div','asset-tags');tags.append(badge(A.TYPES[work.type]));work.tags.forEach(tag=>tags.append(badge(tag,true)));card.append(tags,content('h3','',work.title),content('p','',work.description.slice(0,120)));
+    const tags=element('div','asset-tags');tags.append(badge(GALLERY_TYPES[work.type]));if(work.format==='zip')tags.append(badge('ZIP'));work.tags.forEach(tag=>tags.append(badge(tag,true)));card.append(tags,content('h3','',work.title),content('p','',work.description.slice(0,120)));
     const meta=element('div','meta');meta.append(content('span','',work.author+' · '+dateOf(work.date)),element('span','',work.comments+' 条评论'));card.append(meta);
     const button=element('button','btn btn-small','查看作品 ↗');button.addEventListener('click',()=>openDetail(work));card.append(button);$('list').append(card);
   });
@@ -94,17 +103,21 @@ function render() {
   if(issueParam&&!$('detailDialog').open){const work=works.find(w=>w.number===issueParam);if(work)openDetail(work);}
 }
 function dateOf(value){const date=new Date(value);return Number.isNaN(date.getTime())?'未知日期':date.toLocaleDateString(window.GLI18n?.language||'zh-CN');}
+function warningsFor(work){return work.packageUrl?t('远端 ZIP 未经网站实物校验。下载后保留 JSON + PNG/分类目录，解压并通过游戏导入或启用校验再使用。','The remote ZIP has not been inspected by the website. Preserve JSON + PNG/category directories, extract it and pass game import/activation checks before use.'):work.data?A.getValidationWarnings(work.data,work.type,window.GLI18n?.language).join('\n'):'';}
 async function openDetail(work) {
   commentRequest?.abort();commentRequest=new AbortController();const controller=commentRequest;
-  $('detailTitle').textContent=work.title;$('detailTags').replaceChildren(badge(A.TYPES[work.type]),...work.tags.map(tag=>badge(tag,true)));$('detailMeta').textContent=work.author+' · '+dateOf(work.date);$('detailDescription').textContent=work.description;
+  $('detailTitle').textContent=work.title;$('detailTags').replaceChildren(badge(GALLERY_TYPES[work.type]),...work.tags.map(tag=>badge(tag,true)));$('detailMeta').textContent=work.author+' · '+dateOf(work.date);$('detailDescription').textContent=work.description;
   $('detailSource').href=work.url;$('commentLink').href=work.url+'#issuecomment-new';
   $('detailSupport').textContent=C.supportMessage(work.type);
   $('detailEffects').textContent=C.summary(work.data,work.type);
-  $('detailWarnings').textContent=work.data?A.getValidationWarnings(work.data,work.type,window.GLI18n?.language).join('\n'):'';
+  $('detailWarnings').textContent=warningsFor(work);
   $('detailWarnings').hidden=!$('detailWarnings').textContent;
-  $('detailCode').hidden=!work.data;$('detailStatus').hidden=true;$('detailDownload').disabled=!work.data;
-  if(work.data)$('detailCode').textContent=JSON.stringify(work.data,null,2);else A.status($('detailStatus'),work.error,'error');
-  $('detailDownload').onclick=async()=>{try{await C.ensureProfile(work.type);A.download(A.validate(work.data,work.type),work.title);}catch(error){A.status($('detailStatus'),error.message,'error');}};
+  $('detailCode').hidden=!work.data;$('detailStatus').hidden=true;$('detailDownload').disabled=!work.downloadable;$('detailDownload').hidden=!!work.packageUrl;
+  $('detailPackageDownload').hidden=!work.packageUrl;$('detailPackageDownload').removeAttribute?.('href');
+  if(work.packageUrl)$('detailPackageDownload').href=C.validatePackageUrl(work.packageUrl);
+  if(work.data)$('detailCode').textContent=JSON.stringify(work.data,null,2);
+  if(work.error)A.status($('detailStatus'),work.error,'error');
+  $('detailDownload').onclick=async()=>{try{if(!work.downloadable||work.type==='Items'||work.type==='ModPack')throw new Error(work.error||t('请下载作者提供的完整 ZIP 内容包。','Download the author\'s complete ZIP package.'));await C.ensureProfile(work.type);A.download(A.validate(work.data,work.type),work.title);}catch(error){A.status($('detailStatus'),error.message,'error');}};
   $('comments').textContent='正在读取评论…';if(!$('detailDialog').open)$('detailDialog').showModal();
   const address=new URL(location.href);address.searchParams.set('asset',work.number);address.searchParams.delete('share');history.replaceState(null,'',address);
   const timer=setTimeout(()=>controller.abort(),15000);
@@ -119,27 +132,43 @@ async function openDetail(work) {
     if(response.headers.get('Link')?.includes('rel="next"'))$('comments').append(element('p','tip','这里展示前 100 条评论，完整讨论请打开原帖。'));
   } catch(error) {if(commentRequest===controller)$('comments').textContent=controller.signal.aborted?'评论读取已停止，可到原帖查看。':(error instanceof TypeError?'评论暂时无法读取，请到原帖查看。':error.message);}finally{clearTimeout(timer);}
 }
-function openShare() {$('shareStatus').hidden=true;$('shareDialog').showModal();}
+function updateShareFields(){
+  const zip=$('shareMode').value==='zip';
+  $('shareJsonFields').hidden=zip;$('shareZipFields').hidden=!zip;
+  $('shareFile').required=!zip;$('sharePackageUrl').required=zip;
+  $('shareType').querySelectorAll('option').forEach(option=>{option.disabled=zip?!['Items','ModPack'].includes(option.value):['Items','ModPack'].includes(option.value);});
+  if(zip&&!['Items','ModPack'].includes($('shareType').value))$('shareType').value='ModPack';
+  if(!zip&&['Items','ModPack'].includes($('shareType').value))$('shareType').value='CityNames';
+}
+function openShare() {$('shareStatus').hidden=true;if(['Items','ModPack'].includes($('shareType').value))$('shareMode').value='zip';updateShareFields();$('shareDialog').showModal();}
 $('shareBtn').addEventListener('click',openShare);
 document.querySelectorAll('[data-close]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog').close()));
 $('detailDialog').addEventListener('close',()=>{commentRequest?.abort();const address=new URL(location.href);address.searchParams.delete('asset');history.replaceState(null,'',address);});
 ['search','filter','timeFilter','sort'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));
 let draftArea=null;
 $('shareForm').addEventListener('input',()=>{if(draftArea){draftArea.remove();draftArea=null;}$('shareStatus').hidden=true;});
+$('shareMode').addEventListener('change',updateShareFields);
 $('shareForm').addEventListener('submit',async event=>{
   event.preventDefault();
   const button=$('publishBtn');button.disabled=true;
   try {
-    const file=$('shareFile').files[0];if(!file)throw new Error('请选择 .json 文件');
-    if(!/\.json$/i.test(file.name))throw new Error('请选择 .json 文件');if(file.size>A.MAX_FILE_BYTES)throw new Error('文件超过 1 MB');
     const type=$('shareType').value,name=$('shareName').value.trim(),description=$('shareDescription').value.trim();
     if(!name||!description)throw new Error('请填写作品名称和介绍');
     await C.ensureProfile(type);
     const rawTags=$('shareTags').value.split(/[,，]/).map(tag=>tag.trim()).filter(Boolean);const tags=cleanTags(rawTags);
     if(rawTags.length>5||tags.length!==new Set(rawTags).size)throw new Error('请使用最多 5 个标签，每个标签不超过 24 字，不能含尖括号');
-    const text=await file.text();if(/(?:ghp_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,}|"(?:apiKey|api_key|Authorization)"\s*:)/i.test(text+'\n'+description))throw new Error('内容可能含有密钥，请删除后再分享');
-    const data=A.validate(A.parseJSON(text),type);
-    const body=C.issueBody({type,tags,description},data);
+    let body;
+    if($('shareMode').value==='zip'){
+      const packageUrl=C.validatePackageUrl($('sharePackageUrl').value);
+      if(/(?:ghp_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,}|"(?:apiKey|api_key|Authorization)"\s*:)/i.test(description+'\n'+packageUrl))throw new Error('内容可能含有密钥，请删除后再分享');
+      body=C.packageIssueBody({type,tags,description,packageUrl});
+    }else{
+      const file=$('shareFile').files[0];if(!file)throw new Error('请选择 .json 文件');
+      if(!/\.json$/i.test(file.name))throw new Error('请选择 .json 文件');if(file.size>A.MAX_FILE_BYTES)throw new Error('文件超过 10 MiB');
+      const text=await file.text();if(/(?:ghp_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,}|"(?:apiKey|api_key|Authorization)"\s*:)/i.test(text+'\n'+description))throw new Error('内容可能含有密钥，请删除后再分享');
+      const data=A.validate(A.parseJSON(text),type);
+      body=C.issueBody({type,tags,description},data);
+    }
     const url=new URL('https://github.com/'+REPO+'/issues/new');url.searchParams.set('title','【分享】'+name);url.searchParams.set('body',body);
     if(draftArea){draftArea.remove();draftArea=null;}
     if(url.href.length>7000){
@@ -150,6 +179,7 @@ $('shareForm').addEventListener('submit',async event=>{
   }catch(error){A.status($('shareStatus'),error.message,'error');}finally{button.disabled=false;}
 });
 const params=new URLSearchParams(location.search);
+updateShareFields();
 if(params.get('share')==='1') {const type=typeOf(params.get('type'));if(type)$('shareType').value=type;$('shareName').value=(params.get('name')||'').slice(0,80);openShare();}
-window.addEventListener('gl-languagechange',()=>{renderTags();render();const current=works.find(work=>work.number===Number(new URLSearchParams(location.search).get('asset')));if(current&&$('detailDialog').open){$('detailMeta').textContent=current.author+' · '+dateOf(current.date);$('detailSupport').textContent=C.supportMessage(current.type);$('detailEffects').textContent=C.summary(current.data,current.type);$('detailWarnings').textContent=current.data?A.getValidationWarnings(current.data,current.type,window.GLI18n?.language).join('\n'):'';}});
+window.addEventListener('gl-languagechange',()=>{renderTags();render();const current=works.find(work=>work.number===Number(new URLSearchParams(location.search).get('asset')));if(current&&$('detailDialog').open){$('detailMeta').textContent=current.author+' · '+dateOf(current.date);$('detailSupport').textContent=C.supportMessage(current.type);$('detailEffects').textContent=C.summary(current.data,current.type);$('detailWarnings').textContent=warningsFor(current);}});
 load();

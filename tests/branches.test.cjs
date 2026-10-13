@@ -78,7 +78,7 @@ test('time parameters reject unsupported ranges before download while forward-wo
 });
 
 test('manual condition and network-prefab dependencies stay visible without dropping author fields',()=>{
-  const manual=file({TriggerPhase:'Manual',TriggerConditions:[{Type:'Health',Target:'SpecificId',CharacterId:99}],TriggerConsequences:[effect('SpawnInteractableEffect',{TargetHex:{x:1,y:2}})]});
+  const manual=file({TriggerPhase:'Manual',TriggerConditions:[{Type:'Health',Target:'SpecificId',CharacterId:99}],TriggerConsequences:[effect('SpawnInteractableEffect',{ObjectId:'fixture.interactable',TriggerEventId:'fixture.interact',TargetHex:{x:1,y:2}})]});
   assert.equal(A.validate(manual,'Events').Entries[0].TriggerConditions[0].CharacterId,99);
   const warnings=A.getValidationWarnings(manual,'Events');
   assert.ok(warnings.some(text=>text.includes('固定角色')));assert.ok(warnings.some(text=>text.includes('联机预制体')));assert.ok(warnings.some(text=>text.includes('不会进入每日')));

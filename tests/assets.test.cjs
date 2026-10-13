@@ -4,7 +4,7 @@ const A=require('../assets.js');
 const profile=require('../content-profile.json');
 A.configureProfile(profile);
 test('edited name libraries retain current contents',()=>assert.deepEqual(A.validate({Items:['修改后的名称','青石镇']},'CityNames').Items,['修改后的名称','青石镇']));
-test('names must be unique nonempty text',()=>{for(const Items of [['重复','重复'],[''],[null],[1]])assert.throws(()=>A.validate({Items},'CityNames'));});
+test('legacy name pools normalize blanks and duplicates exactly as game imports',()=>{assert.deepEqual(A.validate({Items:[' 重复 ','重复',null,'','青石镇']},'CityNames').Items,['重复','青石镇']);for(const Items of [[''],[null],[1]])assert.throws(()=>A.validate({Items},'CityNames'));assert.match(A.getValidationWarnings({Items:['重复','重复']},'CityNames')[0],/忽略/);});
 test('Items and Entries cannot be mixed',()=>assert.throws(()=>A.validate({Items:['名字'],Entries:[]},'NPCNames')));
 test('top-level arrays are rejected',()=>assert.throws(()=>A.validate(['名字'],'CityNames')));
 test('content defaults match game DTO fields',()=>{const entry=A.validate({Entries:[{Name:'花会',Description:'故事'}]},'Festivals').Entries[0];assert.equal(entry.Weight,10);assert.equal(entry.CooldownDays,0);assert.equal(entry.RuleDayInYear,1);assert.equal(entry.RulePeriodDays,15);assert.deepEqual(entry.LinkedEventIds,[]);});

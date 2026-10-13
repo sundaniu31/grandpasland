@@ -22,15 +22,18 @@ class Element{
 function page(script,fetcher){
   const elements=new Map();
   const element=id=>{if(!elements.has(id))elements.set(id,new Element(id));return elements.get(id);};
-  const values={libType:'Events',libName:'瘟疫测试',apiUrl:'https://provider.example/chat/completions',apiModel:'test-model',apiKey:'test-key',contentDesc:'某座城市发生瘟疫，感染三名 NPC，药材需求上涨',entryCount:'1',weight:'20',cooldown:'30',ruleType:'ByDayInYear',ruleSeason:'Spring',ruleDay:'2',rulePeriod:'15',ruleDuration:'1',nameCount:'5',nameDesc:'简短城名',shareType:'Events',shareName:'瘟疫测试',shareDescription:'测试组合效果',shareTags:'事件,瘟疫'};
+  const values={libType:'Events',libName:'瘟疫测试',apiUrl:'https://provider.example/chat/completions',apiModel:'test-model',apiKey:'test-key',contentDesc:'某座城市发生瘟疫，感染三名 NPC，药材需求上涨',entryCount:'1',weight:'20',cooldown:'30',ruleType:'ByDayInYear',ruleSeason:'Spring',ruleDay:'2',rulePeriod:'15',ruleDuration:'1',nameCount:'5',nameDesc:'简短城名',dialogueKind:'Conversations',dialogueScene:'ambient',modName:'TestMod',shareType:'Events',shareName:'瘟疫测试',shareDescription:'测试组合效果',shareTags:'事件,瘟疫',shareFormat:'json'};
   Object.entries(values).forEach(([id,value])=>element(id).value=value);
-  const context={URL,URLSearchParams,AbortController,TextEncoder,setTimeout,clearTimeout,Blob,fetch:fetcher,document:{getElementById:element,querySelectorAll:()=>[],createElement:()=>new Element(),body:new Element()},localStorage:{getItem:()=>null,setItem(){},removeItem(){}},location:{search:'',href:'https://site.example/'+script.replace('.js','.html')},history:{replaceState(){}},GLI18n:{language:'zh-CN'},addEventListener(){}};
+  const context={URL,URLSearchParams,AbortController,TextEncoder,Uint8Array,ArrayBuffer,DataView,setTimeout,clearTimeout,Blob,createImageBitmap:async()=>({width:1,height:1,close(){}}),fetch:fetcher,document:{getElementById:element,querySelectorAll:()=>[],createElement:()=>new Element(),body:new Element()},localStorage:{getItem:()=>null,setItem(){},removeItem(){}},location:{search:'',href:'https://site.example/'+script.replace('.js','.html')},history:{replaceState(){}},GLI18n:{language:'zh-CN'},addEventListener(){}};
   context.window=context;vm.createContext(context);
+  vm.runInContext(read('library-protocols.js'),context,{filename:'library-protocols.js'});
   vm.runInContext(read('assets.js'),context,{filename:'assets.js'});
+  vm.runInContext(read('package-export.js'),context,{filename:'package-export.js'});
   vm.runInContext(read('content.js'),context,{filename:'content.js'});
   const downloads=[];context.GLAssets.download=(data,name)=>downloads.push({data:plain(data),name});
+  const packageDownloads=[];context.GLPackages.downloadPackage=result=>packageDownloads.push(result);
   vm.runInContext(read(script),context,{filename:script});
-  return {context,element,downloads};
+  return {context,element,downloads,packageDownloads};
 }
 const settle=()=>new Promise(resolve=>setImmediate(resolve));
 const response=data=>({ok:true,status:200,json:async()=>plain(data),headers:{get:()=>null}});
@@ -105,8 +108,8 @@ test('gallery rejects incompatible protocol metadata while still accepting old n
 test('published guide examples validate against the real exported game profile',()=>{
   const A=require('../assets.js');A.configureProfile(JSON.parse(read('content-profile.json')));
   const examples=[...read('docs.html').matchAll(/<pre><code>(\{[\s\S]*?)<\/code><\/pre>/g)].map(match=>JSON.parse(match[1]));
-  assert.equal(examples.length,4);
-  ['CityNames','Quests','Events','Festivals'].forEach((type,index)=>assert.doesNotThrow(()=>A.validate(examples[index],type),type+' guide example'));
+  assert.equal(examples.length,6);
+  ['CityNames','Quests','Events','Festivals','Dialogues','Items'].forEach((type,index)=>assert.doesNotThrow(()=>A.validate(examples[index],type),type+' guide example'));
 });
 async function generateFixture(effects,{changeProfile=()=>{},target={RandomSettlement:true},options=[],triggerPhase='Daily',triggerConditions=[]}={}){
   const config=profile();changeProfile(config);
@@ -119,7 +122,7 @@ test('empty nested containers do not count as executable effects in new AI event
   assert.equal(workshop.element('status').dataset.kind,'error');assert.match(workshop.element('status').textContent,/没有可执行子效果/);
 });
 test('new AI events reject placeholder leaves even when a real leaf is also present',async()=>{
-  const workshop=await generateFixture([{Type:'SetFlagEffect',Parameters:{Flag:'Guard_Test'}},{Type:'SequenceEffect',Children:[{Type:'ShowMessageUIEffect',Parameters:{}}]}],{changeProfile:config=>{config.effects.ShowMessageUIEffect.status='logOnly';}});
+  const workshop=await generateFixture([{Type:'SetFlagEffect',Parameters:{Flag:'Guard_Test'}},{Type:'SequenceEffect',Children:[{Type:'ShowMessageUIEffect',Parameters:{Text:'测试提示'}}]}],{changeProfile:config=>{config.effects.ShowMessageUIEffect.status='logOnly';}});
   assert.equal(workshop.element('status').dataset.kind,'error');assert.match(workshop.element('status').textContent,/尚未实现的效果/);
 });
 test('generation rejects mandatory and conditional world bindings but allows safe context defaults',async()=>{
@@ -208,7 +211,7 @@ test('new player context and nested settlement-selected actors support valid con
   const player=await generateFixture([self],{triggerPhase:'PlayerStart',target:{},triggerConditions:[{Type:'Health',Target:'Player',Threshold:0,Op:'Greater'}]});assert.equal(player.element('status').dataset.kind,'success',player.element('status').textContent);
   const world=await generateFixture([self],{triggerPhase:'WorldStart',target:{}});assert.equal(world.element('status').dataset.kind,'error');
   const nested=await generateFixture([{Type:'ConditionEffect',Parameters:{TargetMode:'RandomInSettlement',CharacterKind:'Npc',Conditions:[{Type:'Health',Threshold:0,Op:'Greater'}]},Children:[{Type:'ModifyHealthEffect',Parameters:{Delta:-1}}]}]);assert.equal(nested.element('status').dataset.kind,'success',nested.element('status').textContent);
-  const unsupported=await generateFixture([{Type:'SequenceEffect',Parameters:{TargetMode:'RandomInSettlement',CharacterKind:'Npc'},Children:[{Type:'ModifyRelationshipEffect',Parameters:{RelationshipTarget:'Player'}}]}],{triggerPhase:'PlayerStart'});assert.equal(unsupported.element('status').dataset.kind,'error');assert.match(unsupported.element('status').textContent,/不支持离场/);
+  const supported=await generateFixture([{Type:'SequenceEffect',Parameters:{TargetMode:'RandomInSettlement',CharacterKind:'Npc'},Children:[{Type:'ModifyRelationshipEffect',Parameters:{RelationshipTarget:'Player'}}]}],{triggerPhase:'PlayerStart'});assert.equal(supported.element('status').dataset.kind,'success',supported.element('status').textContent);
 });
 
 test('generation rejects unavailable condition targets and prefab bindings while preserving manual edit support',async()=>{
@@ -216,7 +219,7 @@ test('generation rejects unavailable condition targets and prefab bindings while
   for(const condition of [{Type:'Health'},{Type:'Health',Target:'SpecificId',CharacterId:123},{Type:'QuestState',Param:'uninstalled'}]){
     const workshop=await generateFixture(base,{triggerConditions:[condition]});assert.equal(workshop.element('status').dataset.kind,'error');
   }
-  const prefab=await generateFixture([{Type:'SpawnInteractableEffect',Parameters:{ObjectId:'unregistered'}}]);assert.equal(prefab.element('status').dataset.kind,'error');assert.match(prefab.element('status').textContent,/联机预制体/);
+  const prefab=await generateFixture([{Type:'SpawnInteractableEffect',Parameters:{ObjectId:'unregistered',TriggerEventId:'missing'}}]);assert.equal(prefab.element('status').dataset.kind,'error');assert.match(prefab.element('status').textContent,/联机预制体/);
   const unknown=await generateFixture([{Type:'TriggerGameEventEffect',Parameters:{EventId:'missing'}}]);assert.equal(unknown.element('status').dataset.kind,'error');assert.match(unknown.element('status').textContent,/手动绑定/);
 });
 
@@ -235,4 +238,130 @@ test('new generated item-price effects need no unused item tag and context-priva
   const world=await generateFixture([privateStory],{triggerPhase:'WorldStart'});assert.equal(world.element('status').dataset.kind,'error');assert.match(world.element('status').textContent,/玩家上下文/);
   const player=await generateFixture([privateStory],{triggerPhase:'PlayerStart',target:{}});assert.equal(player.element('status').dataset.kind,'success',player.element('status').textContent);
   const settlement=await generateFixture([{Type:'SetGoldEffect',Parameters:{Target:'Settlement',Value:25}}]);assert.equal(settlement.element('status').dataset.kind,'success',settlement.element('status').textContent);
+});
+
+test('all 11 library types have offline templates requiring no AI credentials',async()=>{
+  let paidCalls=0;
+  const workshop=page('workshop.js',async url=>{if(url==='content-profile.json')return response(profile());paidCalls++;throw new Error('No paid request allowed');});
+  workshop.element('apiKey').value='';
+  for(const type of Object.keys(workshop.context.GLAssets.TYPES)){
+    workshop.element('libType').value=type;await workshop.element('libType').fire('change');await workshop.element('templateBtn').fire('click');
+    assert.equal(workshop.element('status').dataset.kind,'success',type+': '+workshop.element('status').textContent);
+    const json=JSON.parse(workshop.element('preview').value);
+    assert.doesNotThrow(()=>workshop.context.GLAssets.validate(json,type),type);
+  }
+  assert.equal(paidCalls,0);
+});
+
+test('large name pools make bounded sequential requests and preserve 250 unique names',async()=>{
+  const prompts=[];let index=0;
+  const workshop=page('workshop.js',async(url,options)=>{
+    if(url==='content-profile.json')return response(profile());
+    const body=JSON.parse(options.body),prompt=body.messages[1].content;prompts.push(prompt);
+    const count=Number(prompt.match(/生成 (\d+) 个/)[1]);
+    return response({choices:[{message:{content:JSON.stringify({Items:Array.from({length:count},()=>('城市'+(++index)))})}}]});
+  });
+  workshop.element('libType').value='CountryNames';workshop.element('nameCount').value='250';
+  await workshop.element('generatorForm').fire('submit');
+  assert.equal(workshop.element('status').dataset.kind,'success',workshop.element('status').textContent);
+  assert.equal(prompts.length,2);assert.match(prompts[0],/生成 200 个/);assert.match(prompts[1],/生成 50 个/);assert.match(prompts[1],/不得重复/);
+  await workshop.element('dlBtn').fire('click');assert.equal(workshop.downloads[0].data.Items.length,250);assert.equal(new Set(workshop.downloads[0].data.Items).size,250);
+});
+
+test('duplicate-only name responses stop after a bounded number of paid requests',async()=>{
+  let calls=0;
+  const workshop=page('workshop.js',async url=>{if(url==='content-profile.json')return response(profile());calls++;return response({choices:[{message:{content:'{"Items":["重复名"]}'}}]});});
+  workshop.element('libType').value='CityNames';await workshop.element('generatorForm').fire('submit');
+  assert.equal(calls,4);assert.equal(workshop.element('status').dataset.kind,'error');assert.match(workshop.element('status').textContent,/停止追加付费/);
+  await workshop.element('dlBtn').fire('click');assert.equal(workshop.downloads.length,0);
+});
+
+test('canceling an in-flight batch sends no following paid request',async()=>{
+  let calls=0;
+  const workshop=page('workshop.js',async(url,options)=>{
+    if(url==='content-profile.json')return response(profile());calls++;
+    return new Promise((resolve,reject)=>options.signal.addEventListener('abort',()=>reject(new Error('Canceled')),{once:true}));
+  });
+  workshop.element('libType').value='CityNames';workshop.element('nameCount').value='250';
+  const task=workshop.element('generatorForm').fire('submit');await settle();await workshop.element('cancelBtn').fire('click');await task;
+  assert.equal(calls,1);assert.match(workshop.element('status').textContent,/已取消/);assert.equal(workshop.element('genBtn').disabled,false);
+});
+
+test('NPC dialogue modes keep their actual arrays and player answer node links',async()=>{
+  for(const kind of ['Conversations','Lines','Profiles']){
+    const workshop=page('workshop.js',async(url,options)=>{
+      if(url==='content-profile.json')return response(profile());
+      const prompt=JSON.parse(options.body).messages[1].content;assert.ok(prompt.includes('仅生成 1 个 '+kind));
+      return response({choices:[{message:{content:workshop.element('preview').value}}]});
+    });
+    workshop.element('libType').value='Dialogues';workshop.element('dialogueKind').value=kind;
+    await workshop.element('templateBtn').fire('click');await workshop.element('generatorForm').fire('submit');
+    assert.equal(workshop.element('status').dataset.kind,'success',workshop.element('status').textContent);
+    await workshop.element('dlBtn').fire('click');const data=workshop.downloads[0].data;
+    assert.equal(data[kind].length,1);assert.equal(data.Entries,undefined);
+    if(kind==='Conversations'){assert.equal(data.Conversations[0].Nodes[0].Options[0].NextNodeId,'end');assert.equal(data.Conversations[0].Nodes[1].Id,'end');}
+  }
+});
+
+const pngFixture=()=>new Uint8Array(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAXpeqz8AAAAASUVORK5CYII=','base64'));
+const uploadPng=async workshop=>{
+  const bytes=pngFixture(),file=new Blob([bytes],{type:'image/png'});file.name='herb.png';
+  workshop.element('iconFiles').files=[file];await workshop.element('iconFiles').fire('change');
+  assert.equal(workshop.element('iconList').textContent,'icons/herb.png',workshop.element('status').textContent);
+};
+
+test('item templates require actual PNG and export complete ZIP, preserving item weight',async()=>{
+  const workshop=page('workshop.js',async url=>url==='content-profile.json'?response(profile()):response({choices:[{message:{content:workshop.element('preview').value}}]}));
+  workshop.element('libType').value='Items';await workshop.element('templateBtn').fire('click');await workshop.element('dlBtn').fire('click');
+  assert.equal(workshop.packageDownloads.length,0);assert.match(workshop.element('resultStatus').textContent,/缺少图标/);
+  await uploadPng(workshop);await workshop.element('templateBtn').fire('click');
+  const edited=JSON.parse(workshop.element('preview').value);edited.Entries[0].Weight=4;workshop.element('preview').value=JSON.stringify(edited);
+  await workshop.element('generatorForm').fire('submit');assert.equal(workshop.element('status').dataset.kind,'success',workshop.element('status').textContent);
+  assert.equal(JSON.parse(workshop.element('preview').value).Entries[0].Weight,4);assert.equal(JSON.parse(workshop.element('preview').value).Entries[0].CooldownDays,undefined);
+  await workshop.element('dlBtn').fire('click');assert.equal(workshop.packageDownloads.length,1);
+  assert.ok(workshop.packageDownloads[0].entries.some(path=>path.endsWith('/icons/herb.png')));
+  assert.match(workshop.element('shareResult').href,/format=zip/);
+});
+
+test('Mod authoring supports same-package item references without changing the game catalog',async()=>{
+  const source={SchemaVersion:1,ProfileId:'crownfall1-v1',Entries:[{Id:'author.gift',Name:'草药礼物',Target:{RandomSettlement:true},TriggerConsequences:[{Type:'GiveItemEffect',Parameters:{Target:'Settlement',ItemId:'author.example_item',Qty:1}}]}]};
+  const workshop=page('workshop.js',async url=>url==='content-profile.json'?response(profile()):response({choices:[{message:{content:JSON.stringify(source)}}]}));
+  workshop.element('libType').value='Items';await uploadPng(workshop);await workshop.element('templateBtn').fire('click');await workshop.element('addToModBtn').fire('click');
+  assert.equal(workshop.element('modStatus').dataset.kind,'success',workshop.element('resultStatus').textContent);
+  workshop.element('libType').value='Events';workshop.element('libName').value='礼物事件';await workshop.element('generatorForm').fire('submit');
+  assert.equal(workshop.element('status').dataset.kind,'success',workshop.element('status').textContent);
+  assert.equal(workshop.context.GLAssets.getProfile().resources.items.includes('author.example_item'),false);
+  await workshop.element('addToModBtn').fire('click');await workshop.element('downloadModBtn').fire('click');
+  assert.equal(workshop.packageDownloads.length,1,workshop.element('modStatus').textContent);
+  const entries=workshop.packageDownloads[0].entries;assert.ok(entries.some(path=>path.includes('/NameLibraries/Items/')));assert.ok(entries.some(path=>path.includes('/NameLibraries/Events/')));
+});
+
+test('existing library import validates the selected type and blocks unknown fields',async()=>{
+  const workshop=page('workshop.js',async url=>url==='content-profile.json'?response(profile()):response({}));
+  workshop.element('libType').value='CountryNames';workshop.element('apiKey').value='';
+  workshop.element('libraryInput').files=[{name:'countries.json',size:50,text:async()=>'{"Items":["甲国","乙国"]}'}];await workshop.element('libraryInput').fire('change');await workshop.element('dlBtn').fire('click');assert.deepEqual(workshop.downloads[0].data.Items,['甲国','乙国']);
+  workshop.element('libraryInput').files=[{name:'bad.json',size:80,text:async()=>'{"Items":["甲国"],"Scripts":["bad"]}'}];await workshop.element('libraryInput').fire('change');assert.equal(workshop.element('status').dataset.kind,'error');assert.match(workshop.element('status').textContent,/Scripts/);
+});
+
+test('a superseded PNG selection cannot corrupt the latest uploaded files',async()=>{
+  const workshop=page('workshop.js',async url=>url==='content-profile.json'?response(profile()):response({}));
+  let release;
+  const slowFile={name:'old.png',arrayBuffer:()=>new Promise(resolve=>{release=()=>resolve(pngFixture().buffer);})};
+  workshop.element('iconFiles').files=[slowFile];const oldUpload=workshop.element('iconFiles').fire('change');
+  await uploadPng(workshop);release();await oldUpload;
+  assert.equal(workshop.element('iconList').textContent,'icons/herb.png');
+  workshop.element('libType').value='Items';await workshop.element('templateBtn').fire('click');assert.equal(JSON.parse(workshop.element('preview').value).Entries[0].Icon.Path,'icons/herb.png');
+});
+
+test('Mod operations lock the basket and export a stable snapshot',async()=>{
+  const workshop=page('workshop.js',async url=>url==='content-profile.json'?response(profile()):response({}));
+  workshop.element('libType').value='CityNames';await workshop.element('templateBtn').fire('click');await workshop.element('addToModBtn').fire('click');
+  let release;const realBuild=workshop.context.GLPackages.buildModPackage;
+  workshop.context.GLPackages.buildModPackage=(...args)=>new Promise(resolve=>{release=()=>realBuild(...args).then(resolve);});
+  const download=workshop.element('downloadModBtn').fire('click');
+  assert.equal(workshop.element('modName').disabled,true);assert.equal(workshop.element('addToModBtn').disabled,true);
+  await workshop.element('modName').fire('input');assert.equal(workshop.element('downloadModBtn').disabled,true);
+  const remove=workshop.element('modLibraries').children[0].children[1];assert.equal(remove.disabled,true);await remove.fire('click');
+  assert.equal(workshop.element('modLibraries').children.length,1);release();await download;
+  assert.equal(workshop.packageDownloads.length,1);assert.equal(workshop.element('modName').disabled,false);
 });

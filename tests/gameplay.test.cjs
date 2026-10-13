@@ -125,12 +125,13 @@ test('generation contract uses the exported catalog and actual calendar',()=>{
   assert.ok(A.getValidationWarnings(options,'Events').some(text=>text.includes('上下文')));
 });
 test('large JSON and normalized libraries fail before download',()=>{
-  assert.throws(()=>A.parseJSON(JSON.stringify({Items:['a'.repeat(A.MAX_FILE_BYTES)]})),/1 MB/);
-  assert.throws(()=>A.validate(entry({Description:'a'.repeat(A.MAX_FILE_BYTES)}),'Events'),/1 MB/);
+  assert.throws(()=>A.parseJSON(JSON.stringify({Items:['a'.repeat(A.MAX_FILE_BYTES)]})),/10 MiB/);
+  assert.throws(()=>A.validate(entry({Description:'a'.repeat(A.MAX_FILE_BYTES)}),'Events'),/10 MiB/);
 });
 test('nested parameter objects reject unknown coordinates and fractional integers',()=>{
-  for(const TargetHex of [{x:0,y:1,z:2},{x:0.5,y:1},[]])assert.throws(()=>A.validate(entry({TriggerConsequences:[effect('SpawnInteractableEffect',{TargetHex})]}),'Events'));
-  assert.deepEqual(A.validate(entry({TriggerConsequences:[effect('SpawnInteractableEffect',{TargetHex:{x:2,y:3}})]}),'Events').Entries[0].TriggerConsequences[0].Parameters.TargetHex,{x:2,y:3});
+  const binding={ObjectId:'fixture.interactable',TriggerEventId:'fixture.interact'};
+  for(const TargetHex of [{x:0,y:1,z:2},{x:0.5,y:1},[]])assert.throws(()=>A.validate(entry({TriggerConsequences:[effect('SpawnInteractableEffect',{...binding,TargetHex})]}),'Events'));
+  assert.deepEqual(A.validate(entry({TriggerConsequences:[effect('SpawnInteractableEffect',{...binding,TargetHex:{x:2,y:3}})]}),'Events').Entries[0].TriggerConsequences[0].Parameters.TargetHex,{x:2,y:3});
 });
 test('unused festival day metadata and positive causal multipliers follow game rules',()=>{
   assert.equal(A.validate(entry({RuleType:'Periodic',RuleDayInYear:42}),'Festivals').Entries[0].RuleDayInYear,42);
@@ -147,7 +148,7 @@ test('placeholder effects remain readable but are excluded from generation',()=>
   A.configureProfile(marked);
   try {
     assert.ok(!A.buildGenerationPrompt({type:'Events'}).includes('"ShowMessageUIEffect":'));
-    assert.ok(A.getValidationWarnings(entry({TriggerConsequences:[effect('ShowMessageUIEffect')]}),'Events').some(text=>text.includes('日志')));
+    assert.ok(A.getValidationWarnings(entry({TriggerConsequences:[effect('ShowMessageUIEffect',{Text:'Read this notice.'})]}),'Events').some(text=>text.includes('日志')));
   } finally {A.configureProfile(profile);}
 });
 test('score limits and fallback IDs match runtime content events',()=>{
