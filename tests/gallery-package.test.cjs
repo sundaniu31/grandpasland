@@ -73,8 +73,9 @@ test('ZIP Issue drafts include actual format and an honest remote-validation dis
 test('gallery page advertises all actual library types and loads protocols before assets',()=>{
   const html=read('gallery.html');
   for(const type of ['CountryNames','Dialogues','AIStyles','Items','ModPack'])assert.equal((html.match(new RegExp('value="'+type+'"','g'))||[]).length,2,type+' filter and share option');
-  assert.ok(html.indexOf('src="library-protocols.js"')<html.indexOf('src="assets.js"'));
-  assert.ok(html.indexOf('src="assets.js"')<html.indexOf('src="package-export.js"'));
+  const scripts=[...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map(match=>new URL(match[1],'https://site.example').pathname);
+  assert.ok(scripts.indexOf('/library-protocols.js')>=0&&scripts.indexOf('/library-protocols.js')<scripts.indexOf('/assets.js'));
+  assert.ok(scripts.indexOf('/assets.js')>=0&&scripts.indexOf('/assets.js')<scripts.indexOf('/package-export.js'));
   for(const id of ['shareMode','sharePackageUrl','shareJsonFields','shareZipFields','detailPackageDownload'])assert.ok(html.includes('id="'+id+'"'),id);
   assert.ok(!html.includes('当前广场不能读取附件'));
 });
