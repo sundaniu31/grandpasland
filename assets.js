@@ -1,12 +1,14 @@
 /* Shared game-compatible library validation. No keys or account credentials. */
 (function (root) {
   'use strict';
-  const TYPES = Object.freeze({CityNames:'城市名库',NPCNames:'NPC 名字库',CompanyNames:'公司名库',FamilyNames:'家族名库',CountryNames:'国家名库',Dialogues:'对话库',Items:'物品库',Quests:'支线库',Events:'事件库',Festivals:'节日库',SpecialNPCs:'特定 NPC 库'});
+  const TYPES = Object.freeze({CityNames:'城市名库',NPCNames:'NPC 名字库',CompanyNames:'公司名库',FamilyNames:'家族名库',CountryNames:'国家名库',Dialogues:'对话库',Items:'物品库',Quests:'支线库',Events:'事件库',Festivals:'节日库',SpecialNPCs:'特定 NPC 库',AIStyles:'世界 AI 风格'});
   const NAME_TYPES = ['CityNames','NPCNames','CompanyNames','FamilyNames','CountryNames'];
   const MAX_FILE_BYTES = 10 * 1024 * 1024;
   const GAME_PATH = '%USERPROFILE%\\AppData\\LocalLow\\DefaultCompany\\Crownfall1\\NameLibraries\\';
   const INT_MIN = -2147483648, INT_MAX = 2147483647;
   const SUPPORTED_PROFILE_ID = 'crownfall1-v1';
+  const AI_STYLE_LIMITS = Object.freeze({maxBytes:128 * 1024,maxNameCharacters:80,maxBackgroundCharacters:8000,maxInstructionsCharacters:8000,maxCombinedCharacters:12000});
+  const AI_STYLE_FIELDS = ['SchemaVersion','ProfileId','Name','WorldBackground','StyleInstructions'];
   const GAMEPLAY_FIELDS = ['EventType','TriggerPhase','TriggerConditions','Repeatable','Score','Tags','IsPrivate','FactKind','RumorHint','DescriptionVariants','CausalTagModifiers','Target','TriggerConsequences','Options'];
   const ENTRY_FIELDS = ['Name','Description','Stages','Id','Type','Weight','CooldownDays','RuleType','RuleDayInYear','RuleSeason','RulePeriodDays','RuleDurationDays','LinkedEventIds',...GAMEPLAY_FIELDS];
   let profile = null;
@@ -235,11 +237,66 @@
     if (['WorldStart','PlayerStart'].includes(clean.TriggerPhase) && clean.Options.some(option=>!option.AutoExecute)) throw new Error(path+' 启动事件只能执行自动效果，不能使用交互选项');
     if (clean.TriggerPhase === 'PlayerStart' && (clean.Target.ActorId || clean.Target.PlayerId)) throw new Error(path+' PlayerStart 由服务器绑定新玩家，不能固定 ActorId/PlayerId');
   }
-  function parseJSON(text) {
+  function validUnicode(text,field) {
+    for (let i=0;i<text.length;i++) {
+      const unit=text.charCodeAt(i);
+      if (unit >= 0xd800 && unit <= 0xdbff) {
+        const next=text.charCodeAt(++i);
+        if (!(next >= 0xdc00 && next <= 0xdfff)) throw new Error(field+' 包含无效 Unicode（未配对的 UTF-16 代理项）');
+      } else if (unit >= 0xdc00 && unit <= 0xdfff) throw new Error(field+' 包含无效 Unicode（未配对的 UTF-16 代理项）');
+    }
+  }
+  // .NET's string.Trim / IsNullOrWhiteSpace include U+0085, but not U+FEFF.
+  function styleTrim(text) {return text.replace(/^[\u0009-\u000d\u0085\u0020\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+|[\u0009-\u000d\u0085\u0020\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+$/g,'');}
+  function detectType(data) {
+    if (!object(data)) return null;
+    if (Object.hasOwn(data,'WorldBackground') || Object.hasOwn(data,'StyleInstructions')) return 'AIStyles';
+    if (Object.hasOwn(data,'Lines') || Object.hasOwn(data,'Conversations') || Object.hasOwn(data,'Profiles')) return 'Dialogues';
+    if (data.Entries?.some?.(entry=>object(entry) && Object.hasOwn(entry,'Icon'))) return 'Items';
+    // Generic Items/Entries cannot identify which name/event category the author intended.
+    return null;
+  }
+  function validateAIStyle(data) {
+    fields(data,AI_STYLE_FIELDS,'AIStyles');
+    for (const key of AI_STYLE_FIELDS) if (!Object.hasOwn(data,key)) throw new Error('AIStyles 必须包含五个字段，缺少 '+key);
+    if (data.SchemaVersion !== 1 || !Number.isInteger(data.SchemaVersion)) throw new Error('AIStyles.SchemaVersion 必须是整数 1');
+    if (data.ProfileId !== SUPPORTED_PROFILE_ID) throw new Error('AIStyles.ProfileId 必须是 '+SUPPORTED_PROFILE_ID);
+    for (const [key,max] of [['Name',AI_STYLE_LIMITS.maxNameCharacters],['WorldBackground',AI_STYLE_LIMITS.maxBackgroundCharacters],['StyleInstructions',AI_STYLE_LIMITS.maxInstructionsCharacters]]) {
+      if (typeof data[key] !== 'string') throw new Error('AIStyles.'+key+' 必须是文本');
+      // Check the original values before trimming the name, matching the game importer.
+      if (data[key].length > max) throw new Error('AIStyles.'+key+' 最多 '+max+' 个 UTF-16 字符单位');
+      validUnicode(data[key],'AIStyles.'+key);
+    }
+    if (!styleTrim(data.Name)) throw new Error('AIStyles.Name 不能为空');
+    if (data.WorldBackground.length+data.StyleInstructions.length > AI_STYLE_LIMITS.maxCombinedCharacters) throw new Error('世界背景和表达风格合计最多 12000 个 UTF-16 字符单位');
+    const clean={SchemaVersion:1,ProfileId:SUPPORTED_PROFILE_ID,Name:styleTrim(data.Name),WorldBackground:data.WorldBackground,StyleInstructions:data.StyleInstructions};
+    if (new TextEncoder().encode(JSON.stringify(clean,null,2)).length > AI_STYLE_LIMITS.maxBytes) throw new Error('世界 AI 风格文件不能超过 128 KiB');
+    return clean;
+  }
+  function worldAIStyleTemplate(settings={}) {
+    const english=settings.language === 'en', seed=object(settings.worldStyle)?settings.worldStyle:{};
+    return validateAIStyle({SchemaVersion:1,ProfileId:SUPPORTED_PROFILE_ID,Name:settings.name ?? settings.styleName ?? seed.Name ?? (english?'World AI style':'世界 AI 风格'),WorldBackground:settings.worldBackground ?? seed.WorldBackground ?? '',StyleInstructions:settings.styleInstructions ?? seed.StyleInstructions ?? ''});
+  }
+  function serializeWorldAIStyle(data) {return JSON.stringify(validateAIStyle(data),null,2);}
+  function parseWorldAIStyle(text) {return validateAIStyle(parseJSON(text,'AIStyles'));}
+  function importPath(type,name) {
+    if (!Object.hasOwn(TYPES,type)) throw new Error('请选择支持的资产类型');
+    return GAME_PATH+type+'\\'+fileName(name);
+  }
+  function parseJSON(text,type=null) {
     if (typeof text !== 'string' || !text.trim()) throw new Error('没有可读取的 JSON 内容');
     if (new TextEncoder().encode(text).length > MAX_FILE_BYTES) throw new Error('文件超过 10 MiB');
-    const source=text.trim().replace(/^\uFEFF/, '');let parsed;
+    // Only JSON whitespace may surround a style file; trim() also accepts non-JSON spaces.
+    const strictSource=text.replace(/^\uFEFF/,'');
+    const source=type === 'AIStyles'?strictSource:text.trim().replace(/^\uFEFF/, '');let parsed;
     try {parsed=JSON.parse(source);} catch {throw new Error('JSON 无法解析，请检查引号、逗号与括号');}
+    const isStyle=type === 'AIStyles' || type === null && detectType(parsed) === 'AIStyles';
+    if (isStyle) {
+      validUnicode(text,'AI 风格 JSON');
+      if (new TextEncoder().encode(text).length > AI_STYLE_LIMITS.maxBytes) throw new Error('世界 AI 风格文件不能超过 128 KiB');
+      // Auto-detected files must have the same strict outer whitespace rules as explicit imports.
+      if (type !== 'AIStyles') {try {JSON.parse(strictSource);}catch {throw new Error('AI 风格必须使用标准 JSON 空白字符');}}
+    }
     // JSON.parse silently overwrites repeated object fields; the game's reader rejects them.
     // Scan the already syntax-checked source so browser and game imports agree.
     let index=0;
@@ -258,7 +315,9 @@
         while (index < source.length) {
           whitespace();const key=quoted();
           if (keys.has(key)) throw new Error(path+'.'+key+' JSON 字段重复');keys.add(key);
-          whitespace();index++;value(depth+1,path+'.'+key);whitespace();
+          whitespace();index++;whitespace();const start=index;value(depth+1,path+'.'+key);const end=index;whitespace();
+          // JavaScript parses 1.0/1e0 as 1; Json.NET retains their floating token type.
+          if (isStyle && depth === 0 && key === 'SchemaVersion' && source.slice(start,end) !== '1') throw new Error('AIStyles.SchemaVersion 必须是整数 1，不能用小数或指数形式');
           if (source[index++] === '}') return;
         }
       } else if (character === '[') {
@@ -268,13 +327,13 @@
       } else if (character === '"') quoted();
       else while (index < source.length && !/[\s,}\]]/.test(source[index])) index++;
     }
-    value(0,'$');return parsed;
+    value(0,'$');return isStyle?validateAIStyle(parsed):parsed;
   }
-  function parseAI(text) {
+  function parseAI(text,type=null) {
     if (typeof text !== 'string') throw new Error('AI 返回的内容不是文本');
     const trimmed = text.trim();
     const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
-    return parseJSON(fenced ? fenced[1] : trimmed);
+    return parseJSON(fenced ? fenced[1] : text,type);
   }
   function validateMetadata(data,{required=false}={}) {
     const metadata={};
@@ -289,6 +348,7 @@
   function validate(data, type,resources=null) {
     if (!Object.hasOwn(TYPES, type)) throw new Error('请选择支持的资产类型');
     if (!object(data)) throw new Error('JSON 顶层必须是对象');
+    if (type === 'AIStyles') return validateAIStyle(data);
     if (['Dialogues','Items'].includes(type)) return protocols().validate(data,type,api,resources);
     const isName = NAME_TYPES.includes(type);
     const key = isName ? 'Items' : 'Entries';
@@ -372,6 +432,22 @@
   }
   function buildGenerationPrompt(settings) {
     const english=settings.language === 'en';
+    if (settings.type === 'AIStyles') {
+      const example=worldAIStyleTemplate(settings);
+      return (english ? [
+        'Return exactly one standard UTF-8 JSON object for a world AI style. No Markdown, explanations, arrays or nested objects.',
+        'The root has exactly five required case-sensitive fields: SchemaVersion (integer 1, not 1.0 or 1e0), ProfileId (exactly "crownfall1-v1"), Name (nonblank string, ≤80 UTF-16 units), WorldBackground and StyleInstructions (strings, each ≤8000 UTF-16 units; their combined length ≤12000). The final JSON including escapes and whitespace is ≤131072 bytes. Unicode must have valid surrogate pairs.',
+        'Create shared world culture and expression guidance, respecting the author\'s input below. Keep private character facts out of shared background. Actual identities, personalities, known memories, privacy, game facts, output protocols and execution permissions take precedence. Background descriptions are not evidence that an event has happened; do not invent secret knowledge or promise rewards/actions.',
+        'Do not add Enabled, APIKey, Model, BaseUrl, NpcIds, Profiles, Items, Entries, $type or any other field. API services/models and enabling the style are configured separately in-game. This file affects later AI requests only; it does not rewrite static dialogue or past memories.',
+        'Produce one style even if a count was requested. The shape example also contains the author\'s seed texts; expand or revise them according to the request without changing the schema.'
+      ] : [
+        '仅返回一个世界 AI 风格的标准 UTF-8 JSON 根对象，不要 Markdown、解释、数组或嵌套对象。',
+        '根对象只有五个必填字段，大小写准确：SchemaVersion（整数 1，不能写1.0或1e0）、ProfileId（必须为 "crownfall1-v1"）、Name（非空白文本，≤80个UTF-16字符单位）、WorldBackground与StyleInstructions（文本，各≤8000个UTF-16字符单位，二者合计≤12000）。文件含转义和空白≤131072字节；Unicode代理项必须成对。',
+        '根据下方作者草稿和补充需求创作共同世界文化与表达要求，不把私人角色事实写成所有人共有知识。实际身份、性格、已知记忆、隐私、游戏事实、输出协议和执行权限始终优先。背景不代表某事件已经发生；不要编造秘密知识或承诺奖励、执行动作。',
+        '禁止添加 Enabled、APIKey、Model、BaseUrl、NpcIds、Profiles、Items、Entries、$type 或其他字段。模型、服务配置和启用开关在游戏另行设置；风格只影响后续AI请求，不改写静态对话或既有记忆。',
+        '本次只生成一个风格，不按条目数量输出多个。以下结构示例也是作者文本草稿，请按需求补充或修订，保持五字段协议。'
+      ]).join('\n')+'\n'+(english?'Requested world style: ':'作者风格草稿：')+JSON.stringify(example);
+    }
     if (['Dialogues','Items'].includes(settings.type)) return protocols().buildGenerationPrompt(settings,api);
     if (NAME_TYPES.includes(settings.type)) return english ? 'Return only {"SchemaVersion":1,"ProfileId":"crownfall1-v1","Items":["name"]}. Each name is unique nonempty text.'+(settings.type === 'CountryNames' ? ' Country names have at most 100 UTF-16 code units.' : '')+' A name pool does not create cities, NPCs, families or countries. Do not add gameplay fields.' : '仅输出 {"SchemaVersion":1,"ProfileId":"crownfall1-v1","Items":["名字"]}，每个名字为不重复的非空文本。'+(settings.type === 'CountryNames' ? '国家名最多 100 个 UTF-16 字符单位。' : '')+'名字库是随机取名池，不会创建城市、NPC、家族或国家，不要加入玩法字段。';
     if (['Quests','SpecialNPCs'].includes(settings.type)) return (english?'This library is a narrative draft; the game has no external gameplay execution entry point yet. Return only SchemaVersion:1,ProfileId:"crownfall1-v1",Entries with Name,Description,Id,Type:"",Stages:[{StageName,Description}],Weight,CooldownDays. Quests: Name/StageName <=100 UTF-16 units, descriptions <=8000, <=100 uniquely named stages. Do not add gameplay effects or invent rewards that the game executes. ':'此类库是内容草稿，游戏尚无外部玩法执行入口。仅输出 SchemaVersion:1、ProfileId:"crownfall1-v1"、Entries，其中使用 Name、Description、Id、Type:""、Stages:[{StageName,Description}]、Weight、CooldownDays。Quests 的名称与阶段名最多100个 UTF-16 字符单位，说明最多8000，阶段最多100个且名称不重复。不要添加子效果或编造游戏已执行的奖励。')+JSON.stringify({SchemaVersion:1,ProfileId:SUPPORTED_PROFILE_ID,Entries:[{Name:english?'Entry name':'条目名称',Description:english?'Story description':'故事描述',Id:'author_library_entry_01',Type:'',Stages:[{StageName:english?'Stage name':'阶段名称',Description:english?'Stage description':'阶段描述'}],Weight:settings.weight ?? 10,CooldownDays:settings.cooldown ?? 0}]});
@@ -453,12 +529,14 @@
     return (condition.Negate?(english?'not: ':'取反：'):'')+target+label+' '+value;
   }
   function describeTrigger(entry,language='zh-CN',type=null) {
+    if (type === 'AIStyles' || detectType(entry) === 'AIStyles') return language === 'en'?'Import → load in World Style → Apply; affects later AI requests':'导入 → 世界风格载入编辑区 → 应用；影响后续 AI 请求';
     if (['Dialogues','Items'].includes(type)) return protocols().describeTrigger(entry,type,language);
     const english=language === 'en', phase=entry.TriggerPhase || 'Daily';
     const names={Daily:['每日候选','daily candidate'],WorldStart:['新世界创建','new world'],PlayerStart:['新玩家创建','new player'],Manual:['显式调用/排期','explicit call/schedule']};
     return (names[phase] || [phase,phase])[english?1:0]+(entry.TriggerConditions?.length?(english?'; requires: ':'；需满足：')+entry.TriggerConditions.map(condition=>describeCondition(condition,language)).join(english?' and ':' 且 '):'');
   }
   function describeEffects(entry, language = 'zh-CN',type=null) {
+    if (type === 'AIStyles' || detectType(entry) === 'AIStyles') return language === 'en'?'Shared world culture and expression guidance; identities, memories, facts and protocols remain authoritative':'共同世界文化与表达要求；角色身份、记忆、事实及原协议优先';
     if (['Dialogues','Items'].includes(type) || entry.UseEffects || entry.Conversations || entry.Lines || entry.Profiles) return protocols().describeEffects(entry,type || (entry.UseEffects?'Items':'Dialogues'),language);
     const english=language === 'en', summaries=[];
     const parameter=(effect,key) => effect.Parameters?.[key] ?? profile?.effects[effect.Type]?.parameters?.[key]?.default;
@@ -513,6 +591,12 @@
     return summaries.length ? prefix+summaries.slice(0,12).join('；')+(summaries.length > 12 ? ' … ('+summaries.length+')' : '') : (english?'No executable effect configured':'未配置可执行子效果');
   }
   function getValidationWarnings(data, type, language = 'zh-CN',resources=null) {
+    if (type === 'AIStyles') {
+      const clean=validateAIStyle(data),english=language === 'en';
+      const warnings=[english?'Importing saves a style file only. Load it in New Game → AI → World Style, then click Apply. Models/API keys are configured separately; static dialogue and past memories are not rewritten.':'导入只保存风格文件；在“新游戏 → AI → 世界风格”载入编辑区后点击“应用风格”。APIKey及模型另行配置，不改写静态对话或既有记忆。',english?'World background is shared cultural context, not proof of events or NPC access to secrets. Existing character identity, memories, facts and output protocols take precedence.':'世界背景仅为共同文化资料，不代表事件已经发生或NPC知道秘密；实际身份、记忆、事实与原输出协议优先。'];
+      if (!styleTrim(clean.WorldBackground) && !styleTrim(clean.StyleInstructions)) warnings.push(english?'Both text fields are empty; this style will add no world context to AI requests.':'两个文本字段均为空，此风格不会向 AI 请求添加总体资料。');
+      return warnings;
+    }
     if (['Dialogues','Items'].includes(type)) return protocols().getValidationWarnings(data,type,api,language,resources);
     const checked=validate(data,type,resources), english=language === 'en', warnings=new Set();
     if (NAME_TYPES.includes(type)) return data.Items.some(item=>item === null || typeof item === 'string' && !item.trim()) || checked.Items.length !== data.Items.length ? [english?'Blank, null and duplicate names are ignored, as in the game.':'空白、null 和重复名字会按游戏规则忽略。'] : [];
@@ -643,16 +727,18 @@
   }
   function fileName(value) {
     const raw = String(value || 'MyLibrary').trim().replace(/\.json$/i,'');
-    const safe = raw.replace(/[<>:"/\\|?*\x00-\x1F]/g,'_').replace(/[. ]+$/g,'').slice(0,80) || 'MyLibrary';
+    let safe = raw.replace(/[<>:"/\\|?*\x00-\x1F]/g,'_').replace(/^[. ]+|[. ]+$/g,'').slice(0,80) || 'MyLibrary';
+    if (/[\uD800-\uDBFF]$/.test(safe)) safe=safe.slice(0,-1);
     return (/^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(safe) ? '_'+safe : safe) + '.json';
   }
   function download(data, name) {
-    const url = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'}));
+    const text=detectType(data) === 'AIStyles'?serializeWorldAIStyle(data):JSON.stringify(data,null,2);
+    const url = URL.createObjectURL(new Blob([text],{type:'application/json;charset=utf-8'}));
     const anchor = document.createElement('a');anchor.href=url;anchor.download=fileName(name);document.body.append(anchor);anchor.click();anchor.remove();setTimeout(() => URL.revokeObjectURL(url),1000);
   }
   function status(element, message, kind = 'success') {element.textContent=message;element.dataset.kind=kind;element.hidden=false;}
-  function count(data,type=null) {if (['Dialogues','Items'].includes(type) || data.Lines || data.Conversations || data.Profiles) return protocols().count(data,type || 'Dialogues');return (data.Items || data.Entries || []).length;}
-  const api = {TYPES,NAME_TYPES,MAX_FILE_BYTES,GAME_PATH,configureProfile,getProfile,getKnownResourceValues,hasKnownResource,parseJSON,parseAI,validate,validateMetadata,validateEffects,validateOptionCondition:condition,getGenerationCatalog,buildGenerationPrompt,describeEffects,describeTrigger,describeCondition,getValidationWarnings,getEffectBindings,effectRequiresCharacter,getEffectContextRequirements,getConditionRequirements,effectSupportsDuration,getEffectResourceReferences,fileName,download,status,count};
+  function count(data,type=null) {if (type === 'AIStyles' || detectType(data) === 'AIStyles') return 1;if (['Dialogues','Items'].includes(type) || data.Lines || data.Conversations || data.Profiles) return protocols().count(data,type || 'Dialogues');return (data.Items || data.Entries || []).length;}
+  const api = {TYPES,NAME_TYPES,MAX_FILE_BYTES,GAME_PATH,AI_STYLE_LIMITS,worldAIStyleTemplate,validateAIStyle,parseWorldAIStyle,serializeWorldAIStyle,detectType,importPath,configureProfile,getProfile,getKnownResourceValues,hasKnownResource,parseJSON,parseAI,validate,validateMetadata,validateEffects,validateOptionCondition:condition,getGenerationCatalog,buildGenerationPrompt,describeEffects,describeTrigger,describeCondition,getValidationWarnings,getEffectBindings,effectRequiresCharacter,getEffectContextRequirements,getConditionRequirements,effectSupportsDuration,getEffectResourceReferences,fileName,download,status,count};
   if (typeof module !== 'undefined' && module.exports) module.exports=api;
   root.GLAssets=api;
 })(typeof window !== 'undefined' ? window : globalThis);

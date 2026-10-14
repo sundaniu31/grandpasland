@@ -31,7 +31,7 @@ function page(){
   const elements=new Map(),calls=[],downloads=[];
   const element=id=>{if(!elements.has(id))elements.set(id,new Element(id));return elements.get(id);};
   const ok=data=>({ok:true,status:200,json:async()=>plain(data),headers:{get:()=>null}});
-  const context={URL,URLSearchParams,AbortController,TextEncoder,setTimeout,clearTimeout,Blob,GLI18n:{language:'zh-CN'},document:{getElementById:element,querySelectorAll:()=>[],createElement:()=>new Element(),body:new Element()},fetch:async url=>{calls.push(url);return ok(url==='content-profile.json'?profile:[]);},location:{search:'',href:'https://site.example/gallery.html'},history:{replaceState(){}},addEventListener(){}};
+  const context={URL,URLSearchParams,AbortController,TextEncoder,TextDecoder,setTimeout,clearTimeout,Blob,GLI18n:{language:'zh-CN'},document:{getElementById:element,querySelectorAll:()=>[],createElement:()=>new Element(),body:new Element()},fetch:async url=>{calls.push(url);return ok(url==='content-profile.json'?profile:[]);},location:{search:'',href:'https://site.example/gallery.html'},history:{replaceState(){}},addEventListener(){}};
   context.window=context;vm.createContext(context);
   for(const script of ['library-protocols.js','assets.js','package-export.js','content.js'])vm.runInContext(read(script),context,{filename:script});
   context.GLAssets.download=(data,name)=>downloads.push({data:plain(data),name});
@@ -41,7 +41,7 @@ function page(){
 }
 const settle=()=>new Promise(resolve=>setImmediate(resolve));
 function issue(body,number=1){return {number,title:'【分享】测试内容包',body,labels:[],user:{login:'author'},created_at:'2026-10-13T00:00:00Z',comments:0};}
-function extractDraft(form){const draft=form.children.at(-1),area=draft.children.find(child=>child.id==='draftBody');return area?.value||new URL(draft.children.find(child=>child.href)?.href).searchParams.get('body');}
+function extractDraft(form){const draft=form.children.at(-1),area=draft?.children.find(child=>child.id==='draftBody'),link=draft?.children.find(child=>child.href);return area?.value||(link?new URL(link.href).searchParams.get('body'):undefined);}
 
 test('Items needs the game profile while dialogue and name sharing remain available without it',()=>{
   assert.equal(C.requiresProfile('Items'),true);assert.equal(C.requiresProfile('Events'),true);
@@ -72,7 +72,7 @@ test('ZIP Issue drafts include actual format and an honest remote-validation dis
 
 test('gallery page advertises all actual library types and loads protocols before assets',()=>{
   const html=read('gallery.html');
-  for(const type of ['CountryNames','Dialogues','Items','ModPack'])assert.equal((html.match(new RegExp('value="'+type+'"','g'))||[]).length,2,type+' filter and share option');
+  for(const type of ['CountryNames','Dialogues','AIStyles','Items','ModPack'])assert.equal((html.match(new RegExp('value="'+type+'"','g'))||[]).length,2,type+' filter and share option');
   assert.ok(html.indexOf('src="library-protocols.js"')<html.indexOf('src="assets.js"'));
   assert.ok(html.indexOf('src="assets.js"')<html.indexOf('src="package-export.js"'));
   for(const id of ['shareMode','sharePackageUrl','shareJsonFields','shareZipFields','detailPackageDownload'])assert.ok(html.includes('id="'+id+'"'),id);
@@ -120,4 +120,66 @@ test('CountryNames and complete dialogue JSON survive draft, gallery and local d
     p.context.currentIssue=issue(extractDraft(p.element('shareForm')));const work=vm.runInContext('workOf(currentIssue)',p.context);assert.equal(work.error,'');assert.equal(work.type,type);
     p.context.currentWork=work;await vm.runInContext('openDetail(currentWork)',p.context);await p.element('detailDownload').onclick();assert.deepEqual(p.downloads[0].data,A.validate(data,type));
   }
+});
+
+const worldStyle=()=>({SchemaVersion:1,ProfileId:'crownfall1-v1',Name:'河谷民谣',WorldBackground:'河谷居民重视农时、商旅和邻里；实际地点与人物以游戏状态为准。',StyleInstructions:'用自然、简洁的中文，遵循角色性格与已知记忆。'});
+function styleFile(text,name='style.json'){
+  const bytes=typeof text==='string'?new TextEncoder().encode(text):text;
+  return {name,size:bytes.byteLength,arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)};
+}
+test('standalone AIStyles support does not need a game resource profile or claim immediate application',()=>{
+  assert.equal(C.requiresProfile('AIStyles'),false);
+  const data=A.validate(worldStyle(),'AIStyles');
+  assert.match(C.summary(data,'AIStyles'),/河谷民谣/);
+  assert.match(C.summary(data,'AIStyles'),/河谷居民/);
+  assert.match(C.supportMessage('AIStyles'),/导入或载入后点击/);
+  assert.match(C.supportMessage('AIStyles'),/不能加入 Mod/);
+  const body=C.issueBody({type:'AIStyles',tags:['田园'],description:'共同背景与措辞风格'},data);
+  const metadata=JSON.parse(body.match(/gl-asset: (\{[^\n]+\})/)[1]);
+  assert.equal(metadata.type,'AIStyles');assert.equal(metadata.schemaVersion,1);assert.equal(metadata.profileId,'crownfall1-v1');
+  assert.throws(()=>C.packageIssueBody({type:'AIStyles',packageUrl}),/ZIP/);
+});
+test('world style JSON survives UTF-8 upload, GitHub draft, gallery preview and download unchanged',async()=>{
+  const p=page();await settle();const data=worldStyle();
+  p.element('shareType').value='AIStyles';p.element('shareFile').files=[styleFile(JSON.stringify(data,null,2))];
+  await p.element('shareForm').fire('submit');
+  assert.equal(p.element('shareStatus').dataset.kind,'success',p.element('shareStatus').textContent);
+  p.context.currentIssue=issue(extractDraft(p.element('shareForm')));
+  const work=vm.runInContext('workOf(currentIssue)',p.context);assert.equal(work.error,'');assert.equal(work.type,'AIStyles');assert.equal(work.downloadable,true);
+  p.context.currentWork=work;await vm.runInContext('openDetail(currentWork)',p.context);await p.element('detailDownload').onclick();
+  assert.deepEqual(p.downloads[0].data,data);assert.equal(p.element('detailPackageDownload').hidden,true);
+  assert.match(p.element('detailSupport').textContent,/应用风格/);
+  assert.ok(p.calls.every(url=>url==='content-profile.json'||url.startsWith('https://api.github.com/repos/sundaniu31/grandpasland/issues')),'No paid AI, upload or issue publishing request');
+});
+test('world style sharing rejects over-budget raw bytes and malformed UTF-8 before creating a draft',async()=>{
+  const json=JSON.stringify(worldStyle());
+  for(const file of [styleFile(json+' '.repeat(A.AI_STYLE_LIMITS.maxBytes)),styleFile(new Uint8Array([0x7b,0xff,0x7d]))]){
+    const p=page();await settle();p.element('shareType').value='AIStyles';p.element('shareFile').files=[file];
+    await p.element('shareForm').fire('submit');assert.equal(p.element('shareStatus').dataset.kind,'error');
+    assert.match(p.element('shareStatus').textContent,/128 KiB|UTF-8/);assert.equal(extractDraft(p.element('shareForm')),undefined);
+  }
+  const p=page();await settle();p.element('shareType').value='AIStyles';
+  const oversized=styleFile(json+' '.repeat(A.AI_STYLE_LIMITS.maxBytes));oversized.size=1;
+  p.element('shareFile').files=[oversized];await p.element('shareForm').fire('submit');
+  assert.equal(p.element('shareStatus').dataset.kind,'error');assert.match(p.element('shareStatus').textContent,/128 KiB/);
+});
+test('world style sharing blocks unknown credentials, duplicate fields and noninteger schema spellings',async()=>{
+  const valid=JSON.stringify(worldStyle());
+  const invalid=[JSON.stringify({...worldStyle(),Enabled:true}),JSON.stringify({...worldStyle(),Model:'hidden'}),valid.replace('"Name":','"Name":"重复", "Name":'),valid.replace('"SchemaVersion":1','"SchemaVersion":1.0')];
+  for(const json of invalid){
+    const p=page();await settle();p.element('shareType').value='AIStyles';p.element('shareFile').files=[styleFile(json)];
+    await p.element('shareForm').fire('submit');assert.equal(p.element('shareStatus').dataset.kind,'error',json);
+    assert.equal(extractDraft(p.element('shareForm')),undefined);
+  }
+});
+test('gallery will not offer a download for an invalid or padded world style post',async()=>{
+  const p=page();await settle();
+  for(const data of [JSON.stringify({...worldStyle(),ApiKey:'not-shareable'}),JSON.stringify(worldStyle())+' '.repeat(A.AI_STYLE_LIMITS.maxBytes),JSON.stringify(worldStyle()).replace('"SchemaVersion":1','"SchemaVersion":1e0')]){
+    p.context.currentIssue=issue('<!-- gl-asset: {"version":1,"type":"AIStyles","schemaVersion":1,"profileId":"crownfall1-v1"} -->\n```json\n'+data+'\n```');
+    const work=vm.runInContext('workOf(currentIssue)',p.context);assert.ok(work.error);assert.equal(work.downloadable,false);assert.equal(work.data,null);
+  }
+});
+test('oversized world style Issue bodies explain standalone JSON sharing without offering an unsupported Mod fallback',()=>{
+  const data=A.validate({...worldStyle(),WorldBackground:'\u0000'.repeat(8000),StyleInstructions:'\u0000'.repeat(4000)},'AIStyles');
+  assert.throws(()=>C.issueBody({type:'AIStyles',tags:[],description:'超长风格'},data),/直接把下载的 JSON 文件分享给朋友；AIStyles 不支持 Mod ZIP/);
 });

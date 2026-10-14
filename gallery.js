@@ -24,7 +24,7 @@ function workOf(issue) {
   // Match a complete Markdown fence; backticks inside JSON text are ordinary content.
   const blocks=[...body.matchAll(/^(`{3,}|~{3,})json[^\S\r\n]*\r?\n([\s\S]*?)^\1[^\S\r\n]*$/gim)];
   let data=null,error='',json='',packageUrl='';
-  if(blocks.length){json=blocks[0][2].trim();}
+  if(blocks.length){json=type==='AIStyles'?blocks[0][2]:blocks[0][2].trim();}
   else {
     const raw=body.replace(/^\s*<!--[\s\S]*?-->/,'').trim();
     if(raw.startsWith('{'))json=raw;
@@ -42,7 +42,7 @@ function workOf(issue) {
     if(C.requiresProfile(type)&&!A.getProfile())throw new Error(profileError||t('游戏兼容目录未加载，请重新加载广场。','Game compatibility profile is not loaded. Reload the gallery.'));
     const profile=A.getProfile();
     if((meta.schemaVersion!==undefined&&meta.schemaVersion!==(profile?.schemaVersion||1))||(meta.profileId&&meta.profileId!==(profile?.profileId||'crownfall1-v1')))throw new Error(t('这份作品使用其他版本的游戏协议，当前版本不能导入。','This creation uses a different game protocol and cannot be imported by this version.'));
-    data=A.validate(A.parseJSON(json),type);
+    data=A.validate(A.parseJSON(json,type),type);
     if(type==='Items')error=t('这份分享仅有物品 JSON，没有实际 PNG 图标；请让作者补充完整 ZIP 包链接。','This post contains item JSON without actual PNG icons. Ask the author to add a complete ZIP package link.');
   }catch(e){error=e.message;}}
   else error='这份分享尚未附上可读取的 JSON，请到原帖查看。';
@@ -164,9 +164,17 @@ $('shareForm').addEventListener('submit',async event=>{
       body=C.packageIssueBody({type,tags,description,packageUrl});
     }else{
       const file=$('shareFile').files[0];if(!file)throw new Error('请选择 .json 文件');
-      if(!/\.json$/i.test(file.name))throw new Error('请选择 .json 文件');if(file.size>A.MAX_FILE_BYTES)throw new Error('文件超过 10 MiB');
-      const text=await file.text();if(/(?:ghp_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,}|"(?:apiKey|api_key|Authorization)"\s*:)/i.test(text+'\n'+description))throw new Error('内容可能含有密钥，请删除后再分享');
-      const data=A.validate(A.parseJSON(text),type);
+      if(!/\.json$/i.test(file.name))throw new Error('请选择 .json 文件');
+      const limit=type==='AIStyles'?A.AI_STYLE_LIMITS.maxBytes:A.MAX_FILE_BYTES;
+      if(file.size>limit)throw new Error(type==='AIStyles'?t('世界 AI 风格文件超过 128 KiB。','The world AI style file exceeds 128 KiB.'):'文件超过 10 MiB');
+      let text;
+      if(type==='AIStyles'){
+        const bytes=await file.arrayBuffer();
+        if(bytes.byteLength>limit)throw new Error(t('世界 AI 风格文件超过 128 KiB。','The world AI style file exceeds 128 KiB.'));
+        try{text=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes);}catch{throw new Error(t('世界 AI 风格文件必须使用有效 UTF-8。','World AI style files must use valid UTF-8.'));}
+      }else text=await file.text();
+      if(/(?:ghp_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,}|"(?:apiKey|api_key|Authorization)"\s*:)/i.test(text+'\n'+description))throw new Error('内容可能含有密钥，请删除后再分享');
+      const data=A.validate(A.parseJSON(text,type),type);
       body=C.issueBody({type,tags,description},data);
     }
     const url=new URL('https://github.com/'+REPO+'/issues/new');url.searchParams.set('title','【分享】'+name);url.searchParams.set('body',body);

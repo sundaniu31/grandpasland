@@ -24,7 +24,7 @@ function page(script,fetcher){
   const element=id=>{if(!elements.has(id))elements.set(id,new Element(id));return elements.get(id);};
   const values={libType:'Events',libName:'瘟疫测试',apiUrl:'https://provider.example/chat/completions',apiModel:'test-model',apiKey:'test-key',contentDesc:'某座城市发生瘟疫，感染三名 NPC，药材需求上涨',entryCount:'1',weight:'20',cooldown:'30',ruleType:'ByDayInYear',ruleSeason:'Spring',ruleDay:'2',rulePeriod:'15',ruleDuration:'1',nameCount:'5',nameDesc:'简短城名',dialogueKind:'Conversations',dialogueScene:'ambient',modName:'TestMod',shareType:'Events',shareName:'瘟疫测试',shareDescription:'测试组合效果',shareTags:'事件,瘟疫',shareFormat:'json'};
   Object.entries(values).forEach(([id,value])=>element(id).value=value);
-  const context={URL,URLSearchParams,AbortController,TextEncoder,Uint8Array,ArrayBuffer,DataView,setTimeout,clearTimeout,Blob,createImageBitmap:async()=>({width:1,height:1,close(){}}),fetch:fetcher,document:{getElementById:element,querySelectorAll:()=>[],createElement:()=>new Element(),body:new Element()},localStorage:{getItem:()=>null,setItem(){},removeItem(){}},location:{search:'',href:'https://site.example/'+script.replace('.js','.html')},history:{replaceState(){}},GLI18n:{language:'zh-CN'},addEventListener(){}};
+  const context={URL,URLSearchParams,AbortController,TextEncoder,TextDecoder,Uint8Array,ArrayBuffer,DataView,setTimeout,clearTimeout,Blob,createImageBitmap:async()=>({width:1,height:1,close(){}}),fetch:fetcher,document:{getElementById:element,querySelectorAll:()=>[],createElement:()=>new Element(),body:new Element()},localStorage:{getItem:()=>null,setItem(){},removeItem(){}},location:{search:'',href:'https://site.example/'+script.replace('.js','.html')},history:{replaceState(){}},GLI18n:{language:'zh-CN'},addEventListener(){}};
   context.window=context;vm.createContext(context);
   vm.runInContext(read('library-protocols.js'),context,{filename:'library-protocols.js'});
   vm.runInContext(read('assets.js'),context,{filename:'assets.js'});
@@ -36,6 +36,51 @@ function page(script,fetcher){
   return {context,element,downloads,packageDownloads};
 }
 const settle=()=>new Promise(resolve=>setImmediate(resolve));
+const styleFile=()=>({SchemaVersion:1,ProfileId:'crownfall1-v1',Name:'田园诸邦',WorldBackground:'河谷小镇\n农人、商旅与邻里',StyleInstructions:'简洁自然，遵循身份与记忆。🌿'});
+test('style display name stays independent of the download filename',async()=>{
+  const workshop=page('workshop.js',async()=>response(profile()));workshop.element('libType').value='AIStyles';workshop.element('libName').value='river-style-file';workshop.element('styleName').value='田园诸邦';
+  await workshop.element('templateBtn').fire('click');assert.equal(JSON.parse(workshop.element('preview').value).Name,'田园诸邦');assert.equal(workshop.element('styleName').value,'田园诸邦');
+  await workshop.element('dlBtn').fire('click');assert.equal(workshop.downloads[0].name,'river-style-file');assert.equal(workshop.downloads[0].data.Name,'田园诸邦');
+});
+test('manual style editor creates, edits and downloads a standalone file without provider or key',async()=>{
+  const calls=[],workshop=page('workshop.js',async url=>{calls.push(url);return response(profile());});
+  workshop.element('apiKey').value='';workshop.element('libName').value='';
+  const data=styleFile();workshop.element('styleName').value=data.Name;workshop.element('worldBackground').value=data.WorldBackground;workshop.element('styleInstructions').value=data.StyleInstructions;
+  await workshop.element('saveStyleBtn').fire('click');
+  assert.equal(workshop.element('status').dataset.kind,'success');assert.equal(workshop.element('addToModBtn').hidden,true);
+  assert.match(workshop.element('resultImportHint').textContent,/应用风格/);assert.match(workshop.element('shareResult').href,/type=AIStyles/);
+  const edited=JSON.parse(workshop.element('preview').value);edited.StyleInstructions+='作者修改';workshop.element('preview').value=JSON.stringify(edited);
+  await workshop.element('dlBtn').fire('click');assert.deepEqual(workshop.downloads[0].data,edited);
+  assert.deepEqual(calls,['content-profile.json']);await workshop.element('addToModBtn').fire('click');assert.equal(workshop.packageDownloads.length,0);
+});
+test('style generation produces one five-field file and captures the original style context',async()=>{
+  const calls=[],workshop=page('workshop.js',async(url,options)=>{calls.push({url,options});return url==='content-profile.json'?response(profile()):response({choices:[{message:{content:JSON.stringify(styleFile())}}]});});
+  workshop.element('libType').value='AIStyles';workshop.element('entryCount').value='20';workshop.element('worldBackground').value='童话河谷';workshop.element('styleInstructions').value='质朴口语';workshop.element('contentDesc').value='';
+  await workshop.element('libType').fire('change');assert.equal(workshop.element('entryFields').hidden,true);assert.equal(workshop.element('contentDesc').required,false);
+  const generating=workshop.element('generatorForm').fire('submit');workshop.element('worldBackground').value='之后改动';await generating;
+  assert.equal(workshop.element('status').dataset.kind,'success',workshop.element('status').textContent);
+  const request=JSON.parse(calls.find(call=>call.options?.body)?.options.body);assert.match(request.messages[1].content,/童话河谷/);assert.doesNotMatch(request.messages[1].content,/之后改动/);
+  assert.deepEqual(JSON.parse(workshop.element('preview').value),styleFile());await workshop.element('dlBtn').fire('click');assert.deepEqual(workshop.downloads[0].data,styleFile());
+});
+test('optional shared style guides name generation without altering library schema',async()=>{
+  const prompts=[],workshop=page('workshop.js',async(url,options)=>{if(options)prompts.push(JSON.parse(options.body));return url==='content-profile.json'?response(profile()):response({choices:[{message:{content:JSON.stringify({Items:['河谷','青石','溪桥','长堤','田畔']})}}]});});
+  workshop.element('libType').value='CityNames';workshop.element('useWorldStyle').checked=true;workshop.element('worldBackground').value='共同世界背景';workshop.element('styleInstructions').value='简短城名';
+  await workshop.element('generatorForm').fire('submit');assert.equal(workshop.element('status').dataset.kind,'success');assert.match(prompts[0].messages[1].content,/共同世界背景/);
+  assert.deepEqual(Object.keys(JSON.parse(workshop.element('preview').value)).sort(),['Items','ProfileId','SchemaVersion']);
+});
+test('style file load preserves the editor on invalid bytes and raw JSON',async()=>{
+  const workshop=page('workshop.js',async()=>response(profile()));const data=styleFile();
+  const bytes=new TextEncoder().encode(JSON.stringify(data));workshop.element('styleInput').files=[{size:bytes.length,arrayBuffer:async()=>bytes.buffer}];await workshop.element('styleInput').fire('change');assert.equal(workshop.element('worldBackground').value,data.WorldBackground);
+  for(const invalid of [new Uint8Array([0xc3,0x28]),new TextEncoder().encode(JSON.stringify(data).replace('"SchemaVersion":1','"SchemaVersion":1e0'))]){
+    workshop.element('styleInput').files=[{size:invalid.length,arrayBuffer:async()=>invalid.buffer}];await workshop.element('styleInput').fire('change');assert.equal(workshop.element('status').dataset.kind,'error');assert.equal(workshop.element('worldBackground').value,data.WorldBackground);
+  }
+  workshop.element('styleInput').files=[{size:131073,arrayBuffer:async()=>{throw Error('Should not read');}}];await workshop.element('styleInput').fire('change');assert.match(workshop.element('status').textContent,/128 KiB/);
+});
+test('style edits exceeding combined budget block direct creation, generation and downloads',async()=>{
+  const calls=[],workshop=page('workshop.js',async url=>{calls.push(url);return response(profile());});
+  workshop.element('useWorldStyle').checked=true;workshop.element('worldBackground').value='a'.repeat(8000);workshop.element('styleInstructions').value='b'.repeat(4001);
+  await workshop.element('saveStyleBtn').fire('click');assert.equal(workshop.element('status').dataset.kind,'error');await workshop.element('generatorForm').fire('submit');assert.equal(workshop.element('status').dataset.kind,'error');assert.deepEqual(calls,['content-profile.json']);
+});
 const response=data=>({ok:true,status:200,json:async()=>plain(data),headers:{get:()=>null}});
 // The plague/demand reproduction uses explicitly synthetic resource names. Real game
 // resource compatibility is covered separately by the exported-profile validator.
@@ -108,8 +153,8 @@ test('gallery rejects incompatible protocol metadata while still accepting old n
 test('published guide examples validate against the real exported game profile',()=>{
   const A=require('../assets.js');A.configureProfile(JSON.parse(read('content-profile.json')));
   const examples=[...read('docs.html').matchAll(/<pre><code>(\{[\s\S]*?)<\/code><\/pre>/g)].map(match=>JSON.parse(match[1]));
-  assert.equal(examples.length,6);
-  ['CityNames','Quests','Events','Festivals','Dialogues','Items'].forEach((type,index)=>assert.doesNotThrow(()=>A.validate(examples[index],type),type+' guide example'));
+  assert.equal(examples.length,7);
+  ['CityNames','Quests','Events','Festivals','Dialogues','Items','AIStyles'].forEach((type,index)=>assert.doesNotThrow(()=>A.validate(examples[index],type),type+' guide example'));
 });
 async function generateFixture(effects,{changeProfile=()=>{},target={RandomSettlement:true},options=[],triggerPhase='Daily',triggerConditions=[]}={}){
   const config=profile();changeProfile(config);

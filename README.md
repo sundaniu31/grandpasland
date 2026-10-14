@@ -7,7 +7,7 @@
 - `gallery.html`：GitHub Issues 分享列表、标签/时间筛选、作品预览与下载、评论阅读。
 - `docs.html`：接口、资产导入、JSON 格式与分享说明。
 - `styles.css`：四页共用的玻璃样式、响应式布局与减少动态效果支持。
-- `assets.js`：与游戏 Items/Entries 格式对应的公共校验逻辑。
+- `assets.js`：与游戏 Items/Entries 格式及独立 AIStyles 五字段格式对应的公共校验逻辑。
 - `library-protocols.js`：对话的 Lines / Conversations / Profiles 及物品定义的严格协议。
 - `package-export.js`：真实 PNG 解码、Hash / 切片 / 预算验证、ZIP 导出和同包资源引用校验。
 - `external-library-rules.md`：按游戏现有导入器整理的完整接入规则，可从使用文档下载。
@@ -25,7 +25,7 @@
 
 `node --test tests/*.test.cjs`
 
-另外已通过浏览器的模拟 AI 请求测试，覆盖编辑后下载、Key 保存与清除、节日日期、旧分享兼容、标签和时间筛选、下载、评论文本安全显示、发布草稿，以及 390/768/1440 像素下四页的横向溢出检查。没有使用真实 AI Key 或发起付费请求，也没有发布测试帖子。
+既有版本曾通过浏览器的模拟 AI 请求测试，覆盖编辑后下载、Key 保存与清除、节日日期、旧分享兼容、标签和时间筛选、下载、评论文本安全显示、发布草稿，以及 390/768/1440 像素下四页的横向溢出检查。本轮新增世界 AI 风格的浏览器界面验收尚未完成；已完成的自动检查见下方。没有使用真实 AI Key 或发起付费请求，也没有发布测试帖子。
 
 ## 社区与部署说明
 
@@ -38,6 +38,14 @@ Steam 链接尚未配置；域名 HTTPS 证书与 GitHub Pages 的强制 HTTPS �
 ## 文件与游戏兼容
 
 五类名字库使用 `Items`，包含 CountryNames；最多 5000 个不同名字，每次最多请求 200 个，跨批去重，额外补充请求最多 3 次。对话使用 Lines / Conversations / Profiles；物品、事件、节日和阶段草稿使用 `Entries`。交付内容携带 `SchemaVersion:1` / `ProfileId:"crownfall1-v1"`。事件通过已有 `TriggerConsequences` / `Options` 调用注册效果；普通世界事件默认 `Options: []`，无须加入选择。
+
+世界 AI 风格使用独立分类 `AIStyles`，根对象必须且只能包含 `SchemaVersion`、`ProfileId`、`Name`、`WorldBackground`、`StyleInstructions`。名称最多 80 个 UTF-16 单位；两种文本各最多 8000、合计最多 12000；原始 UTF-8 JSON 含空白和转义最多 128 KiB。未知／重复字段、无效 Unicode／UTF-8、非标准 JSON、错误版本与类型会报错，不静默删除、替换或截断。Enabled、模型与 APIKey 不写入共享文件。
+
+网站入口是 AI 工坊的“世界背景与 AI 风格”卡片。玩家可直接填写名称、共同背景和表达要求，或点击“载入风格 JSON”读取外部文件。点击“用当前输入创建风格文件”后在结果区检查并下载独立 JSON，无需 API Key。勾选“用于本次内容生成”时，这些文本作为创作参考加入当前名字、对话、事件等生成请求，原分类协议、数量和已注册资源约束保持有效；这个网站开关不会写进共享文件，也不等于游戏已经应用风格。资产类型中的“世界 AI 风格”也可通过离线模板或 AI 生成独立文件。
+
+AIStyles 下载独立 JSON，并沿用 GitHub Issues 草稿、广场校验、预览与下载。游戏入口为“新游戏 → AI → 世界风格”；导入或选择载入后点击“应用风格”。外部素材页保存到 `NameLibraries/AIStyles` 也需要在风格页载入、应用。风格不进入 Mod ZIP，不会随 Mod 开关自动启用；超过本站 GitHub 分享正文容量时应缩短文本，或直接分享 JSON 文件。
+
+总体风格为后续 AI 请求提供共同背景与表达要求；原协议、实际世界事实、角色身份、性格、已知记忆和执行权限保持优先。对话 Profiles 继续提供按角色匹配的人设和知识。静态台词、历史与已生成内容不会自动重写，AI 服务仍由玩家在游戏配置。新游戏页保存开局草稿，当前世界风格随下一次世界存档保存为快照。
 
 `TriggerPhase` 区分每日随机 `Daily`、玩家出生前的新世界启动 `WorldStart`、每名新玩家创建后的 `PlayerStart`、显式调用/排期的 `Manual`。启动事件自动且仅执行一次（PlayerStart 每角色一次），不受 `Repeatable` 默认值影响；不会被每日事件池再次抽取。PlayerStart 使用服务器提供的新玩家 Actor/Player，不允许固定角色编号或交互选项。工坊可选择触发时机。
 
@@ -55,6 +63,6 @@ Steam 链接尚未配置；域名 HTTPS 证书与 GitHub Pages 的强制 HTTPS �
 
 物品支持 Material / Consumable / Quest / Special，暂不支持外部 Equipment。完整包检查每张 PNG ≤2 MiB、≤2048×2048、真实解码与切片；JSON ≤10 MiB，包 ≤32 MiB，总去重解码像素 ≤16777216。Mod 最多 256 JSON；还需符合游戏分类目录的 4 层 / 256 目录预算。AI 人设仅提供 Persona / Knowledge，自由回复仍需在游戏配置可用模型和 APIKey。
 
-本轮验证：164 项 Node 测试通过，覆盖三套 Unity 默认对话、模拟 AI 生成→编辑→下载→GitHub 草稿→广场，以及同包依赖、名字分批 / 取消、PNG 上传和 Mod 操作竞态。真实浏览器已创建对话模板、解码 PNG、下载完整 Mod ZIP；Windows .NET ZipFile 验证文件路径和内容。没有发起真实付费 AI 请求、发布测试 Issue 或宣称所有游戏世界状态均已运行验证。
+本轮 189 项 Node 测试通过，覆盖三套 Unity 默认对话、模拟 AI 生成→编辑→下载→GitHub 草稿→广场，以及同包依赖、名字分批 / 取消、PNG 上传和 Mod 操作竞态。世界 AI 风格覆盖直接输入、外部文件载入、生成上下文、严格协议、GitHub 草稿往返、图库下载与无效文件拦截。实际游戏 `WorldAIStyleStore` 另通过 77 项离线校验，覆盖 59 个网站输入样例，其中 17 个有效风格可读取，其余无效样例按预期拒绝。既有版本的真实浏览器曾创建对话模板、解码 PNG、下载完整 Mod ZIP；Windows .NET ZipFile 验证文件路径和内容。本轮真实浏览器另验证了无 Key 直接填写世界风格、创建 JSON 预览、下载 UTF-8 文件并再次用生产校验器读取；新增界面的付费 AI 调用仍仅使用模拟响应测试。没有发起真实付费 AI 请求、发布测试 Issue 或宣称所有游戏世界状态均已运行验证。
 
 Unity 端协议导出后，应同步更新兼容目录与协议快照，再运行 JavaScript 校验和模拟生成/分享/下载测试，并用游戏现有加载和执行检查验证导出的文件。真实服务商调用、打包版和双客户端联机需要各自的运行验证。

@@ -7,15 +7,25 @@ const A=require('../assets.js');
 const {createServer}=require('../preview.cjs');
 const site=path.join(__dirname,'..'),read=name=>fs.readFileSync(path.join(site,name),'utf8');
 A.configureProfile(JSON.parse(read('content-profile.json')));
-test('six published JSON guide examples use their actual Unity-compatible category roots',()=>{
+test('seven published JSON guide examples use their actual Unity-compatible category roots',()=>{
   const examples=[...read('docs.html').matchAll(/<pre><code>(\{[\s\S]*?)<\/code><\/pre>/g)].map(match=>JSON.parse(match[1]));
-  assert.equal(examples.length,6);
-  ['CityNames','Quests','Events','Festivals','Dialogues','Items'].forEach((type,index)=>{
+  assert.equal(examples.length,7);
+  ['CityNames','Quests','Events','Festivals','Dialogues','Items','AIStyles'].forEach((type,index)=>{
     const clean=A.validate(examples[index],type);
     assert.equal(clean.SchemaVersion,1);assert.equal(clean.ProfileId,'crownfall1-v1');
   });
   assert.equal(examples[4].Conversations[0].Nodes[0].Options[1].EventId,'');
   assert.equal(examples[5].Entries[0].Icon.Path,'icons/herb.png');
+});
+test('world style documentation states the exact standalone import and apply contract',()=>{
+  const docs=read('docs.html'),rules=read('external-library-rules.md'),guide=read('README.md');
+  for(const text of [docs,rules,guide]){
+    for(const term of ['AIStyles','WorldBackground','StyleInstructions','128 KiB','8000','12000','应用'])assert.ok(text.includes(term),term+' missing');
+    assert.match(text,/不能加入 Mod|不进入 Mod|不属于.*Mod/);
+  }
+  assert.match(docs,/仅导入或载入不会立即生效/);
+  assert.match(rules,/WorldAIStyleStore\.cs/);
+  assert.match(rules,/Enabled.*ApiKey.*Model/);
 });
 test('documentation distinguishes JSON, complete item packs and extracted data-only Mods',()=>{
   const doc=read('docs.html');

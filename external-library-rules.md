@@ -1,6 +1,6 @@
 # Crownfall1 外部内容库接入规则
 
-适用日期：2026 年 10 月 13 日。项目版本：Unity 2022.3.62f3c1。内容协议：`SchemaVersion = 1`，`ProfileId = "crownfall1-v1"`。
+适用日期：2026 年 10 月 14 日。项目版本：Unity 2022.3.62f3c1。内容协议：`SchemaVersion = 1`，`ProfileId = "crownfall1-v1"`。
 
 这套规则用于网站生成、玩家下载与分享，以及游戏导入外部内容。设计者应先确定内容分类，再按本规则生成文件；涉及游戏行为时，只组合已经注册的事件子效果，并引用当前世界实际存在的资源和角色上下文。
 
@@ -16,6 +16,7 @@
 | `CompanyNames` | `Items` | 公司命名候选池 | 支持 |
 | `CountryNames` | `Items` | 国家命名候选池 | 支持 |
 | `Dialogues` | `Lines / Conversations / Profiles` | NPC 单句、分支会话、AI 人设知识 | 支持，按第 4 节匹配和触发 |
+| `AIStyles` | `Name / WorldBackground / StyleInstructions` 及版本字段 | 世界共同背景与总体 AI 表达风格 | 支持独立 JSON，载入后点击应用；不能进入 Mod 包 |
 | `Events` | `Entries` | 完整事件，由现有子效果组合 | 支持，按第 5～6 节执行 |
 | `Festivals` | `Entries` | 节日时间规则、关联事件 | 支持，关联事件需同时启用 |
 | `Items` | `Entries` | 外部物品、图标、消耗效果、贸易和生产来源 | 支持，使用专用 JSON＋PNG 导入 |
@@ -48,7 +49,7 @@
 | 小数 | 有限值，符合能力目录范围；不使用 NaN、Infinity |
 | 空值 | 需要空文本时写 `""`，空列表写 `[]`，空匹配写 `{}`；不要把对象或条目写成 `null` |
 
-名字、事件、节日和物品的两个版本字段目前兼容省略；上述要求是新文件的交付规范。**对话库必须显式提供这两个字段**，否则会拒绝。名字库中的 `null`、空白和重复词条有兼容忽略逻辑，新文件应在生成时清理。
+名字、事件、节日和物品的两个版本字段目前兼容省略；上述要求是新文件的交付规范。**对话库和世界 AI 风格必须显式提供这两个字段**，否则会拒绝。名字库中的 `null`、空白和重复词条有兼容忽略逻辑，新文件应在生成时清理。AIStyles 的文件上限是 **128 KiB**，不适用普通库的 10 MiB 上限，也不使用 Items / Entries 数量规则；完整规则见第 4.5 节。
 
 文字长度限制按 C# `string.Length` 计算，即 UTF-16 代码单元，包含标点、换行；部分 emoji 会占多个单位。
 
@@ -65,6 +66,7 @@ Application.persistentDataPath/
     CompanyNames/公司库.json
     CountryNames/国家库.json
     Dialogues/对话库.json
+    AIStyles/世界风格.json
     Events/事件库.json
     Festivals/节日库.json
     Items/物品库.json
@@ -277,6 +279,49 @@ Gold、Health、Prestige、Age、Stat、HasTag、HasItem 检查当前玩家；Np
 Profiles 只提供 AI 人设和知识。AI NPC 自由回复仍需要游戏中已有的 APIKey、模型与 AI 启用配置，外部库不保存密钥，也不决定联网服务是否可用。多个匹配 Profile 按 Priority 降序、Id 顺序拼接；背景会受运行时长度限制而截断，避免重复和相互矛盾。
 
 AI 说“给你金币”不会自动修改游戏数据。需要实际奖励时使用受服务器验证的事件路径，不能把自然语言承诺当成已经执行的子效果。
+
+### 4.5 世界 AI 风格：独立五字段文件
+
+AIStyles 提供整个世界的共同文化背景和表达要求，与按角色匹配的 `Dialogues.Profiles` 共存。它不修改角色身份、性格、关系、记忆、事实、事件权限或 AI 服务凭据。
+
+```json
+{
+  "SchemaVersion": 1,
+  "ProfileId": "crownfall1-v1",
+  "Name": "田园诸邦",
+  "WorldBackground": "河谷市镇以农业和商旅往来为共同文化背景。实际国家、城市和人物以游戏当前状态为准。",
+  "StyleInstructions": "使用自然、简洁的中文口语，遵循角色性格、已知记忆和事实，不将传闻写成已发生的结果。"
+}
+```
+
+根对象只能有上面五个字段，全部必填、区分大小写：
+
+| 字段 | 接受规则 |
+|---|---|
+| `SchemaVersion` | JSON 整数 `1`，不能省略或用文本、小数代替 |
+| `ProfileId` | 必须为 `crownfall1-v1` |
+| `Name` | 非空且非纯空白文本，最多 80 个 UTF-16 代码单元 |
+| `WorldBackground` | 文本，最多 8000 个 UTF-16 代码单元，可为空 |
+| `StyleInstructions` | 文本，最多 8000 个 UTF-16 代码单元，可为空 |
+
+两个长文本合计最多 **12000 个 UTF-16 代码单元**。文件连同字段名、空白、引号与 JSON 转义最多 **128 KiB（131072 字节）**，必须是有效 UTF-8 标准 JSON。拒绝重复字段、未知字段、注释、单引号、尾随逗号、额外根对象、嵌套对象／数组、`null`、无效 Unicode 或 UTF-8。不要加入 `Enabled`、`ApiKey`、`Model`、`BaseUrl`、`NpcIds`、`Profiles`、`Items`、`Entries` 或 `$type`。两个长文本都为空时不补充风格内容。
+
+安装和使用：
+
+1. 网站选择世界 AI 风格，生成或手动编辑上述文件，校验后下载独立 JSON。
+2. 游戏打开 **新游戏 → AI → 世界风格**，导入文件；也可将文件放入 `Application.persistentDataPath/NameLibraries/AIStyles/` 后刷新，选择并载入编辑区。
+3. 外部素材页 AIStyles 分类可以保存文件，但仍需回到世界风格页选择、载入。导入、载入或修改磁盘文件都不等于已经应用。
+4. 检查“使用总体风格”开关和文本，点击 **应用风格**。这个开关随世界设置保存，不属于外部文件。
+
+新游戏页面的应用只更新开局草稿；当前世界的应用在下一次世界存档时保存为快照，读档不依赖原 JSON。联机应用遵循现有主机权限。应用影响后续 AI 请求，不重写静态台词、已发生的对话、NPC 记忆、历史或既有报纸。
+
+游戏统一请求入口使用总体风格处理 NPC 自由对话、酒馆闲聊、NPC 决策、已实现并通过权限检查的国家事务、AI 内容生成和报纸文字。报纸插画在原事实和任务保留后，按剩余提示词预算使用风格资料。独立音频／图片服务参数和第三方请求不由此文件配置；实际请求仍需可用模型和 API Key。
+
+总体背景不能把 NPC 变成全知角色、披露私人记忆、证明事件已经发生、创建未注册子效果或绕过服务器。不要把角色秘密放进世界共同背景。作者仍需检查文本与实际世界是否矛盾。
+
+**AIStyles 不属于当前 Mod 加载器支持的分类**。网站不把它加入多库 ZIP；应单独下载、分享并在游戏 AI 页载入、应用。GitHub Issues 分享正文超过本站 50000 字符容量时，缩短背景和风格文本，或直接将下载的 JSON 文件分享给朋友，不能改用 Mod ZIP 绕过限制。
+
+游戏依据：`AGame/Script/Core/AI/WorldAIStyleStore.cs`、`WorldAIStyleSettings.cs`、`WorldAIStyleComposer.cs` 与 `AGame/Docs/AI/世界AI风格外部文件规则.md`。
 
 ## 5 事件库
 
@@ -818,6 +863,8 @@ Application.persistentDataPath/
 
 安装列表显示 ZIP、裸 JSON 或任意文件，不表示这些文件能作为运行包启用。运行内容来自识别到分类的 JSON 目录；代码文件和未分类文件不会自动执行。
 
+AIStyles 使用第 4.5 节的独立安装与应用流程，不属于上述 Mod 支持分类。不要把它写入 Mod 的 NameLibraries 目录并期待启用模组后自动生效。
+
 ### 10.2 限额与合并
 
 | 项目 | 限制或行为 |
@@ -837,11 +884,11 @@ Application.persistentDataPath/
 
 ### 10.3 网站和 GitHub 流程
 
-1. 网站让作者选择名字、对话、事件、节日、物品或多分类 Mod，不输出未支持的“大一统世界 JSON”。
+1. 网站让作者选择名字、对话、世界 AI 风格、事件、节日、物品或多分类 Mod，不输出未支持的“大一统世界 JSON”。世界 AI 风格独立交付，不进入 Mod。
 2. 生成器使用本规则和同期 content-profile.json，先生成数据，再完成语法、字段、引用、限额检查。
 3. 单类别导出 JSON；物品同时提供 PNG；多类别导出上述目录结构的 ZIP。
 4. GitHub 保存并分享数据文件和说明，给出作者、适配游戏版本、依赖包和安装方式。
-5. 下载页提示玩家选择对应基础库／启用 Mod，并用新世界验收。
+5. 下载页提示玩家选择对应基础库／启用 Mod，并用新世界验收。世界 AI 风格须导入或载入后点击应用，再通过后续 AI 请求验收。
 
 GitHub 仓库 URL 不是游戏已支持的远程加载指令。玩家先下载并安装文件；JSON 中不能新增 DownloadUrl、GitHubRepo 等字段要求游戏自动联网下载。
 
@@ -947,6 +994,7 @@ GitHub 仓库 URL 不是游戏已支持的远程加载指令。玩家先下载�
 | 事件结构与构建 | `AGame/Script/Core/Event/EventLibraryDefinition.cs`、`EventEffectRegistry.cs` |
 | 事件执行与上下文 | `AGame/Script/Core/Event/EventManager.cs`、`RuntimeContentEvent.cs`、`EventExecutionContext.cs` |
 | 对话结构与读取 | `AGame/Script/Core/Dialogue/DialogueLibraryDefinition.cs`、`DialogueLibraryStore.cs` |
+| 世界 AI 风格格式与请求接入 | `AGame/Script/Core/AI/WorldAIStyleStore.cs`、`WorldAIStyleSettings.cs`、`WorldAIStyleComposer.cs` |
 | 对话匹配、玩家回答和记忆 | `AGame/Script/Core/Dialogue/DialogueLibraryRuntime.cs`、`NpcConversationSessionService.cs` |
 | 物品包与资源 | `AGame/Script/Core/Inventory/ExternalItemDefinition.cs`、`ExternalItemPackageImporter.cs`、`ExternalItemCatalog.cs` |
 | Mod 校验和合并 | `AGame/Script/UI/ModContentSelectionService.cs` |
