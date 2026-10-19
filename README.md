@@ -6,7 +6,7 @@
 - `workshop.html`：玩家自带 Key 的 AI 生成、离线模板、已有 JSON 导入、校验编辑、物品 PNG / ZIP 和多库 Mod 打包。
 - `gallery.html`：GitHub Issues 分享列表、标签/时间筛选、作品预览与下载、评论阅读。
 - `docs.html`：接口、资产导入、JSON 格式与分享说明。
-- `play/index.html`：可试玩原型（单文件、零依赖）。导航栏「试玩」进入，地址为 `/play/`。
+- 可试玩原型：已拆到独立仓库 sundaniu31/EmberEpoch，在线地址 https://sundaniu31.github.io/EmberEpoch/ 。导航栏「试玩」直接跳转。
 - `styles.css`：四页共用的玻璃样式、响应式布局与减少动态效果支持。
 - `assets.js`：与游戏 Items/Entries 格式及独立 AIStyles 五字段格式对应的公共校验逻辑。
 - `library-protocols.js`：对话的 Lines / Conversations / Profiles 及物品定义的严格协议。
