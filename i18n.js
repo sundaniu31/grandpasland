@@ -11,7 +11,7 @@ const en={
 '生成器会检查所有分支的资源与上下文依赖。需要游戏联机预制体的交互物体只能先手动配置、绑定；网站文件不会替你安装预制体、疾病或物品定义。':'Generation checks resource and context dependencies in every branch. Interactive objects needing game network prefabs require manual configuration and binding first. Website files do not install prefabs, diseases or item definitions.',
 '触发时机':'Trigger phase','每日随机事件':'Daily random event','新世界创建 · 出生前':'New world · Before birth','新玩家创建 · 创建后':'New player · After creation','显式调用或延迟触发':'Explicit call or scheduled trigger','启动事件执行一次且只支持自动效果；可在描述中编排条件、分支与后续事件。':'Startup events run once and support automatic effects only. Describe conditions, branches and follow-up events in your prompt.',
 'Grandpas Land 爷爷的地 — 官方网站':'Grandpas Land — Official Website',
-'跳到主要内容':'Skip to main content','游戏':'Game','AI 工坊':'AI Workshop','分享广场':'Community','使用文档':'Guide','主导航':'Main navigation',
+'跳到主要内容':'Skip to main content','游戏':'Game','AI 工坊':'AI Workshop','分享广场':'Community','使用文档':'Guide','试玩':'Play','主导航':'Main navigation',
 '让世界，':'Let your world','生长出你的':'grow with','想象。':'imagination.',
 '爷爷留下的土地，由你来传承。与朋友建设、探索，也用 AI 为这片世界写下新的名字、故事和节日。':'Carry on the legacy of the land Grandpa left behind. Build and explore with friends, and use AI to add new names, stories and festivals to your world.',
 '开始创造':'Start creating','走进爷爷的地':'Explore the game','自己的 API Key':'Your own API key','八类世界内容':'Eight library types','世界概念插画 · 营地与远方':'World concept art · A camp and a distant world',
